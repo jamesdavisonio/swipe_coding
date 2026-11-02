@@ -31,7 +31,7 @@ export const TASK_TYPE_LABELS: Record<TaskType, string> = {
 }
 
 export function subtasksFor(type: TaskType): Subtask[] {
-  return TASK_TEMPLATES[type].map(t => ({ key: t.key, label: t.label, status: 'pending' }))
+  return TASK_TEMPLATES[type].map((t) => ({ key: t.key, label: t.label, status: 'pending' }))
 }
 
 // Every project gets exactly one pinned task of this type; its id is derived so

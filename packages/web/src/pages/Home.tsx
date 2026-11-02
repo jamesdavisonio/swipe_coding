@@ -1,7 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Project, Task } from '@kanban/shared'
-import { renameProject, useOpenTodos, useProjects, useRecentTasks, useWaitingTasks } from '../data.ts'
+import {
+  renameProject,
+  useOpenTodos,
+  useProjects,
+  useRecentTasks,
+  useWaitingTasks,
+} from '../data.ts'
 import { Empty, Page, Section, TaskCard, TopBar } from '../ui.tsx'
 
 export default function Home() {
@@ -10,13 +16,21 @@ export default function Home() {
   const recent = useRecentTasks()
   const todos = useOpenTodos()
 
-  const nameOf = useMemo(() => new Map(projects.data.map(p => [p.id, p.name])), [projects.data])
+  const nameOf = useMemo(() => new Map(projects.data.map((p) => [p.id, p.name])), [projects.data])
 
   const counts = useMemo(() => {
-    const m = new Map<string, { in_progress: number; waiting: number; queued: number; done: number }>()
+    const m = new Map<
+      string,
+      { in_progress: number; waiting: number; queued: number; done: number }
+    >()
     for (const t of recent.data) {
       const c = m.get(t.projectId) ?? { in_progress: 0, waiting: 0, queued: 0, done: 0 }
-      if (t.status === 'in_progress' || t.status === 'blocked_on_permission' || t.status === 'orphaned') c.in_progress++
+      if (
+        t.status === 'in_progress' ||
+        t.status === 'blocked_on_permission' ||
+        t.status === 'orphaned'
+      )
+        c.in_progress++
       else if (t.status === 'waiting_on_james') c.waiting++
       else if (t.status === 'queued') c.queued++
       else if (t.status === 'done') c.done++
@@ -40,18 +54,32 @@ export default function Home() {
             {waiting.loading ? null : waiting.data.length === 0 ? (
               <Empty>Nothing needs you right now.</Empty>
             ) : (
-              waiting.data.map((t: Task) => <TaskCard key={t.id} task={t} projectName={nameOf.get(t.projectId) ?? t.projectId} />)
+              waiting.data.map((t: Task) => (
+                <TaskCard
+                  key={t.id}
+                  task={t}
+                  projectName={nameOf.get(t.projectId) ?? t.projectId}
+                />
+              ))
             )}
           </Section>
 
           <Section title="Projects" count={projects.data.length}>
             {projects.error && <p className="text-sm text-red-500">{projects.error}</p>}
             {!projects.loading && projects.data.length === 0 && (
-              <Empty>No projects yet. Start a Claude Code session with the kanban channel and it will register its folder here.</Empty>
+              <Empty>
+                No projects yet. Start a Claude Code session with the kanban channel and it will
+                register its folder here.
+              </Empty>
             )}
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {projects.data.map(p => (
-                <ProjectCard key={p.id} project={p} counts={counts.get(p.id)} todos={todoCounts.get(p.id) ?? 0} />
+              {projects.data.map((p) => (
+                <ProjectCard
+                  key={p.id}
+                  project={p}
+                  counts={counts.get(p.id)}
+                  todos={todoCounts.get(p.id) ?? 0}
+                />
               ))}
             </div>
           </Section>
@@ -61,7 +89,15 @@ export default function Home() {
   )
 }
 
-function ProjectCard({ project, counts, todos }: { project: Project; counts?: { in_progress: number; waiting: number; queued: number; done: number }; todos: number }) {
+function ProjectCard({
+  project,
+  counts,
+  todos,
+}: {
+  project: Project
+  counts?: { in_progress: number; waiting: number; queued: number; done: number }
+  todos: number
+}) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(project.name)
   const c = counts ?? { in_progress: 0, waiting: 0, queued: 0, done: 0 }
@@ -80,31 +116,64 @@ function ProjectCard({ project, counts, todos }: { project: Project; counts?: { 
             autoFocus
             className="input py-1"
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             onBlur={save}
-            onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setName(project.name); setEditing(false) } }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') void save()
+              if (e.key === 'Escape') {
+                setName(project.name)
+                setEditing(false)
+              }
+            }}
           />
         ) : (
           <Link to={`/p/${project.id}`} className="min-w-0 flex-1">
             <div className="truncate font-semibold">{project.name}</div>
-            <div className="truncate font-mono text-[11px] text-slate-500">{project.hostname}:{project.cwd}</div>
+            <div className="truncate font-mono text-[11px] text-slate-500">
+              {project.hostname}:{project.cwd}
+            </div>
           </Link>
         )}
         {!editing && (
-          <button className="btn-ghost -mr-2 px-2 text-slate-400" onClick={() => setEditing(true)} aria-label="Rename">✎</button>
+          <button
+            className="btn-ghost -mr-2 px-2 text-slate-400"
+            onClick={() => setEditing(true)}
+            aria-label="Rename"
+          >
+            ✎
+          </button>
         )}
       </div>
-      <Link to={`/p/${project.id}`} className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
-        <Count n={c.waiting} label="waiting" accent={c.waiting > 0 ? 'text-amber-600 dark:text-amber-400' : ''} />
-        <Count n={c.in_progress} label="in progress" accent={c.in_progress > 0 ? 'text-sky-600 dark:text-sky-400' : ''} />
+      <Link
+        to={`/p/${project.id}`}
+        className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500"
+      >
+        <Count
+          n={c.waiting}
+          label="waiting"
+          accent={c.waiting > 0 ? 'text-amber-600 dark:text-amber-400' : ''}
+        />
+        <Count
+          n={c.in_progress}
+          label="in progress"
+          accent={c.in_progress > 0 ? 'text-sky-600 dark:text-sky-400' : ''}
+        />
         <Count n={c.queued} label="queued" />
         <Count n={c.done} label="done" />
-        {todos > 0 && <span className="ml-auto rounded-full bg-violet-100 px-2 py-0.5 text-violet-800 dark:bg-violet-900/50 dark:text-violet-200">{todos} for me</span>}
+        {todos > 0 && (
+          <span className="ml-auto rounded-full bg-violet-100 px-2 py-0.5 text-violet-800 dark:bg-violet-900/50 dark:text-violet-200">
+            {todos} for me
+          </span>
+        )}
       </Link>
     </div>
   )
 }
 
 function Count({ n, label, accent = '' }: { n: number; label: string; accent?: string }) {
-  return <span className={accent}><b className="font-semibold">{n}</b> {label}</span>
+  return (
+    <span className={accent}>
+      <b className="font-semibold">{n}</b> {label}
+    </span>
+  )
 }

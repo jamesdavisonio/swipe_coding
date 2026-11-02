@@ -1,10 +1,12 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   color-scheme: light dark;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   min-height: 100%;
 }
 
@@ -16,21 +18,34 @@ body {
 }
 
 /* Safe-area helpers */
-.pt-safe { padding-top: env(safe-area-inset-top); }
-.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
 
 .card {
   @apply rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
 }
 
 /* Tailwind v4: @apply cannot reference other custom classes, so the base is repeated. */
-.btn, .btn-primary, .btn-ghost, .btn-outline {
+.btn,
+.btn-primary,
+.btn-ghost,
+.btn-outline {
   @apply inline-flex items-center justify-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition
          active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
 }
-.btn-primary { @apply bg-sky-600 text-white hover:bg-sky-500; }
-.btn-ghost { @apply bg-transparent text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800; }
-.btn-outline { @apply border border-slate-300 text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800; }
+.btn-primary {
+  @apply bg-sky-600 text-white hover:bg-sky-500;
+}
+.btn-ghost {
+  @apply bg-transparent text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800;
+}
+.btn-outline {
+  @apply border border-slate-300 text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800;
+}
 
 .input {
   @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base outline-none
@@ -38,4 +53,6 @@ body {
          dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100;
 }
 
-.pill { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
+.pill {
+  @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+}

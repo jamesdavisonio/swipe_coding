@@ -11,17 +11,26 @@
 import { readFileSync, appendFileSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { cert, getApps, initializeApp } from 'firebase-admin/app'
+import { cert, getApps, initializeApp, type ServiceAccount } from 'firebase-admin/app'
 import { getFirestore, type Firestore } from 'firebase-admin/firestore'
 
 const here = dirname(fileURLToPath(import.meta.url))
 export const pkgDir = join(here, '..')
 const logFile = join(pkgDir, 'agent.log')
+// agent.log is a convenience copy of stderr; if it cannot be written we say so once and
+// keep going on stderr alone.
+let logFileWritable = true
 
 export function log(msg: string) {
   const line = `${new Date().toISOString()} [${process.pid}] ${msg}`
   console.error(line)
-  try { appendFileSync(logFile, line + '\n') } catch {}
+  if (!logFileWritable) return
+  try {
+    appendFileSync(logFile, line + '\n')
+  } catch (err) {
+    logFileWritable = false
+    console.error(`agent.log not writable (${(err as Error).message}); logging to stderr only`)
+  }
 }
 
 export type BoardMode = 'emulator' | 'service_account' | 'offline'
@@ -53,8 +62,12 @@ function saCandidates(): string[] {
 function findSa(): { path: string | null; tried: string[] } {
   const tried: string[] = []
   for (const p of saCandidates()) {
-    try { statSync(p); return { path: p, tried } }
-    catch (e) { tried.push(`${p} (${(e as NodeJS.ErrnoException).code ?? 'error'})`) }
+    try {
+      statSync(p)
+      return { path: p, tried }
+    } catch (e) {
+      tried.push(`${p} (${(e as NodeJS.ErrnoException).code ?? 'error'})`)
+    }
   }
   return { path: null, tried }
 }
@@ -74,7 +87,7 @@ function init() {
       detail = `no service account key; tried ${tried.join(', ')} (user=${process.env.USERNAME ?? '?'}); FIRESTORE_EMULATOR_HOST unset`
       return
     }
-    const sa = JSON.parse(readFileSync(path, 'utf8'))
+    const sa = JSON.parse(readFileSync(path, 'utf8')) as ServiceAccount & { project_id?: string }
     if (getApps().length === 0) initializeApp({ credential: cert(sa), projectId: sa.project_id })
     db = getFirestore()
     mode = 'service_account'

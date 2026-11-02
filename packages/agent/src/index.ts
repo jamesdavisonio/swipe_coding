@@ -12,8 +12,19 @@
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import { CallToolRequestSchema, ListToolsRequestSchema, type Tool } from '@modelcontextprotocol/sdk/types.js'
-import { TASK_STATUSES, type Comment, type Task } from '@kanban/shared'
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  type Tool,
+} from '@modelcontextprotocol/sdk/types.js'
+import {
+  TASK_STATUSES,
+  type Comment,
+  type SubtaskStatus,
+  type Task,
+  type TaskStatus,
+  type TaskType,
+} from '@kanban/shared'
 import { Board, BoardError } from './board.ts'
 import { BoardOfflineError, boardStatus, log } from './firestore.ts'
 
@@ -50,20 +61,33 @@ WORKFLOW.
 const tools: Tool[] = [
   {
     name: 'kanban_list_tasks',
-    description: 'List tasks in this project, open ones first (the pinned "For James" task comes first).',
+    description:
+      'List tasks in this project, open ones first (the pinned "For James" task comes first).',
     inputSchema: {
       type: 'object',
-      properties: { status: { type: 'string', enum: [...TASK_STATUSES], description: 'Only tasks with this status' } },
+      properties: {
+        status: {
+          type: 'string',
+          enum: [...TASK_STATUSES],
+          description: 'Only tasks with this status',
+        },
+      },
     },
   },
   {
     name: 'kanban_get_task',
-    description: 'Full task with its subtasks and the last 30 comments. Use before resuming an orphaned task.',
-    inputSchema: { type: 'object', properties: { task_id: { type: 'string' } }, required: ['task_id'] },
+    description:
+      'Full task with its subtasks and the last 30 comments. Use before resuming an orphaned task.',
+    inputSchema: {
+      type: 'object',
+      properties: { task_id: { type: 'string' } },
+      required: ['task_id'],
+    },
   },
   {
     name: 'kanban_create_task',
-    description: 'Create a task for the work this session is doing and bind it to this session. Creates the subtask template for the type.',
+    description:
+      'Create a task for the work this session is doing and bind it to this session. Creates the subtask template for the type.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -76,12 +100,18 @@ const tools: Tool[] = [
   },
   {
     name: 'kanban_start_task',
-    description: 'Bind an existing (queued or orphaned) task to this session and mark it in progress. Refused if another live session owns it.',
-    inputSchema: { type: 'object', properties: { task_id: { type: 'string' } }, required: ['task_id'] },
+    description:
+      'Bind an existing (queued or orphaned) task to this session and mark it in progress. Refused if another live session owns it.',
+    inputSchema: {
+      type: 'object',
+      properties: { task_id: { type: 'string' } },
+      required: ['task_id'],
+    },
   },
   {
     name: 'kanban_update_task',
-    description: 'Update status, summary, PR link, branch or title of a task bound to this session. status "done" releases the task.',
+    description:
+      'Update status, summary, PR link, branch or title of a task bound to this session. status "done" releases the task.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -97,13 +127,21 @@ const tools: Tool[] = [
   },
   {
     name: 'kanban_subtask',
-    description: 'Set the status of one templated subtask (e.g. spec → awaiting_approval, implement → in_progress).',
+    description:
+      'Set the status of one templated subtask (e.g. spec → awaiting_approval, implement → in_progress).',
     inputSchema: {
       type: 'object',
       properties: {
         task_id: { type: 'string' },
-        key: { type: 'string', description: 'Subtask key from the task (spec, spec_approved, implement, pr_open, done, reproduce, fix, do)' },
-        status: { type: 'string', enum: ['pending', 'in_progress', 'awaiting_approval', 'done', 'skipped'] },
+        key: {
+          type: 'string',
+          description:
+            'Subtask key from the task (spec, spec_approved, implement, pr_open, done, reproduce, fix, do)',
+        },
+        status: {
+          type: 'string',
+          enum: ['pending', 'in_progress', 'awaiting_approval', 'done', 'skipped'],
+        },
         note: { type: 'string' },
       },
       required: ['task_id', 'key', 'status'],
@@ -111,7 +149,8 @@ const tools: Tool[] = [
   },
   {
     name: 'kanban_comment',
-    description: 'Post a short progress note on a task bound to this session. James reads it on his phone.',
+    description:
+      'Post a short progress note on a task bound to this session. James reads it on his phone.',
     inputSchema: {
       type: 'object',
       properties: { task_id: { type: 'string' }, body: { type: 'string' } },
@@ -120,7 +159,8 @@ const tools: Tool[] = [
   },
   {
     name: 'kanban_ask',
-    description: 'Ask James a question on a task. The task shows as waiting on him; his answer arrives as a <channel kind="answer"> event.',
+    description:
+      'Ask James a question on a task. The task shows as waiting on him; his answer arrives as a <channel kind="answer"> event.',
     inputSchema: {
       type: 'object',
       properties: { task_id: { type: 'string' }, question: { type: 'string' } },
@@ -129,7 +169,8 @@ const tools: Tool[] = [
   },
   {
     name: 'kanban_todo_for_james',
-    description: 'Add something James must do by hand to this project\'s "For James" list (merge PR, sign in, rotate key…).',
+    description:
+      'Add something James must do by hand to this project\'s "For James" list (merge PR, sign in, rotate key…).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -142,7 +183,8 @@ const tools: Tool[] = [
   },
   {
     name: 'kanban_whoami',
-    description: 'This session\'s agent id, project id, working directory and board connection status.',
+    description:
+      "This session's agent id, project id, working directory and board connection status.",
     inputSchema: { type: 'object', properties: {} },
   },
 ]
@@ -152,10 +194,10 @@ const mcp = new Server(
   {
     capabilities: { experimental: { 'claude/channel': {} }, tools: {} },
     instructions: INSTRUCTIONS,
-  },
+  }
 )
 
-mcp.setRequestHandler(ListToolsRequestSchema, async () => ({ tools }))
+mcp.setRequestHandler(ListToolsRequestSchema, () => ({ tools }))
 
 // The board is created lazily on first use so an offline Firestore never prevents
 // the MCP server from starting (the session would otherwise lose the server).
@@ -171,10 +213,16 @@ function getBoard(): Promise<Board> {
       await b.register()
       const stopComments = b.listenForJames(deliverToSession)
       const stopQueued = b.listenForQueued(announceQueued)
-      stopListening = () => { stopComments(); stopQueued() }
+      stopListening = () => {
+        stopComments()
+        stopQueued()
+      }
       board = b
       return b
-    })().catch(err => { boardInit = null; throw err })
+    })().catch((err) => {
+      boardInit = null
+      throw err
+    })
   }
   return boardInit
 }
@@ -194,7 +242,8 @@ async function announceQueued(t: Task): Promise<void> {
   await mcp.notification({
     method: 'notifications/claude/channel',
     params: {
-      content: `James queued a ${t.type} on the board: "${t.title}" (task ${t.id}).${desc}\n\n` +
+      content:
+        `James queued a ${t.type} on the board: "${t.title}" (task ${t.id}).${desc}\n\n` +
         `If you are idle, call kanban_start_task with task_id "${t.id}" and begin. ` +
         `If you are in the middle of other work, or kanban_start_task says another session owns it, ignore this.`,
       meta: { task: t.id, from: 'board', kind: 'queued' },
@@ -203,17 +252,49 @@ async function announceQueued(t: Task): Promise<void> {
 }
 
 function taskBrief(t: Task) {
-  const steps = t.subtasks.map(s => `${s.key}:${s.status}`).join(' ')
+  const steps = t.subtasks.map((s) => `${s.key}:${s.status}`).join(' ')
   return {
-    id: t.id, type: t.type, title: t.title, status: t.status,
-    subtasks: steps || undefined, openQuestion: t.openQuestion ?? undefined,
-    prUrl: t.prUrl ?? undefined, mine: t.agentId === board?.id.agentId || undefined,
+    id: t.id,
+    type: t.type,
+    title: t.title,
+    status: t.status,
+    subtasks: steps || undefined,
+    openQuestion: t.openQuestion ?? undefined,
+    prUrl: t.prUrl ?? undefined,
+    mine: t.agentId === board?.id.agentId || undefined,
   }
 }
 
-mcp.setRequestHandler(CallToolRequestSchema, async req => {
-  const a = (req.params.arguments ?? {}) as Record<string, any>
-  const name = req.params.name
+// Each tool's arguments as its inputSchema above declares them. Claude Code validates calls
+// against those schemas before they reach us, so required fields are typed as present; the
+// Board re-checks anything that matters (ids, statuses, ownership).
+interface ToolArgs {
+  kanban_list_tasks: { status?: TaskStatus }
+  kanban_get_task: { task_id: string }
+  kanban_create_task: { title: string; type: TaskType; description?: string }
+  kanban_start_task: { task_id: string }
+  kanban_update_task: {
+    task_id: string
+    status?: TaskStatus
+    summary?: string
+    pr_url?: string
+    branch?: string
+    title?: string
+  }
+  kanban_subtask: { task_id: string; key: string; status: SubtaskStatus; note?: string }
+  kanban_comment: { task_id: string; body: string }
+  kanban_ask: { task_id: string; question: string }
+  kanban_todo_for_james: { body: string; link?: string; task_id?: string }
+}
+function argsOf<N extends keyof ToolArgs>(
+  args: Record<string, unknown> | undefined,
+  _tool: N
+): ToolArgs[N] {
+  return (args ?? {}) as ToolArgs[N]
+}
+
+mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
+  const { name, arguments: args } = req.params
   try {
     if (name === 'kanban_whoami') {
       const status = boardStatus()
@@ -222,33 +303,64 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
     }
     const b = await getBoard()
     switch (name) {
-      case 'kanban_list_tasks':
+      case 'kanban_list_tasks': {
+        const a = argsOf(args, name)
         return ok((await b.listTasks(a.status)).map(taskBrief))
+      }
       case 'kanban_get_task': {
+        const a = argsOf(args, name)
         const task = await b.getTask(a.task_id)
         const comments = await b.getComments(a.task_id)
-        return ok({ ...task, comments: comments.map(c => ({ at: new Date(c.createdAt).toISOString(), author: c.author, kind: c.kind, body: c.body })) })
+        return ok({
+          ...task,
+          comments: comments.map((c) => ({
+            at: new Date(c.createdAt).toISOString(),
+            author: c.author,
+            kind: c.kind,
+            body: c.body,
+          })),
+        })
       }
-      case 'kanban_create_task':
-        return ok(taskBrief(await b.createTask({ title: a.title, type: a.type, description: a.description })))
-      case 'kanban_start_task':
+      case 'kanban_create_task': {
+        const a = argsOf(args, name)
+        return ok(
+          taskBrief(
+            await b.createTask({ title: a.title, type: a.type, description: a.description })
+          )
+        )
+      }
+      case 'kanban_start_task': {
+        const a = argsOf(args, name)
         return ok(taskBrief(await b.startTask(a.task_id)))
+      }
       case 'kanban_update_task':
-        return ok(taskBrief(await b.updateTask(a as any)))
-      case 'kanban_subtask':
+        return ok(taskBrief(await b.updateTask(argsOf(args, name))))
+      case 'kanban_subtask': {
+        const a = argsOf(args, name)
         return ok(await b.setSubtask(a.task_id, a.key, a.status, a.note))
-      case 'kanban_comment':
+      }
+      case 'kanban_comment': {
+        const a = argsOf(args, name)
         return ok({ id: (await b.comment(a.task_id, a.body)).id })
-      case 'kanban_ask':
-        return ok({ id: (await b.ask(a.task_id, a.question)).id, note: 'James will see this on his phone; his answer arrives as a <channel kind="answer"> event.' })
-      case 'kanban_todo_for_james':
+      }
+      case 'kanban_ask': {
+        const a = argsOf(args, name)
+        return ok({
+          id: (await b.ask(a.task_id, a.question)).id,
+          note: 'James will see this on his phone; his answer arrives as a <channel kind="answer"> event.',
+        })
+      }
+      case 'kanban_todo_for_james': {
+        const a = argsOf(args, name)
         return ok({ id: (await b.todoForJames(a.body, a.link, a.task_id)).id })
+      }
       default:
         throw new BoardError(`unknown tool: ${name}`)
     }
   } catch (err) {
     const e = err as Error
-    if (!(e instanceof BoardError) && !(e instanceof BoardOfflineError)) log(`${name} failed: ${e.stack ?? e.message}`)
+    if (!(e instanceof BoardError) && !(e instanceof BoardOfflineError))
+      log(`${name} failed: ${e.stack ?? e.message}`)
     return { isError: true, content: [{ type: 'text', text: e.message }] }
   }
 })
@@ -264,8 +376,16 @@ async function shutdown(reason: string) {
   if (shuttingDown) return
   shuttingDown = true
   log(`shutting down (${reason})`)
-  try { stopListening?.() } catch {}
-  try { await board?.shutdown() } catch (err) { log(`shutdown bookkeeping failed: ${(err as Error).message}`) }
+  try {
+    stopListening?.()
+  } catch (err) {
+    log(`stopping listeners failed: ${(err as Error).message}`)
+  }
+  try {
+    await board?.shutdown()
+  } catch (err) {
+    log(`shutdown bookkeeping failed: ${(err as Error).message}`)
+  }
   process.exit(0)
 }
 
@@ -281,5 +401,5 @@ log(`mcp connected cwd=${process.cwd()} board=${boardStatus().mode}`)
 // Register eagerly when the board is reachable so James sees the session come
 // online before Claude's first tool call; failures are logged and retried on use.
 if (boardStatus().mode !== 'offline') {
-  getBoard().catch(err => log(`board registration failed: ${(err as Error).message}`))
+  getBoard().catch((err) => log(`board registration failed: ${(err as Error).message}`))
 }
