@@ -13,10 +13,11 @@ firebase.json / firestore.rules / firestore.indexes.json
 ## One-time setup
 
 ### Firebase project
+
 1. Create a project, enable **Firestore** (native mode) and **Authentication → Google**.
 2. Add a **Web app**; copy its config into `packages/web/.env` (see `.env.example`).
-3. A service-account key (IAM → Service Accounts → `kanban-agent`, role *Cloud Datastore
-   User* → Keys → JSON). Save it as **`C:\Users\Intel\Documents\code\kanban-secrets\sa.json`**
+3. A service-account key (IAM → Service Accounts → `kanban-agent`, role _Cloud Datastore
+   User_ → Keys → JSON). Save it as **`C:\Users\Intel\Documents\code\kanban-secrets\sa.json`**
    — a sibling folder of this repo, never inside it. Do **not** use `%APPDATA%`: the Claude
    desktop app is an MSIX package, and processes it starts (terminal panel, sessions, MCP
    servers) see a virtualised `AppData\Roaming`, so a file there is invisible to them.
@@ -26,6 +27,7 @@ firebase.json / firestore.rules / firestore.indexes.json
 5. Hosting → add custom domain `kanban.nullnoise.ai` and create the DNS record it asks for.
 
 ### Desktop (per machine)
+
 Register the agent once, user-wide, so every project folder has it:
 
 ```bash

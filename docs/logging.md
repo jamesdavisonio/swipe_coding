@@ -6,10 +6,10 @@ warehouse pipeline yet).
 
 ## Where logs go
 
-| Emitter | Logger | Destination today | Destination when provisioned |
-|---|---|---|---|
+| Emitter                                 | Logger                                               | Destination today                                                 | Destination when provisioned                                                                             |
+| --------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | Desktop agent (`packages/agent`), hooks | `logging/logger.server.js` — one JSON line per event | stderr + `packages/agent/agent.log` (stdout is the MCP transport) | Cloud Logging is not applicable (no GCP runtime); stays local, or forwarded by a later `instrument` step |
-| Web app (`packages/web`) | `logging/logger.browser.js`, `source: 'web_client'` | buffered, dropped (no endpoint) | `log_endpoint` in `app.manifest.yaml` once the `jamesdavisonio` client logging project exists |
+| Web app (`packages/web`)                | `logging/logger.browser.js`, `source: 'web_client'`  | buffered, dropped (no endpoint)                                   | `log_endpoint` in `app.manifest.yaml` once the `jamesdavisonio` client logging project exists            |
 
 The client's logging block in the registry is still `TBD-jamesdavisonio-logging-project`,
 `provisioned: false`. Until James provisions it (commands in the skills repo,

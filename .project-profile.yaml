@@ -7,7 +7,7 @@ description: Phone-first board where James follows and steers his local Claude C
 stack:
   primary_language: typescript
   runtime: node
-  runtime_version: "24"
+  runtime_version: '24'
   frontend:
     - react
     - vite
@@ -15,14 +15,14 @@ stack:
     - typescript
   backend:
     - firestore
-    - firebase-admin          # desktop agent process, not Cloud Functions
-    - mcp                     # Claude Code channel MCP server
+    - firebase-admin # desktop agent process, not Cloud Functions
+    - mcp # Claude Code channel MCP server
   ai_providers: []
   package_manager: npm
 
 tests:
   unit: vitest
-  integration: none           # emulator-backed once Java is installed
+  integration: none # emulator-backed once Java is installed
   e2e: none
   coverage_report: false
 
@@ -36,7 +36,7 @@ deploy:
   deploy_workflow_needed: true
 
 compliance:
-  gdpr: false                 # internal, single owner; only James's own account data
+  gdpr: false # internal, single owner; only James's own account data
   ccpa: false
   age_restricted: false
   scorm: false
@@ -51,7 +51,7 @@ ai:
   fallback_strategy: none
 
 ops:
-  tracker: none               # this app is the tracker
+  tracker: none # this app is the tracker
   observability: stdout
   alerting_tiers_enabled: []
 
@@ -60,6 +60,6 @@ principles_enforced:
   - observability
   - traceability
 
-gate_stage: setup
+gate_stage: tooling
 
 overlays: []

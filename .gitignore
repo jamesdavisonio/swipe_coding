@@ -8,3 +8,4 @@ dist/
 sa.json
 firebase-debug.log
 .firebase/
+.claude/settings.local.json

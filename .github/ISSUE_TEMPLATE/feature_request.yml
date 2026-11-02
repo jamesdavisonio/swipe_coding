@@ -1,0 +1,26 @@
+name: Feature request
+description: Something you want the board or the agent to do that it doesn't yet.
+body:
+  - type: textarea
+    id: user
+    attributes:
+      label: Who is this for
+      description: James on the phone, a session on the desktop, or both.
+    validations: { required: true }
+  - type: textarea
+    id: observation
+    attributes:
+      label: What they'd observe (behavioural)
+      description: Not "add a function that…"; "the user does X and sees Y".
+    validations: { required: true }
+  - type: textarea
+    id: out
+    attributes:
+      label: Out of scope
+      description: What might a reader assume is included that isn't?
+    validations: { required: true }
+  - type: textarea
+    id: success
+    attributes:
+      label: How you'd know it's working
+      description: Measurable if possible.

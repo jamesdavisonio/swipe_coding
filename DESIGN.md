@@ -96,7 +96,14 @@ One process per Claude session, spawned by Claude Code from MCP config:
 
 ```json
 // ~/.claude.json
-{ "mcpServers": { "kanban": { "command": "node", "args": ["C:/Users/Intel/Documents/code/kanban/packages/agent/dist/index.js"] } } }
+{
+  "mcpServers": {
+    "kanban": {
+      "command": "node",
+      "args": ["C:/Users/Intel/Documents/code/kanban/packages/agent/dist/index.js"]
+    }
+  }
+}
 ```
 
 On start it:
@@ -109,17 +116,17 @@ On start it:
 3. Exposes tools (all scoped to this agent; the backend binds a task to an agent when
    the agent starts or creates it, so inbound routing needs no Claude session id):
 
-| tool | purpose |
-|---|---|
-| `kanban_list_tasks` | tasks in this project (open first) so the session can pick one up |
-| `kanban_create_task` | `{title, type, description?}` → creates task + templated subtasks, binds to this agent |
-| `kanban_start_task` | `{task_id}` → binds existing task to this agent, status `in_progress` |
-| `kanban_update_task` | `{task_id, status?, summary?, pr_url?, branch?}` |
-| `kanban_subtask` | `{task_id, key, status, note?}` — advance a templated step (e.g. `spec: awaiting_approval`) |
-| `kanban_comment` | `{task_id, body}` — the session's narrative, visible to me |
-| `kanban_ask` | `{task_id, question}` — sets `needs_james`, pushes notification to me; the answer comes back as a channel event |
-| `kanban_todo_for_james` | `{project, body, link?}` — appends to the project's "For James" task |
-| `kanban_get_task` | full task with comments, so a fresh session can resume one |
+| tool                    | purpose                                                                                                         |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `kanban_list_tasks`     | tasks in this project (open first) so the session can pick one up                                               |
+| `kanban_create_task`    | `{title, type, description?}` → creates task + templated subtasks, binds to this agent                          |
+| `kanban_start_task`     | `{task_id}` → binds existing task to this agent, status `in_progress`                                           |
+| `kanban_update_task`    | `{task_id, status?, summary?, pr_url?, branch?}`                                                                |
+| `kanban_subtask`        | `{task_id, key, status, note?}` — advance a templated step (e.g. `spec: awaiting_approval`)                     |
+| `kanban_comment`        | `{task_id, body}` — the session's narrative, visible to me                                                      |
+| `kanban_ask`            | `{task_id, question}` — sets `needs_james`, pushes notification to me; the answer comes back as a channel event |
+| `kanban_todo_for_james` | `{project, body, link?}` — appends to the project's "For James" task                                            |
+| `kanban_get_task`       | full task with comments, so a fresh session can resume one                                                      |
 
 4. Routes inbound: it listens with `onSnapshot` to
    `collectionGroup('comments') where agentId == me && deliveredAt == null`; each new
@@ -146,7 +153,7 @@ React + Vite + Tailwind PWA, installable on the phone.
   "For James" task pinned at top.
 - `/t/:task` task view: type + subtask stepper, summary, PR link (opens GitHub), agent
   presence (online / idle / offline, `claude --resume …`), comment thread with a
-  composer. Quick actions on an open question: *Approve*, *Reply*.
+  composer. Quick actions on an open question: _Approve_, _Reply_.
 - Web Push for `kanban_ask`, `Stop` with open question, PR opened, permission prompt.
 
 ### Data model (Firestore)
@@ -197,10 +204,11 @@ the end of that turn. Well under the 1-minute target.
 **Phase 0 — spike. DONE 2026-11-02.** `packages/agent` minimal channel server
 (capability + `kanban_reply` / `kanban_whoami` tools + local HTTP stand-in for
 Firestore). Results:
+
 - Protocol test (`npm run test:agent`) drives the server over stdio like Claude Code.
 - Live: `claude --dangerously-load-development-channels server:kanban` from the
   desktop app's **terminal panel**; a `POST /say` became a `<channel source="kanban"
-  from="james">` event, the session acted without asking, created the requested file
+from="james">` event, the session acted without asking, created the requested file
   and called `kanban_reply`. 12 s end to end including the work.
 - **Team plan gotcha:** events were dropped silently until channels were enabled for
   the org in the admin console. Sessions started before that never register the
@@ -208,7 +216,7 @@ Firestore). Results:
 - The dev-channel confirmation dialog did not appear once the org setting was on;
   only the one-time per-project MCP consent did (avoided entirely with user-scope
   registration).
-- Still untested: a session started from the desktop app's *chat* UI (no way to pass
+- Still untested: a session started from the desktop app's _chat_ UI (no way to pass
   the flag). Workaround that already works: launch from the app's terminal panel.
 
 **Phase 1 — usable loop. DONE 2026-11-02.** Firebase project `kanban-nullnoise`
@@ -219,6 +227,7 @@ Live round trip verified from the phone: James queued a chore → session announ
 started and did it → `kanban_ask` → James answered from the task page → answer arrived
 as `<channel kind="answer">` → session closed the task with a summary.
 Found along the way:
+
 - Service-account key creation needed a project-level override of the org policy
   `iam.managed.disableServiceAccountKeyCreation`; SA `kanban-agent`, role Cloud Datastore User.
 - The MSIX-packaged desktop app virtualises `%APPDATA%` for its child processes, so
@@ -235,7 +244,7 @@ Found along the way:
 2026-11-02 after five mock-ups. Work packages, in build order:
 
 1. **Model.** Stages become `spec → approved → build → pr → merged → main_ci →
-   after_deploy? → done` (bugfix: `fix → pr → …`; chore: `do → done`). Task gains
+after_deploy? → done` (bugfix: `fix → pr → …`; chore: `do → done`). Task gains
    `afterDeploy: string[]`, `afterDone`, `specVersion`, `reopenedAt`, `log[]` (decision
    history: who / when / what, append-only). Comments gain delivery state
    `sent → delivered → working → handled`. Done tasks stay in Firestore forever;
