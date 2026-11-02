@@ -38,6 +38,11 @@ export default function TaskPage() {
       </>
     )
 
+  // Menu items close the menu, then run their action.
+  const act = (fn: () => Promise<void>) => {
+    setMenu(false)
+    void fn()
+  }
   const agentOnline = agent.data ? isAgentOnline(agent.data) : false
   const resumeCmd = agent.data?.claudeSessionId
     ? `claude --resume ${agent.data.claudeSessionId}`
@@ -58,20 +63,19 @@ export default function TaskPage() {
               ⋯
             </button>
             {menu && (
-              <div
-                className="card absolute right-0 top-9 z-30 w-44 p-1 text-sm"
-                onClick={() => setMenu(false)}
-              >
+              <div role="menu" className="card absolute right-0 top-9 z-30 w-44 p-1 text-sm">
                 {t.status !== 'done' && (
-                  <MenuItem onClick={() => setTaskStatus(t, 'done')}>Mark done</MenuItem>
+                  <MenuItem onClick={() => act(() => setTaskStatus(t, 'done'))}>Mark done</MenuItem>
                 )}
                 {t.status !== 'queued' && (
-                  <MenuItem onClick={() => setTaskStatus(t, 'queued')}>
+                  <MenuItem onClick={() => act(() => setTaskStatus(t, 'queued'))}>
                     Re-queue (unbind session)
                   </MenuItem>
                 )}
                 {t.status === 'done' && (
-                  <MenuItem onClick={() => setTaskStatus(t, 'in_progress')}>Reopen</MenuItem>
+                  <MenuItem onClick={() => act(() => setTaskStatus(t, 'in_progress'))}>
+                    Reopen
+                  </MenuItem>
                 )}
               </div>
             )}
@@ -194,6 +198,7 @@ export default function TaskPage() {
 function MenuItem({ onClick, children }: { onClick: () => void; children: string }) {
   return (
     <button
+      role="menuitem"
       className="block w-full rounded-md px-3 py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-800"
       onClick={onClick}
     >

@@ -1,56 +1,160 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/manrope';
+@import './styles/tokens.css';
 
-:root {
-  color-scheme: light dark;
+/* Dark mode is a class on <html>, set by src/lib/theme.ts (system preference by default). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tailwind utilities read the tokens; `inline` keeps them live so .dark overrides apply. */
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-soft: hsl(var(--primary-soft));
+  --color-needs: hsl(var(--needs));
+  --color-needs-foreground: hsl(var(--needs-foreground));
+  --color-needs-soft: hsl(var(--needs-soft));
+  --color-ok: hsl(var(--ok));
+  --color-ok-foreground: hsl(var(--ok-foreground));
+  --color-ok-soft: hsl(var(--ok-soft));
+  --color-me: hsl(var(--me));
+  --color-me-foreground: hsl(var(--me-foreground));
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-base: var(--text-base);
+  --text-lg: var(--text-lg);
+  --text-xl: var(--text-xl);
+  --text-2xl: var(--text-2xl);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --ease-out: var(--ease-out);
 }
 
-html,
-body,
-#root {
-  min-height: 100%;
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-background font-sans text-base text-foreground antialiased;
+    line-height: 1.4;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    overscroll-behavior-y: none;
+  }
+
+  h1,
+  h2 {
+    text-wrap: balance;
+  }
+
+  /* Every focusable element gets the same visible ring (WCAG 2.4.7). Components may
+     restyle it but never remove it. */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
 }
 
-body {
-  @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-  overscroll-behavior-y: none;
-}
-
-/* Safe-area helpers */
-.pt-safe {
+@utility pt-safe {
   padding-top: env(safe-area-inset-top);
 }
-.pb-safe {
+@utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-.card {
-  @apply rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+/* Bottom sheet motion (components/ui/sheet.tsx). Durations come from tokens, so
+   prefers-reduced-motion collapses them to 0. */
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes sheet-down {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+[data-slot='sheet-content'][data-state='open'] {
+  animation: sheet-up var(--motion-slow) var(--ease-out);
+}
+[data-slot='sheet-content'][data-state='closed'] {
+  animation: sheet-down var(--motion-med) ease-in;
+}
+[data-slot='sheet-overlay'][data-state='open'] {
+  animation: fade-in var(--motion-med) ease-out;
+}
+[data-slot='sheet-overlay'][data-state='closed'] {
+  animation: fade-out var(--motion-med) ease-in;
 }
 
-/* Tailwind v4: @apply cannot reference other custom classes, so the base is repeated. */
+/* ---- Legacy helpers ---------------------------------------------------------
+   Used by the Phase 1 pages until they are rebuilt on components/ui. Expressed in tokens
+   so nothing in the tree hardcodes a colour; delete each as its last caller goes. */
+.card {
+  @apply rounded-md border border-border bg-card text-card-foreground shadow-sm;
+}
+
 .btn,
 .btn-primary,
 .btn-ghost,
 .btn-outline {
-  @apply inline-flex items-center justify-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition
+  @apply inline-flex items-center justify-center gap-1 rounded-sm px-3 py-2 text-sm font-semibold transition
          active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
 }
 .btn-primary {
-  @apply bg-sky-600 text-white hover:bg-sky-500;
+  @apply bg-primary text-primary-foreground hover:bg-primary/90;
 }
 .btn-ghost {
-  @apply bg-transparent text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800;
+  @apply bg-transparent text-foreground hover:bg-muted;
 }
 .btn-outline {
-  @apply border border-slate-300 text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800;
+  @apply border border-border bg-card text-foreground hover:bg-muted;
 }
 
 .input {
-  @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base outline-none
-         focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30
-         dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100;
+  @apply w-full rounded-sm border border-input bg-card px-3 py-2 text-base text-foreground outline-none
+         placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30;
 }
 
 .pill {

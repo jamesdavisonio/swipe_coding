@@ -40,3 +40,4 @@ For features shipped via `implement-feature`:
 - [ ] `docs/` updated where a stable fact changed; DESIGN.md if a decision changed
 - [ ] AGENTS.md still under ~2KB
 - [ ] No test files modified since the red-checkpoint SHA (or explicit justification)
+- [ ] UI change: `docs/security/A11Y_CHECKLIST.md` walked; `node scripts/check-contrast.mjs` passes if tokens changed

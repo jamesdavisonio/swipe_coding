@@ -7,6 +7,7 @@ import {
   type TaskStatus,
 } from '@kanban/shared'
 import { useUser, logOut } from './auth.tsx'
+import { Sheet as SheetRoot, SheetContent } from './components/ui/sheet.tsx'
 import type { ReactNode } from 'react'
 
 export const STATUS_LABEL: Record<TaskStatus, string> = {
@@ -177,7 +178,7 @@ export function Section({
   )
 }
 
-// Bottom sheet on phones, centered dialog on larger screens.
+// Legacy open/onClose API over the design-system bottom sheet (focus trap, Escape, a11y).
 export function Sheet({
   open,
   onClose,
@@ -189,24 +190,9 @@ export function Sheet({
   title: string
   children: ReactNode
 }) {
-  if (!open) return null
   return (
-    <div
-      className="fixed inset-0 z-30 flex items-end justify-center bg-black/40 md:items-center"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-lg rounded-t-2xl bg-white p-4 pb-safe shadow-xl md:rounded-2xl dark:bg-slate-900"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <button className="btn-ghost px-2" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
+    <SheetRoot open={open} onOpenChange={(next) => !next && onClose()}>
+      <SheetContent title={title}>{children}</SheetContent>
+    </SheetRoot>
   )
 }

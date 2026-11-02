@@ -19,6 +19,15 @@ stack:
     - mcp # Claude Code channel MCP server
   ai_providers: []
   package_manager: npm
+  ui:
+    library: shadcn-style # vendored components on Radix primitives, no CLI
+    tokens: css-custom-properties # packages/web/src/styles/tokens.css, Tailwind 4 @theme
+    dark_mode: class # .dark on <html>, system preference by default (src/lib/theme.ts)
+    a11y_target: wcag-aa
+    i18n: none # single owner, English only
+    locales: [en]
+    icons: lucide-react # via src/lib/icons.ts only
+    font: manrope # self-hosted (@fontsource-variable), CSP stays 'self'
 
 tests:
   unit: vitest
@@ -60,6 +69,6 @@ principles_enforced:
   - observability
   - traceability
 
-gate_stage: security
+gate_stage: ui-ready
 
 overlays: []

@@ -26,3 +26,5 @@ jobs:
       - run: npm run test:agent
       - name: firestore rules lint
         run: node scripts/check-firestore-rules.mjs
+      - name: token contrast check (WCAG AA)
+        run: node scripts/check-contrast.mjs
