@@ -14,15 +14,26 @@ try {
   // Prefer the agent that recorded this session id; fall back to (hostname, cwd).
   let agentId: string | null = null
   if (input.session_id) {
-    const bySession = await db.collection(C.agents).where('claudeSessionId', '==', input.session_id).limit(1).get()
+    const bySession = await db
+      .collection(C.agents)
+      .where('claudeSessionId', '==', input.session_id)
+      .limit(1)
+      .get()
     agentId = bySession.docs[0]?.id ?? null
   }
   if (!agentId) {
-    const snap = await db.collection(C.agents).where('hostname', '==', host).where('cwd', '==', input.cwd).get()
-    const live = snap.docs.filter(d => d.get('lastSeen') > 0).sort((a, b) => b.get('startedAt') - a.get('startedAt'))
+    const snap = await db
+      .collection(C.agents)
+      .where('hostname', '==', host)
+      .where('cwd', '==', input.cwd)
+      .get()
+    const live = snap.docs
+      .filter((d) => d.get('lastSeen') > 0)
+      .sort((a, b) => b.get('startedAt') - a.get('startedAt'))
     agentId = live[0]?.id ?? null
   }
-  if (!agentId) log(`hook SessionEnd: no agent found for session ${input.session_id} at ${host}:${input.cwd}`)
+  if (!agentId)
+    log(`hook SessionEnd: no agent found for session ${input.session_id} at ${host}:${input.cwd}`)
   else await orphanAgent(db, agentId)
 } catch (err) {
   log(`hook SessionEnd failed: ${(err as Error).message}`)

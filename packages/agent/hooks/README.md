@@ -48,7 +48,14 @@ MCP registration for the agent itself (user scope, so every project has it):
 
 ```json
 // ~/.claude.json
-{ "mcpServers": { "kanban": { "command": "node", "args": ["C:/Users/Intel/Documents/code/kanban/packages/agent/src/index.ts"] } } }
+{
+  "mcpServers": {
+    "kanban": {
+      "command": "node",
+      "args": ["C:/Users/Intel/Documents/code/kanban/packages/agent/src/index.ts"]
+    }
+  }
+}
 ```
 
 Start sessions with `claude --dangerously-load-development-channels server:kanban`.

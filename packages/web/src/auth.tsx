@@ -1,5 +1,11 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth'
+import {
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+  type User,
+} from 'firebase/auth'
 import { OWNER_EMAIL, OWNER_EMAILS, isOwnerEmail } from '@kanban/shared'
 import { auth } from './firebase.ts'
 
@@ -30,7 +36,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
           <p className="mt-1 text-sm text-slate-500">Your sessions, your board.</p>
           <button
             className="btn-primary mt-6 w-full"
-            onClick={() => signIn().catch(e => setErr(e.message))}
+            onClick={() =>
+              signIn().catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)))
+            }
           >
             Sign in with Google
           </button>
@@ -49,7 +57,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
             Signed in as <span className="font-mono">{user.email}</span>. This board belongs to{' '}
             <span className="font-mono">{OWNER_EMAILS.join(' / ')}</span>.
           </p>
-          <button className="btn-outline mt-6 w-full" onClick={() => logOut()}>Sign out</button>
+          <button className="btn-outline mt-6 w-full" onClick={() => logOut()}>
+            Sign out
+          </button>
         </div>
       </Center>
     )
@@ -59,5 +69,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
 }
 
 function Center({ children }: { children: ReactNode }) {
-  return <div className="flex min-h-dvh items-center justify-center p-6 pt-safe pb-safe">{children}</div>
+  return (
+    <div className="flex min-h-dvh items-center justify-center p-6 pt-safe pb-safe">{children}</div>
+  )
 }

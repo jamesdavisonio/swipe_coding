@@ -56,5 +56,5 @@ npm run typecheck
 
 ## Skills used in this repo
 
-- `setup-project` ✓ · `setup-tooling`, `setup-security`, `bootstrap-design-system` next (see `.project-profile.yaml`)
+- `setup-project` ✓ · `setup-tooling` ✓ · `setup-security`, `bootstrap-design-system` next (see `.project-profile.yaml`)
 - `ship` / `implement-feature` for behaviour · `change-ui` for UI · `check` before every commit · `pre-deploy-check` before deploy

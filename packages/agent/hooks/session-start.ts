@@ -14,7 +14,7 @@ try {
   let agent = null
   for (let i = 0; i < 10 && !agent; i++) {
     agent = await findLiveAgent(db, host, input.cwd)
-    if (!agent) await new Promise(r => setTimeout(r, 500))
+    if (!agent) await new Promise((r) => setTimeout(r, 500))
   }
   if (!agent) {
     log(`hook SessionStart: no live agent for ${host}:${input.cwd} (session ${input.session_id})`)

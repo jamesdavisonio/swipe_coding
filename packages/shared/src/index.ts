@@ -25,14 +25,14 @@ export type TaskType = 'feature' | 'bugfix' | 'chore' | 'for_james'
 export const TASK_TYPES: readonly TaskType[] = ['feature', 'bugfix', 'chore', 'for_james']
 
 export type TaskStatus =
-  | 'queued'
-  | 'in_progress'
-  | 'waiting_on_james'
-  | 'blocked_on_permission'
-  | 'done'
-  | 'orphaned'
+  'queued' | 'in_progress' | 'waiting_on_james' | 'blocked_on_permission' | 'done' | 'orphaned'
 export const TASK_STATUSES: readonly TaskStatus[] = [
-  'queued', 'in_progress', 'waiting_on_james', 'blocked_on_permission', 'done', 'orphaned',
+  'queued',
+  'in_progress',
+  'waiting_on_james',
+  'blocked_on_permission',
+  'done',
+  'orphaned',
 ]
 
 export type SubtaskStatus = 'pending' | 'in_progress' | 'awaiting_approval' | 'done' | 'skipped'
@@ -50,7 +50,7 @@ export interface Project {
   id: string
   hostname: string
   cwd: string
-  name: string          // basename of cwd by default; editable in the UI
+  name: string // basename of cwd by default; editable in the UI
   createdAt: number
   updatedAt: number
 }
@@ -61,9 +61,9 @@ export interface AgentDoc {
   hostname: string
   cwd: string
   pid: number
-  claudeSessionId: string | null   // filled by the SessionStart hook when known
+  claudeSessionId: string | null // filled by the SessionStart hook when known
   startedAt: number
-  lastSeen: number                 // heartbeat; online = now - lastSeen < AGENT_STALE_MS
+  lastSeen: number // heartbeat; online = now - lastSeen < AGENT_STALE_MS
 }
 export const AGENT_HEARTBEAT_MS = 30_000
 export const AGENT_STALE_MS = 90_000
@@ -71,19 +71,19 @@ export const AGENT_STALE_MS = 90_000
 export interface Task {
   id: string
   projectId: string
-  agentId: string | null           // the session currently bound to this task
+  agentId: string | null // the session currently bound to this task
   type: TaskType
   title: string
   description: string
   status: TaskStatus
-  summary: string                  // the session's running summary / final report
+  summary: string // the session's running summary / final report
   prUrl: string | null
   branch: string | null
   createdBy: Author
   createdAt: number
   updatedAt: number
   subtasks: Subtask[]
-  openQuestion: string | null      // set by kanban_ask, cleared when James answers
+  openQuestion: string | null // set by kanban_ask, cleared when James answers
   lastCommentAt: number | null
 }
 
@@ -91,12 +91,12 @@ export interface Comment {
   id: string
   taskId: string
   projectId: string
-  agentId: string | null           // denormalised from the task at write time; routing key for delivery
+  agentId: string | null // denormalised from the task at write time; routing key for delivery
   author: Author
   kind: CommentKind
   body: string
   createdAt: number
-  deliveredAt: number | null       // null until the bound agent has pushed it into its session
+  deliveredAt: number | null // null until the bound agent has pushed it into its session
 }
 
 export interface Todo {
@@ -115,7 +115,11 @@ export interface Todo {
 export function projectIdFor(hostname: string, cwd: string): string {
   const norm = cwd.replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase()
   const base = norm.split('/').filter(Boolean).pop() ?? 'root'
-  const slug = base.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 24) || 'project'
+  const slug =
+    base
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 24) || 'project'
   let h = 0x811c9dc5
   for (const ch of `${hostname.toLowerCase()}:${norm}`) {
     h ^= ch.charCodeAt(0)

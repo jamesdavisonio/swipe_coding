@@ -1,6 +1,12 @@
 // All Firestore reads/writes for one agent (= one Claude Code session).
 import { hostname as osHostname } from 'node:os'
-import { FieldValue, type DocumentSnapshot, type Firestore, type WriteBatch } from 'firebase-admin/firestore'
+import {
+  FieldValue,
+  type DocumentSnapshot,
+  type Firestore,
+  type QuerySnapshot,
+  type WriteBatch,
+} from 'firebase-admin/firestore'
 import {
   AGENT_HEARTBEAT_MS,
   COLLECTIONS as C,
@@ -31,13 +37,25 @@ export class BoardError extends Error {
   }
 }
 
-const OPEN_STATUSES: TaskStatus[] = ['waiting_on_james', 'blocked_on_permission', 'in_progress', 'queued', 'orphaned']
+const OPEN_STATUSES: TaskStatus[] = [
+  'waiting_on_james',
+  'blocked_on_permission',
+  'in_progress',
+  'queued',
+  'orphaned',
+]
 const ACTIVE_STATUSES: TaskStatus[] = ['in_progress', 'waiting_on_james', 'blocked_on_permission']
 
-function now() { return Date.now() }
+function now() {
+  return Date.now()
+}
 
 function asTask(snap: DocumentSnapshot): Task | null {
-  return snap.exists ? ({ ...(snap.data() as Omit<Task, 'id'>), id: snap.id }) : null
+  return snap.exists ? taskOf(snap) : null
+}
+// Documents that come out of a query always exist.
+function taskOf(snap: DocumentSnapshot): Task {
+  return { ...(snap.data() as Omit<Task, 'id'>), id: snap.id }
 }
 
 export interface BoardIdentity {
@@ -76,27 +94,55 @@ export class Board {
 
     const batch = this.db.batch()
     if (!projectSnap.exists) {
-      const project: Omit<Project, 'id'> = { hostname, cwd, name: projectNameFor(cwd), createdAt: t, updatedAt: t }
+      const project: Omit<Project, 'id'> = {
+        hostname,
+        cwd,
+        name: projectNameFor(cwd),
+        createdAt: t,
+        updatedAt: t,
+      }
       batch.set(projectRef, project)
     } else {
       batch.update(projectRef, { updatedAt: t })
     }
     if (!forJamesSnap.exists) {
       const task: Omit<Task, 'id'> = {
-        projectId, agentId: null, type: 'for_james', title: 'For James',
+        projectId,
+        agentId: null,
+        type: 'for_james',
+        title: 'For James',
         description: 'Things James has to do by hand for this project.',
-        status: 'in_progress', summary: '', prUrl: null, branch: null, createdBy: 'james',
-        createdAt: t, updatedAt: t, subtasks: [], openQuestion: null, lastCommentAt: null,
+        status: 'in_progress',
+        summary: '',
+        prUrl: null,
+        branch: null,
+        createdBy: 'james',
+        createdAt: t,
+        updatedAt: t,
+        subtasks: [],
+        openQuestion: null,
+        lastCommentAt: null,
       }
       batch.set(forJamesRef, task)
     }
-    const agent: Omit<AgentDoc, 'id'> = { projectId, hostname, cwd, pid, claudeSessionId: null, startedAt: t, lastSeen: t }
+    const agent: Omit<AgentDoc, 'id'> = {
+      projectId,
+      hostname,
+      cwd,
+      pid,
+      claudeSessionId: null,
+      startedAt: t,
+      lastSeen: t,
+    }
     batch.set(this.db.collection(C.agents).doc(agentId), agent)
     await batch.commit()
 
     this.heartbeat = setInterval(() => {
-      this.db.collection(C.agents).doc(agentId).update({ lastSeen: now() })
-        .catch(err => log(`heartbeat failed: ${err.message}`))
+      this.db
+        .collection(C.agents)
+        .doc(agentId)
+        .update({ lastSeen: now() })
+        .catch((err: Error) => log(`heartbeat failed: ${err.message}`))
     }, AGENT_HEARTBEAT_MS)
     log(`registered agent=${agentId} project=${projectId} cwd=${cwd}`)
   }
@@ -104,7 +150,10 @@ export class Board {
   // Mark this agent gone and its active tasks orphaned (agentId kept so a new
   // session can resume them with kanban_start_task).
   async shutdown(): Promise<void> {
-    if (this.heartbeat) { clearInterval(this.heartbeat); this.heartbeat = null }
+    if (this.heartbeat) {
+      clearInterval(this.heartbeat)
+      this.heartbeat = null
+    }
     await orphanAgent(this.db, this.id.agentId)
   }
 
@@ -114,22 +163,32 @@ export class Board {
     let q = this.db.collection(C.tasks).where('projectId', '==', this.id.projectId)
     if (status) q = q.where('status', '==', status)
     const snap = await q.orderBy('updatedAt', 'desc').limit(100).get()
-    const tasks = snap.docs.map(d => asTask(d)!)
-    const rank = (t: Task) => (t.type === 'for_james' ? -1 : OPEN_STATUSES.indexOf(t.status) === -1 ? 99 : OPEN_STATUSES.indexOf(t.status))
+    const tasks = snap.docs.map(taskOf)
+    const rank = (t: Task) =>
+      t.type === 'for_james'
+        ? -1
+        : OPEN_STATUSES.indexOf(t.status) === -1
+          ? 99
+          : OPEN_STATUSES.indexOf(t.status)
     return tasks.sort((a, b) => rank(a) - rank(b) || b.updatedAt - a.updatedAt)
   }
 
   async getTask(taskId: string): Promise<Task> {
     const task = asTask(await this.db.collection(C.tasks).doc(taskId).get())
     if (!task) throw new BoardError(`no task ${taskId}`)
-    if (task.projectId !== this.id.projectId) throw new BoardError(`task ${taskId} belongs to another project`)
+    if (task.projectId !== this.id.projectId)
+      throw new BoardError(`task ${taskId} belongs to another project`)
     return task
   }
 
   async getComments(taskId: string, limit = 30): Promise<Comment[]> {
-    const snap = await this.db.collection(C.comments)
-      .where('taskId', '==', taskId).orderBy('createdAt', 'desc').limit(limit).get()
-    return snap.docs.map(d => ({ ...(d.data() as Omit<Comment, 'id'>), id: d.id })).reverse()
+    const snap = await this.db
+      .collection(C.comments)
+      .where('taskId', '==', taskId)
+      .orderBy('createdAt', 'desc')
+      .limit(limit)
+      .get()
+    return snap.docs.map((d) => ({ ...(d.data() as Omit<Comment, 'id'>), id: d.id })).reverse()
   }
 
   // ---- task writes ----------------------------------------------------------
@@ -141,10 +200,21 @@ export class Board {
     const t = now()
     const ref = this.db.collection(C.tasks).doc()
     const task: Omit<Task, 'id'> = {
-      projectId: this.id.projectId, agentId: this.id.agentId, type: input.type,
-      title: input.title.trim(), description: input.description?.trim() ?? '',
-      status: 'in_progress', summary: '', prUrl: null, branch: null, createdBy: 'agent',
-      createdAt: t, updatedAt: t, subtasks: subtasksFor(input.type), openQuestion: null, lastCommentAt: null,
+      projectId: this.id.projectId,
+      agentId: this.id.agentId,
+      type: input.type,
+      title: input.title.trim(),
+      description: input.description?.trim() ?? '',
+      status: 'in_progress',
+      summary: '',
+      prUrl: null,
+      branch: null,
+      createdBy: 'agent',
+      createdAt: t,
+      updatedAt: t,
+      subtasks: subtasksFor(input.type),
+      openQuestion: null,
+      lastCommentAt: null,
     }
     await ref.set(task)
     log(`created task ${ref.id} "${task.title}"`)
@@ -155,19 +225,29 @@ export class Board {
     const task = await this.getTask(taskId)
     if (task.status === 'done') throw new BoardError(`task ${taskId} is done; create a new one`)
     if (task.agentId && task.agentId !== this.id.agentId) {
-      const other = (await this.db.collection(C.agents).doc(task.agentId).get()).data() as AgentDoc | undefined
+      const other = (await this.db.collection(C.agents).doc(task.agentId).get()).data() as
+        AgentDoc | undefined
       if (other && isAgentOnline(other)) {
-        throw new BoardError(`task ${taskId} is being worked on by another live session (agent ${task.agentId}, pid ${other.pid})`)
+        throw new BoardError(
+          `task ${taskId} is being worked on by another live session (agent ${task.agentId}, pid ${other.pid})`
+        )
       }
       log(`taking over task ${taskId} from stale agent ${task.agentId}`)
     }
     const t = now()
     const batch = this.db.batch()
     const status: TaskStatus = task.openQuestion ? 'waiting_on_james' : 'in_progress'
-    batch.update(this.db.collection(C.tasks).doc(taskId), { agentId: this.id.agentId, status, updatedAt: t })
+    batch.update(this.db.collection(C.tasks).doc(taskId), {
+      agentId: this.id.agentId,
+      status,
+      updatedAt: t,
+    })
     // Route any undelivered comments on this task to us so they flow through the listener.
-    const pending = await this.db.collection(C.comments)
-      .where('taskId', '==', taskId).where('deliveredAt', '==', null).get()
+    const pending = await this.db
+      .collection(C.comments)
+      .where('taskId', '==', taskId)
+      .where('deliveredAt', '==', null)
+      .get()
     for (const d of pending.docs) {
       if (d.get('agentId') !== this.id.agentId) batch.update(d.ref, { agentId: this.id.agentId })
     }
@@ -177,11 +257,17 @@ export class Board {
   }
 
   async updateTask(input: {
-    task_id: string; status?: TaskStatus; summary?: string; pr_url?: string; branch?: string; title?: string
+    task_id: string
+    status?: TaskStatus
+    summary?: string
+    pr_url?: string
+    branch?: string
+    title?: string
   }): Promise<Task> {
     const task = await this.getTask(input.task_id)
     this.assertMine(task)
-    if (input.status && !TASK_STATUSES.includes(input.status)) throw new BoardError(`bad status ${input.status}`)
+    if (input.status && !TASK_STATUSES.includes(input.status))
+      throw new BoardError(`bad status ${input.status}`)
     const t = now()
     const patch: Record<string, unknown> = { updatedAt: t }
     if (input.status) patch.status = input.status
@@ -202,11 +288,18 @@ export class Board {
     return { ...task, ...(patch as Partial<Task>) }
   }
 
-  async setSubtask(taskId: string, key: string, status: SubtaskStatus, note?: string): Promise<Subtask[]> {
+  async setSubtask(
+    taskId: string,
+    key: string,
+    status: SubtaskStatus,
+    note?: string
+  ): Promise<Subtask[]> {
     const task = await this.getTask(taskId)
     this.assertMine(task)
-    if (!task.subtasks.some(s => s.key === key)) {
-      throw new BoardError(`task ${taskId} has no subtask "${key}" (has: ${task.subtasks.map(s => s.key).join(', ') || 'none'})`)
+    if (!task.subtasks.some((s) => s.key === key)) {
+      throw new BoardError(
+        `task ${taskId} has no subtask "${key}" (has: ${task.subtasks.map((s) => s.key).join(', ') || 'none'})`
+      )
     }
     const subtasks = setSubtask(task.subtasks, key, status, note)
     await this.db.collection(C.tasks).doc(taskId).update({ subtasks, updatedAt: now() })
@@ -236,27 +329,50 @@ export class Board {
     const t = now()
     const ref = this.db.collection(C.todos).doc()
     const todo: Omit<Todo, 'id'> = {
-      projectId: this.id.projectId, body: body.trim(), link: link || null, done: false,
-      sourceTaskId: sourceTaskId ?? null, createdAt: t, doneAt: null,
+      projectId: this.id.projectId,
+      body: body.trim(),
+      link: link || null,
+      done: false,
+      sourceTaskId: sourceTaskId ?? null,
+      createdAt: t,
+      doneAt: null,
     }
     await ref.set(todo)
     const forJames = await this.getTask(forJamesTaskId(this.id.projectId))
-    await this.writeAgentComment(forJames, `New to-do: ${todo.body}${link ? ` (${link})` : ''}`, 'system')
+    await this.writeAgentComment(
+      forJames,
+      `New to-do: ${todo.body}${link ? ` (${link})` : ''}`,
+      'system'
+    )
     log(`todo for james: ${todo.body}`)
     return { ...todo, id: ref.id }
   }
 
-  private async writeAgentComment(task: Task, body: string, kind: CommentKind, taskPatch: Record<string, unknown> = {}): Promise<Comment> {
+  private async writeAgentComment(
+    task: Task,
+    body: string,
+    kind: CommentKind,
+    taskPatch: Record<string, unknown> = {}
+  ): Promise<Comment> {
     const t = now()
     const ref = this.db.collection(C.comments).doc()
     const c: Omit<Comment, 'id'> = {
-      taskId: task.id, projectId: task.projectId, agentId: this.id.agentId,
-      author: 'agent', kind, body: body.trim(), createdAt: t,
+      taskId: task.id,
+      projectId: task.projectId,
+      agentId: this.id.agentId,
+      author: 'agent',
+      kind,
+      body: body.trim(),
+      createdAt: t,
       deliveredAt: t, // our own words never come back to us
     }
     const batch = this.db.batch()
     batch.set(ref, c)
-    batch.update(this.db.collection(C.tasks).doc(task.id), { lastCommentAt: t, updatedAt: t, ...taskPatch })
+    batch.update(this.db.collection(C.tasks).doc(task.id), {
+      lastCommentAt: t,
+      updatedAt: t,
+      ...taskPatch,
+    })
     await batch.commit()
     return { ...c, id: ref.id }
   }
@@ -268,11 +384,12 @@ export class Board {
   // move the task out of waiting_on_james.
   listenForJames(deliver: (c: Comment) => Promise<void>): () => void {
     const inflight = new Set<string>()
-    const q = this.db.collection(C.comments)
+    const q = this.db
+      .collection(C.comments)
       .where('agentId', '==', this.id.agentId)
       .where('deliveredAt', '==', null)
       .orderBy('createdAt', 'asc')
-    return q.onSnapshot(async snap => {
+    const onChanges = async (snap: QuerySnapshot) => {
       for (const change of snap.docChanges()) {
         if (change.type === 'removed') continue
         const c: Comment = { ...(change.doc.data() as Omit<Comment, 'id'>), id: change.doc.id }
@@ -288,7 +405,13 @@ export class Board {
           inflight.delete(c.id)
         }
       }
-    }, err => log(`comment listener error: ${err.message}`))
+    }
+    return q.onSnapshot(
+      (snap) => {
+        onChanges(snap).catch((err: Error) => log(`comment batch failed: ${err.message}`))
+      },
+      (err) => log(`comment listener error: ${err.message}`)
+    )
   }
 
   // Streams tasks James queues from the board for this project (including ones queued
@@ -296,13 +419,14 @@ export class Board {
   // announced once per session; binding is still an explicit kanban_start_task.
   listenForQueued(announce: (t: Task) => Promise<void>): () => void {
     const announced = new Set<string>()
-    const q = this.db.collection(C.tasks)
+    const q = this.db
+      .collection(C.tasks)
       .where('projectId', '==', this.id.projectId)
       .where('status', '==', 'queued')
-    return q.onSnapshot(async snap => {
+    const onChanges = async (snap: QuerySnapshot) => {
       for (const change of snap.docChanges()) {
         if (change.type === 'removed') continue
-        const t = asTask(change.doc)!
+        const t = taskOf(change.doc)
         if (t.agentId || announced.has(t.id)) continue
         announced.add(t.id)
         try {
@@ -313,13 +437,19 @@ export class Board {
           log(`announce of ${t.id} failed: ${(err as Error).message}`)
         }
       }
-    }, err => log(`queued listener error: ${err.message}`))
+    }
+    return q.onSnapshot(
+      (snap) => {
+        onChanges(snap).catch((err: Error) => log(`queued batch failed: ${err.message}`))
+      },
+      (err) => log(`queued listener error: ${err.message}`)
+    )
   }
 
   private async markDelivered(c: Comment): Promise<void> {
     const t = now()
     const taskRef = this.db.collection(C.tasks).doc(c.taskId)
-    await this.db.runTransaction(async tx => {
+    await this.db.runTransaction(async (tx) => {
       const task = asTask(await tx.get(taskRef))
       tx.update(this.db.collection(C.comments).doc(c.id), { deliveredAt: t })
       if (!task) return
@@ -332,7 +462,9 @@ export class Board {
 
   private assertMine(task: Task) {
     if (task.agentId !== this.id.agentId) {
-      throw new BoardError(`task ${task.id} is not bound to this session; call kanban_start_task first`)
+      throw new BoardError(
+        `task ${task.id} is not bound to this session; call kanban_start_task first`
+      )
     }
   }
 }
@@ -341,8 +473,11 @@ export class Board {
 export async function orphanAgent(db: Firestore, agentId: string): Promise<number> {
   const batch: WriteBatch = db.batch()
   batch.update(db.collection(C.agents).doc(agentId), { lastSeen: 0 })
-  const active = await db.collection(C.tasks)
-    .where('agentId', '==', agentId).where('status', 'in', ACTIVE_STATUSES).get()
+  const active = await db
+    .collection(C.tasks)
+    .where('agentId', '==', agentId)
+    .where('status', 'in', ACTIVE_STATUSES)
+    .get()
   const t = now()
   for (const d of active.docs) batch.update(d.ref, { status: 'orphaned', updatedAt: t })
   await batch.commit()
@@ -351,18 +486,33 @@ export async function orphanAgent(db: Firestore, agentId: string): Promise<numbe
 }
 
 // Most recent live agent for (hostname, cwd): how hooks find "their" session.
-export async function findLiveAgent(db: Firestore, hostname: string, cwd: string): Promise<(AgentDoc & { id: string }) | null> {
-  const snap = await db.collection(C.agents).where('hostname', '==', hostname).where('cwd', '==', cwd).get()
+export async function findLiveAgent(
+  db: Firestore,
+  hostname: string,
+  cwd: string
+): Promise<(AgentDoc & { id: string }) | null> {
+  const snap = await db
+    .collection(C.agents)
+    .where('hostname', '==', hostname)
+    .where('cwd', '==', cwd)
+    .get()
   const live = snap.docs
-    .map(d => ({ ...(d.data() as Omit<AgentDoc, 'id'>), id: d.id }))
-    .filter(a => isAgentOnline(a))
+    .map((d) => ({ ...(d.data() as Omit<AgentDoc, 'id'>), id: d.id }))
+    .filter((a) => isAgentOnline(a))
     .sort((a, b) => b.startedAt - a.startedAt)
   return live[0] ?? null
 }
 
-function setSubtask(subtasks: Subtask[], key: string, status: SubtaskStatus, note?: string): Subtask[] {
-  if (!subtasks.some(s => s.key === key)) return subtasks
-  return subtasks.map(s => (s.key === key ? { ...s, status, ...(note !== undefined ? { note } : {}) } : s))
+function setSubtask(
+  subtasks: Subtask[],
+  key: string,
+  status: SubtaskStatus,
+  note?: string
+): Subtask[] {
+  if (!subtasks.some((s) => s.key === key)) return subtasks
+  return subtasks.map((s) =>
+    s.key === key ? { ...s, status, ...(note !== undefined ? { note } : {}) } : s
+  )
 }
 
 export { FieldValue }
