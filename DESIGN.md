@@ -230,9 +230,34 @@ Found along the way:
   Fix in Phase 2 (share identity via a per-parent lock file, or find the config
   combination that spawns once — project-scope `.mcp.json` spawned once).
 
-**Phase 2 — comfort.** FCM push, subtask templates with Approve button, "For James"
-task, PR link auto-detect (`gh pr view` on `Stop`), permission relay over the channel
-so I can approve prompts from the phone.
+**Phase 2 — the real product, to the prototype.** Spec = the interactive prototype
+(`prototype/index.html`, https://claude.ai/artifact/G9eMLDsxFLp8S7bhxyC6uU), chosen
+2026-11-02 after five mock-ups. Work packages, in build order:
+
+1. **Model.** Stages become `spec → approved → build → pr → merged → main_ci →
+   after_deploy? → done` (bugfix: `fix → pr → …`; chore: `do → done`). Task gains
+   `afterDeploy: string[]`, `afterDone`, `specVersion`, `reopenedAt`, `log[]` (decision
+   history: who / when / what, append-only). Comments gain delivery state
+   `sent → delivered → working → handled`. Done tasks stay in Firestore forever;
+   lists hide them 7 days after `doneAt`.
+2. **Agent behaviour.** Sessions speak only at four moments: spec ready, question, PR
+   ready, after-deploy ready. New tools `kanban_submit_spec`, `kanban_pr_ready`
+   (refused unless `gh pr view` says mergeable + checks green), `kanban_log`.
+   Instructions rewritten around the stage model; reopen arrives as a channel event
+   with James's note. `working` state set when Claude's turn starts after a delivery
+   (`UserPromptSubmit`/`PostToolUse` hooks → agent), `handled` when it replies or
+   goes idle (`Stop` hook). Fix the double-spawn (per-parent lock or config change).
+3. **GitHub signal.** The agent polls `gh pr view --json mergeable,statusCheckRollup`
+   every 60 s while a task is in `pr`, detects merge, then watches the main branch's
+   checks / deploy workflow and flips the task to `after_deploy` (and pings) or `done`.
+   No public endpoint needed; a webhook → Cloud Function can replace polling later.
+4. **Web.** Rebuild the PWA to the prototype: Threads home (filters, quick replies,
+   ticks), decision sheet, Projects (Live / For James / Done + Show older), New task
+   with after-deploy steps, History sheet, Reopen-with-note. FCM push for the four
+   moments. Custom domain `kanban.nullnoise.ai`.
+5. **Hooks installed** on the desktop (`SessionStart`, `Stop`, `SessionEnd`,
+   `UserPromptSubmit`) and `For James` todos auto-created from after-deploy steps.
+6. Later: permission relay over the channel (approve prompts from the phone).
 
 **Phase 3 — launch from phone.** Agent SDK runner on the desktop picks `queued`
 tasks and runs them headless in a worktree (streaming input mode, so comments flow

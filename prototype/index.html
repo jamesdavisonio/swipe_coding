@@ -1,0 +1,601 @@
+<title>Kanban Threads</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: one-screen phone app; sticky header, scrolling list, fixed bottom bar, modal sheet from the bottom. */
+:root{
+  --bg:#F5F4F0; --surface:#FFFFFF; --ink:#1A1A1D; --muted:#66666D; --line:#E3E2DC;
+  --accent:#1F5AE0; --accent-ink:#FFFFFF; --accent-soft:#E8EEFC;
+  --needs:#8F5300; --needs-soft:#FFF1D6; --ok:#1B7A45; --ok-soft:#E3F3E8; --me:#1A1A1D; --me-ink:#FFFFFF;
+  --font:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121214; --surface:#1C1C20; --ink:#F1F1EE; --muted:#A4A4AA; --line:#2C2C32;
+  --accent:#7FA3FF; --accent-ink:#0B1A3F; --accent-soft:#1A2440;
+  --needs:#F2B84B; --needs-soft:#332508; --ok:#71CF98; --ok-soft:#10301E; --me:#F1F1EE; --me-ink:#121214; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#121214; --surface:#1C1C20; --ink:#F1F1EE; --muted:#A4A4AA; --line:#2C2C32;
+  --accent:#7FA3FF; --accent-ink:#0B1A3F; --accent-soft:#1A2440;
+  --needs:#F2B84B; --needs-soft:#332508; --ok:#71CF98; --ok-soft:#10301E; --me:#F1F1EE; --me-ink:#121214; color-scheme:dark }
+
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;overflow:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+a{color:var(--accent);text-decoration:none}
+h1,h2,h3,p{margin:0}
+h1,h2{text-wrap:balance}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+#app{height:100%;display:flex;flex-direction:column;max-width:560px;margin:0 auto;position:relative}
+.screen{flex:1;display:flex;flex-direction:column;min-height:0}
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px}
+.hdr-row{display:flex;align-items:center;gap:10px;min-height:44px}
+.hdr h1{font-size:26px;font-weight:800;letter-spacing:-0.02em;flex:1}
+.hdr .sub{font-size:13px;color:var(--muted);font-weight:600}
+.body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:4px 110px;display:flex;flex-direction:column;gap:12px}
+.body.flush{padding-left:0;padding-right:0}
+
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-inline:-2px;padding-inline:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip .n{font-size:12px;font-weight:700;color:var(--needs)}
+.chip[aria-pressed="true"] .n{color:inherit}
+
+.pill{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:8px;font-size:12px;font-weight:700;white-space:nowrap}
+.pill.needs{background:var(--needs-soft);color:var(--needs)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.quiet{background:var(--line);color:var(--muted)}
+.pill.me{background:var(--accent-soft);color:var(--accent)}
+
+.badge{min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:var(--needs);color:#fff;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+.badge.me{background:var(--accent);color:var(--accent-ink)}
+
+.btn{height:44px;padding:0 16px;border-radius:12px;font-weight:700;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+.btn.primary{background:var(--ink);color:var(--bg)}
+.btn.accent{background:var(--accent);color:var(--accent-ink)}
+.btn.ok{background:var(--ok);color:#fff}
+.btn.ghost{border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.sm{height:36px;padding:0 12px;font-size:13px;border-radius:10px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:default}
+
+/* thread rows */
+.row{display:flex;flex-direction:column;gap:0;padding:14px max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);background:var(--surface);text-align:left;width:100%}
+.rowbtn{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%}
+.row .quick{padding-left:58px}
+.row.unread{background:color-mix(in srgb,var(--needs-soft) 45%,var(--surface))}
+.row.me-thread.unread{background:color-mix(in srgb,var(--accent-soft) 55%,var(--surface))}
+.tile{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex:none;position:relative;color:#fff}
+.tile .live{position:absolute;right:-3px;bottom:-3px;width:12px;height:12px;border-radius:6px;background:var(--ok);border:2px solid var(--surface)}
+.row .main{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.row .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.row .title{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .time{font-size:12px;color:var(--muted);flex:none;font-variant-numeric:tabular-nums}
+.row.unread .time{color:var(--needs);font-weight:700}
+.row .meta{font-size:12px;color:var(--muted);font-weight:600}
+.row .prev{font-size:14px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.row.unread .prev{color:var(--ink)}
+.row .quick{display:flex;gap:8px;flex-wrap:wrap;padding-top:6px}
+.qr{height:36px;padding:0 13px;border-radius:18px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.qr.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.section-h{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;padding:10px max(16px,env(safe-area-inset-right,0px)) 6px max(16px,env(safe-area-inset-left,0px))}
+.empty{padding:40px 24px;text-align:center;color:var(--muted)}
+
+/* steps: one grid column per stage, dot and label share the column so they can't drift apart */
+.steps{display:grid;gap:0}
+.st{display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;min-width:0}
+.st::before{content:"";position:absolute;top:10px;right:50%;width:100%;height:2px;background:var(--line)}
+.st:first-child::before{display:none}
+.st.linked::before{background:var(--ok)}
+.st .lbl{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.01em;text-align:center;line-height:1.15;max-width:100%}
+.st.on .lbl{color:var(--ink)}
+.dot{width:22px;height:22px;border-radius:11px;border:2px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;flex:none;position:relative;z-index:1}
+.dot.done{background:var(--ok);border-color:var(--ok)}
+.dot.cur{border-color:var(--needs)}
+.dot.cur::after{content:"";width:8px;height:8px;border-radius:4px;background:var(--needs)}
+
+/* delivery ticks on my messages */
+.ticks{display:inline-flex;align-items:center;gap:4px}
+.ticks svg{width:14px;height:14px}
+.ticks.working,.ticks.done{color:var(--accent)}
+.typing{display:inline-flex;gap:4px;align-items:center;padding:14px 16px}
+.typing span{width:7px;height:7px;border-radius:4px;background:var(--muted);opacity:.5}
+@media (prefers-reduced-motion:no-preference){.typing span{animation:blink 1.2s infinite}.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}@keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}}
+.hist{display:flex;flex-direction:column}
+.hist .e{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.4}
+.hist .e:last-child{border-bottom:0}
+.hist .when{flex:none;width:92px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:2px}
+.hist .me .what{font-weight:700}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.card.flat{padding:4px 16px}
+.lst{display:flex;align-items:center;gap:12px;min-height:54px;border-bottom:1px solid var(--line)}
+.lst:last-child{border-bottom:0}
+.chk{width:28px;height:28px;border-radius:14px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex:none}
+.chk.on{background:var(--ok);border-color:var(--ok)}
+.chk svg{opacity:0}.chk.on svg{opacity:1}
+.strike{color:var(--muted);text-decoration:line-through}
+
+/* conversation */
+.conv{display:flex;flex-direction:column;gap:12px;padding-block:12px 160px}
+.sys{align-self:center;text-align:center;font-size:12px;font-weight:600;color:var(--muted);max-width:85%}
+.msg{display:flex;flex-direction:column;gap:4px;max-width:88%}
+.msg.session{align-self:flex-start}.msg.me{align-self:flex-end;align-items:flex-end;max-width:80%}
+.msg .lbl{font-size:11px;font-weight:700;color:var(--muted);margin:0 10px}
+.bub{padding:12px 14px;border-radius:18px;font-size:15px;line-height:1.45;white-space:pre-line}
+.session .bub{background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:6px}
+.session.needs .bub{border-color:color-mix(in srgb,var(--needs) 50%,var(--line))}
+.me .bub{background:var(--me);color:var(--me-ink);border-bottom-right-radius:6px}
+.bub .more{display:block;margin-top:8px;font-weight:700;color:var(--accent)}
+.composer{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:10px}
+.composer .in{display:flex;gap:8px;align-items:center}
+.composer input{flex:1;height:46px;border-radius:23px;border:1px solid var(--line);padding:0 16px;background:var(--bg);min-width:0}
+.composer .send{width:46px;height:46px;border-radius:23px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;flex:none}
+
+/* bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--muted);min-width:72px;min-height:48px;justify-content:center;position:relative}
+.nav button[aria-current="page"]{color:var(--ink)}
+.nav .nb{position:absolute;top:2px;right:14px}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:560px;max-height:88%;background:var(--surface);border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -12px 40px rgba(0,0,0,.3)}
+.sheet .grab{align-self:center;width:38px;height:4px;border-radius:2px;background:var(--line);margin:10px 0 4px}
+.sheet .sh-body{overflow-y:auto;padding:8px max(20px,env(safe-area-inset-right,0px)) 16px max(20px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.sheet .sh-foot{border-top:1px solid var(--line);padding:12px max(20px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:10px}
+.sheet h2{font-size:21px;font-weight:800;letter-spacing:-0.01em;line-height:1.2}
+.doc{font-size:15px;line-height:1.55;display:flex;flex-direction:column;gap:8px}
+.doc ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.doc .new{background:var(--ok-soft);border-radius:8px;padding:2px 6px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg);display:flex;flex-direction:column;gap:2px;min-height:44px}
+.opt b{font-size:15px}.opt span{font-size:13px;color:var(--muted)}
+textarea{width:100%;min-height:88px;border-radius:12px;border:1px solid var(--line);padding:12px;background:var(--bg);resize:vertical}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:700;color:var(--muted)}
+.field input,.field select{height:46px;border-radius:12px;border:1px solid var(--line);padding:0 14px;background:var(--surface);width:100%}
+.seg{display:flex;background:var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;height:38px;border-radius:9px;font-weight:700;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;font-size:14px;max-width:90%;text-align:center}
+.demo{font-size:12px;color:var(--muted);text-align:center;padding:12px 0}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .22s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+
+<div id="app" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+const KEY='kanban-threads-proto-v4';
+const MIN=60000, HOUR=3600000, DAY=86400000;
+const now=()=>Date.now();
+
+const PROJECTS=[
+  {id:'data-tracker',name:'data-tracker',host:'desktop-qdv4h00',color:'#1A1A1D',live:true},
+  {id:'kanban',name:'kanban',host:'desktop-qdv4h00',color:'#1F5AE0',live:true},
+  {id:'prague-move',name:'prague-move',host:'desktop-qdv4h00',color:'#6B5B95',live:false},
+  {id:'workshop',name:'workshop',host:'macbook-air',color:'#7A7A80',live:false},
+];
+const STAGE_LABEL={spec:'Spec',approved:'Approved',build:'Build',pr:'PR',merged:'Merged',main_ci:'Main CI',after_deploy:'After deploy',done:'Done',fix:'Fix',do:'Do'};
+function stagesFor(type,hasAfter){
+  const tail=['pr','merged','main_ci'].concat(hasAfter?['after_deploy']:[]).concat(['done']);
+  if(type==='feature')return ['spec','approved','build'].concat(tail);
+  if(type==='bugfix')return ['fix'].concat(tail);
+  return ['do','done'];
+}
+
+function seed(){
+  const t=now();
+  const mk=(o)=>Object.assign({messages:[],unread:false,needs:null,afterDeploy:[],afterDone:{},doneAt:null,summary:'',pr:null,specVersion:1},o);
+  const tasks=[
+    mk({id:'t1',projectId:'data-tracker',type:'feature',title:'Add CSV export to reports',createdAt:t-70*MIN,updatedAt:t-12*MIN,stage:'approved',unread:true,
+      afterDeploy:['Check the export on the production report page','Tell Maria the export is live'],
+      needs:{kind:'spec'},
+      spec:{goal:'Download the report on screen as CSV, same rows, same columns.',points:['"Export CSV" button in the report toolbar, next to Share.','Server-side; respects date range, filters and column order.','UTF-8 with BOM so Excel opens accents correctly; ISO dates.','Above 50 000 rows → emailed link instead of a direct download.'],out:'Scheduled exports, XLSX.',touches:'ReportToolbar.tsx, api/reports/export.ts, one new test file.'},
+      messages:[
+        {from:'system',text:'Created by you · 11:52',at:t-70*MIN},
+        {from:'session',kind:'info',text:'Picked up the task on desktop-qdv4h00. Writing the spec from your description.',at:t-69*MIN},
+        {from:'session',kind:'spec',text:'Spec v1 is ready. Export button in the toolbar, server-side CSV with the current filters, emailed link above 50k rows.',at:t-12*MIN},
+      ]}),
+    mk({id:'t2',projectId:'kanban',type:'feature',title:'Push notifications',createdAt:t-3*HOUR,updatedAt:t-35*MIN,stage:'build',unread:true,
+      needs:{kind:'question',question:'Where should push notifications be sent from?',options:[
+        {k:'A',b:'From the desktop agent',s:'Simplest. Only works while a session is up.'},
+        {k:'B',b:'Cloud Function on comment write',s:'Works with no agent online. One more moving part.'}]},
+      messages:[
+        {from:'system',text:'Created by you · 09:40',at:t-3*HOUR},
+        {from:'me',text:'Approved.',at:t-2*HOUR},
+        {from:'system',text:'Spec approved · building',at:t-2*HOUR},
+        {from:'session',kind:'question',text:'Question: send FCM from the desktop agent (simple, only while a session is up) or via a Cloud Function on the comment write (works with no agent online)?',at:t-35*MIN},
+      ]}),
+    mk({id:'t3',projectId:'data-tracker',type:'feature',title:'Nightly backup of Firestore',createdAt:t-DAY,updatedAt:t-80*MIN,stage:'pr',unread:false,
+      pr:{n:45,url:'https://github.com/jamesdavisonio/data-tracker/pull/45'},needs:{kind:'pr'},
+      summary:'Scheduled export to the backups bucket at 03:00, 30-day retention. CI green, no conflicts.',
+      messages:[
+        {from:'system',text:'Created by you · yesterday',at:t-DAY},
+        {from:'me',text:'Approved.',at:t-DAY+HOUR},
+        {from:'session',kind:'pr',text:'PR #45 is ready to merge. Scheduled export to the backups bucket at 03:00, 30-day retention. CI green, no conflicts.',at:t-80*MIN},
+      ]}),
+    mk({id:'t4',projectId:'data-tracker',type:'bugfix',title:'Fix timezone bug in weekly digest',createdAt:t-DAY,updatedAt:t-5*HOUR,stage:'fix',
+      messages:[{from:'system',text:'Created by a review session · yesterday',at:t-DAY},{from:'session',kind:'info',text:'Reproduced: digest uses server time, not the user\'s zone. Fixing.',at:t-5*HOUR}]}),
+    mk({id:'t5',projectId:'prague-move',type:'feature',title:'Review move cash: January vs later',createdAt:t-4*HOUR,updatedAt:t-4*HOUR,stage:'spec',
+      messages:[{from:'system',text:'Created by a session from your review notes · 09:20',at:t-4*HOUR},{from:'session',kind:'info',text:'Writing the spec. I will come back when it is ready.',at:t-4*HOUR}]}),
+    mk({id:'t6',projectId:'kanban',type:'feature',title:'Custom domain kanban.nullnoise.ai',createdAt:t-2*DAY,updatedAt:t-50*MIN,stage:'after_deploy',unread:true,
+      afterDeploy:['Add the CNAME record at the registrar','Open https://kanban.nullnoise.ai on the phone and sign in'],
+      needs:{kind:'after_deploy'},pr:{n:7,url:'https://github.com/jamesdavisonio/kanban/pull/7'},
+      messages:[
+        {from:'system',text:'Created by you · 2 days ago',at:t-2*DAY},
+        {from:'session',kind:'pr',text:'PR #7 ready to merge: hosting config for the custom domain.',at:t-3*HOUR},
+        {from:'me',text:'Merged it.',at:t-2*HOUR},
+        {from:'system',text:'Merged · waiting for CI on main',at:t-2*HOUR},
+        {from:'session',kind:'after_deploy',text:'Deployed and main is green. Two steps need you before this is done.',at:t-50*MIN},
+      ]}),
+    mk({id:'t7',projectId:'kanban',type:'chore',title:'Add an MIT LICENSE file',createdAt:t-3*HOUR,updatedAt:t-2*HOUR,stage:'done',doneAt:t-2*HOUR,
+      summary:'LICENSE at the repo root, README links to it. Written to the tree, no PR.',
+      messages:[{from:'system',text:'Created by you · 11:56',at:t-3*HOUR},{from:'session',kind:'done',text:'Done. LICENSE at the repo root, README links to it. No PR: the repo had no git yet.',at:t-2*HOUR}]}),
+    mk({id:'t8',projectId:'workshop',type:'bugfix',title:'Reports page crash on empty range',createdAt:t-9*DAY,updatedAt:t-8*DAY,stage:'done',doneAt:t-8*DAY,
+      summary:'Guarded the empty-range case. Merged, deployed.',messages:[{from:'session',kind:'done',text:'Done. Guarded the empty-range case.',at:t-8*DAY}]}),
+    mk({id:'t9',projectId:'workshop',type:'chore',title:'Upgrade to Node 24',createdAt:t-3*DAY,updatedAt:t-2*DAY,stage:'done',doneAt:t-2*DAY,
+      summary:'Engines bumped, CI image updated, all green.',messages:[{from:'session',kind:'done',text:'Done. Engines bumped, CI image updated, all green.',at:t-2*DAY}]}),
+  ];
+  const todos=[
+    {id:'d1',projectId:'kanban',body:'Enable Google sign-in in the Firebase console',link:'https://console.firebase.google.com',done:false,at:t-90*MIN,unread:true},
+    {id:'d2',projectId:'kanban',body:'Create service account kanban-agent (Cloud Datastore User)',link:'https://console.cloud.google.com',done:false,at:t-85*MIN,unread:true},
+    {id:'d3',projectId:'data-tracker',body:'Merge PR #42 — weekly digest timezone',link:'https://github.com',done:false,at:t-DAY,unread:false},
+    {id:'d4',projectId:'data-tracker',body:'Rotate the Postgres password after the backup PR lands',link:null,done:true,at:t-2*DAY,unread:false},
+  ];
+  return {tasks,todos,filter:'all',seedAt:t};
+}
+
+let S=null;
+function load(){ try{const r=localStorage.getItem(KEY); if(r){S=JSON.parse(r)}}catch(e){} if(!S)S=seed(); normalise(); }
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} }
+
+/* ---------- derived ---------- */
+const proj=(id)=>PROJECTS.find(p=>p.id===id);
+const task=(id)=>S.tasks.find(t=>t.id===id);
+const initials=(name)=>name.split(/[-_ ]/).slice(0,2).map(s=>s[0].toUpperCase()).join('');
+function stageList(t){return stagesFor(t.type,t.afterDeploy.length>0)}
+function stageIdx(t){const l=stageList(t);return Math.max(0,l.indexOf(t.stage))}
+function isDone(t){return t.stage==='done'}
+function visibleDone(t){return isDone(t)&&t.doneAt&&(now()-t.doneAt)<7*DAY}
+function visible(t){return !isDone(t)||visibleDone(t)}
+function stageText(t){
+  if(isDone(t))return 'Done';
+  if(t.needs){return {spec:'Spec · needs you',question:'Question for you',pr:'PR ready · needs you',after_deploy:'After deploy · needs you'}[t.needs.kind]}
+  return {spec:'Writing spec',approved:'Approved',build:'Building',fix:'Fixing',do:'Doing',pr:'PR open',merged:'Merged',main_ci:'Waiting for CI on main',after_deploy:'After deploy'}[t.stage]||t.stage;
+}
+function rel(at){
+  const d=now()-at;
+  if(d<MIN)return 'now'; if(d<HOUR)return Math.round(d/MIN)+' min'; if(d<DAY)return new Date(at).toTimeString().slice(0,5);
+  const days=Math.floor(d/DAY); return days===1?'Yesterday':days+' d';
+}
+function lastMsg(t){return t.messages[t.messages.length-1]}
+function openTodos(pid){return S.todos.filter(d=>d.projectId===pid&&!d.done)}
+function needsCount(pid){
+  const tn=S.tasks.filter(t=>visible(t)&&t.needs&&(!pid||pid==='all'||t.projectId===pid)).length;
+  const dn=S.todos.filter(d=>!d.done&&(!pid||pid==='all'||d.projectId===pid)).length;
+  return tn+dn;
+}
+
+/* ---------- actions (with a demo "session" that answers after a moment) ---------- */
+const timers=[];
+function later(ms,fn){timers.push(setTimeout(()=>{fn();save();render()},ms))}
+function sys(t,text){t.messages.push({from:'system',text,at:now()});t.updatedAt=now()}
+// The session answering settles my last message (coloured double tick) and stops the working indicator.
+function fromSession(t,kind,text){t.messages.push({from:'session',kind,text,at:now()});t.updatedAt=now();t.unread=true;t.working=false;
+  const mine=t.messages.filter(m=>m.from==='me'); if(mine.length)mine[mine.length-1].state='done';}
+// My message: one tick (sent) → two grey ticks (received by the session) → two coloured ticks + typing dots (working on it).
+function fromMe(t,text){const m={from:'me',text,at:now(),state:'sent'};t.messages.push(m);t.updatedAt=now();
+  later(700,()=>{if(m.state==='sent')m.state='delivered'}); later(1700,()=>{if(m.state==='delivered'){m.state='working';t.working=true}});}
+function setStage(t,s){t.stage=s;t.updatedAt=now()}
+// Decision log: the things worth remembering later, separate from the chat.
+function logE(t,who,text){(t.log=t.log||[]).push({at:now(),who,text})}
+function nextPr(){return 50+S.tasks.filter(t=>t.pr).length}
+
+function approveSpec(t){
+  fromMe(t,'Approved.'); logE(t,'me','Approved spec v'+(t.specVersion||1)); t.needs=null; setStage(t,'build'); sys(t,'Spec approved · building. You hear from it next with a question or the PR.');
+  later(6000,()=>{ t.pr={n:nextPr(),url:'https://github.com/jamesdavisonio/'+t.projectId+'/pull/'+nextPr()}; setStage(t,'pr'); t.needs={kind:'pr'};
+    t.summary=t.summary||'Implemented as specified. Tests added. CI green.'; fromSession(t,'pr','PR #'+t.pr.n+' is ready to merge. '+t.summary); logE(t,'session','PR #'+t.pr.n+' ready, CI green'); toast('PR ready: '+t.title); });
+}
+function requestChanges(t,text){
+  fromMe(t,'Change: '+text); logE(t,'me','Asked for a change to spec v'+(t.specVersion||1)+': '+text); t.needs=null; sys(t,'Session is revising the spec.');
+  later(5000,()=>{ t.specVersion=(t.specVersion||1)+1; if(t.spec){t.spec.points=t.spec.points.concat(['NEW · '+text]);} t.needs={kind:'spec'}; setStage(t,'approved');
+    fromSession(t,'spec','Spec v'+t.specVersion+' is ready with your change: '+text); logE(t,'session','Spec v'+t.specVersion+' submitted'); toast('Spec v'+t.specVersion+' ready'); });
+}
+function answer(t,text){
+  const q=t.needs&&t.needs.question?t.needs.question:'the question';
+  fromMe(t,text); logE(t,'me','Answered "'+q+'": '+text); t.needs=null; sys(t,'Answered · building continues.');
+  later(7000,()=>{ t.pr={n:nextPr(),url:'https://github.com/jamesdavisonio/'+t.projectId+'/pull/'+nextPr()}; setStage(t,'pr'); t.needs={kind:'pr'};
+    t.summary=t.summary||'Done as discussed. CI green.'; fromSession(t,'pr','PR #'+t.pr.n+' is ready to merge. '+t.summary); logE(t,'session','PR #'+t.pr.n+' ready, CI green'); toast('PR ready: '+t.title); });
+}
+function merged(t){
+  fromMe(t,'Merged it.'); logE(t,'me','Merged PR #'+(t.pr?t.pr.n:'?')); t.needs=null; setStage(t,'merged'); sys(t,'Merged · waiting for CI on main');
+  later(6000,()=>{ setStage(t,'main_ci'); logE(t,'session','CI on main green, deployed');
+    if(t.afterDeploy.length){ setStage(t,'after_deploy'); t.needs={kind:'after_deploy'}; fromSession(t,'after_deploy','Deployed and main is green. '+t.afterDeploy.length+' step'+(t.afterDeploy.length>1?'s':'')+' need you before this is done.'); toast('After-deploy steps ready: '+t.title); }
+    else { finish(t); }
+  });
+}
+function finish(t){ setStage(t,'done'); t.doneAt=now(); t.needs=null; t.working=false; fromSession(t,'done','Done. '+(t.summary||'')); logE(t,'session','Done'); }
+function tickAfter(t,i){ t.afterDone[i]=!t.afterDone[i]; t.updatedAt=now(); logE(t,'me',(t.afterDone[i]?'Step done: ':'Step unticked: ')+t.afterDeploy[i]);
+  if(t.afterDeploy.every((_,j)=>t.afterDone[j])){ fromMe(t,'After-deploy steps done.'); finish(t); toast('Done: '+t.title);} }
+// Reopen a finished task: back to the stage before Done; with after-deploy steps you can untick the mistaken one.
+// Reopen always carries a note: it goes to the session as a channel message, like any reply.
+function reopen(t,note){
+  const l=stageList(t); const prev=l[l.length-2]; t.doneAt=null; setStage(t,prev); t.unread=false;
+  if(prev==='after_deploy'){ t.needs={kind:'after_deploy'}; } else { t.needs=null; }
+  fromMe(t,'Reopened: '+note); sys(t,'Reopened by you'); logE(t,'me','Reopened: '+note);
+  later(4500,()=>{ fromSession(t,'info','Reopened, looking at it: '+note); logE(t,'session','Acknowledged the reopen');
+    if(prev!=='after_deploy'){ setStage(t,'build'); later(7000,()=>{ setStage(t,'pr'); t.needs={kind:'pr'}; t.summary='Follow-up: '+note; fromSession(t,'pr','PR #'+(t.pr?t.pr.n:nextPr())+' updated and ready to merge again. '+t.summary); logE(t,'session','PR updated, CI green'); toast('PR ready again: '+t.title); }); }
+  });
+}
+function toggleTodo(d){ d.done=!d.done; d.unread=false; }
+function createTask(f){
+  const id='t'+Math.random().toString(36).slice(2,8);
+  const t={id,projectId:f.projectId,type:f.type,title:f.title,description:f.description,createdAt:now(),updatedAt:now(),stage:stagesFor(f.type,f.after.length)[0],
+    messages:[{from:'system',text:'Queued by you · waiting for a session in '+f.projectId,at:now()}],unread:false,needs:null,afterDeploy:f.after,afterDone:{},doneAt:null,summary:'',pr:null,specVersion:1,queued:true,
+    spec:{goal:f.description||f.title,points:['(the session writes the spec from your description)'],out:'',touches:''}};
+  S.tasks.unshift(t); logE(t,'me','Queued: '+f.title+(f.after.length?' · '+f.after.length+' after-deploy step'+(f.after.length>1?'s':''):''));
+  later(4000,()=>{ t.queued=false; sys(t,'Session picked it up on desktop-qdv4h00.'); logE(t,'session','Picked up on desktop-qdv4h00');
+    if(f.type==='feature'){ later(6000,()=>{ t.spec={goal:f.description||f.title,points:['Scope taken from your description.','One PR, tests included.','No scope beyond the description without asking.'],out:'Anything not in the description.',touches:'to be listed by the session'}; t.needs={kind:'spec'}; setStage(t,'approved'); fromSession(t,'spec','Spec v1 is ready for "'+f.title+'".'); logE(t,'session','Spec v1 submitted'); toast('Spec ready: '+f.title); }); }
+    else if(f.type==='bugfix'){ later(8000,()=>{ t.pr={n:nextPr(),url:'https://github.com/jamesdavisonio/'+t.projectId+'/pull/'+nextPr()}; setStage(t,'pr'); t.needs={kind:'pr'}; t.summary='Reproduced and fixed, regression test added.'; fromSession(t,'pr','PR #'+t.pr.n+' is ready to merge. '+t.summary); logE(t,'session','PR #'+t.pr.n+' ready, CI green'); toast('PR ready: '+f.title); }); }
+    else { later(6000,()=>{ t.summary='Done as asked.'; finish(t); toast('Done: '+f.title); }); }
+  });
+  return t;
+}
+// Seeded tasks get a log derived from their messages; after a reload, nothing is left "sent" or "working".
+function normalise(){
+  S.tasks.forEach(t=>{
+    t.working=false;
+    t.messages.forEach((m,i)=>{ if(m.from==='me'&&(!m.state||m.state==='sent'||m.state==='delivered'||m.state==='working')){ m.state=t.messages.slice(i+1).some(x=>x.from==='session')?'done':'delivered'; } });
+    if(!t.log){ t.log=[]; t.messages.forEach(m=>{
+      if(m.from==='system')t.log.push({at:m.at,who:'system',text:m.text});
+      else if(m.from==='me')t.log.push({at:m.at,who:'me',text:m.text});
+      else if(m.kind&&m.kind!=='info')t.log.push({at:m.at,who:'session',text:({spec:'Spec submitted',question:'Asked: '+m.text,pr:'PR ready, CI green',after_deploy:'Deployed, after-deploy steps handed over',done:'Done'})[m.kind]});
+    }); }
+  });
+}
+
+/* ---------- UI state ---------- */
+let view={name:'threads',threadId:null,projectId:null,sheet:null};
+const viewFromHash=()=>{const h=(location.hash||'').replace('#','');return ['threads','projects','new'].includes(h)?h:'threads'};
+let toastT=null; function toast(text){view.toast=text;render();clearTimeout(toastT);toastT=setTimeout(()=>{view.toast=null;render()},2600)}
+const h=(s)=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const CHECK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>';
+const BACK='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+
+function stepsHtml(t){
+  const l=stageList(t), i=stageIdx(t), done=isDone(t);
+  return '<div class="steps" style="grid-template-columns:repeat('+l.length+',minmax(0,1fr))">'+l.map((k,j)=>{
+    const d=done||j<i, cur=!done&&j===i, prevDone=done||j-1<i; // connector from the previous dot is green once that dot is done
+    return '<div class="st '+(j>0&&prevDone&&d?'linked':'')+' '+(d||cur?'on':'')+'"><span class="dot '+(d?'done':cur?'cur':'')+'">'+(d?'<span style="color:#fff;display:flex">'+CHECK+'</span>':'')+'</span><span class="lbl">'+h(STAGE_LABEL[k])+'</span></div>';
+  }).join('')+'</div>';
+}
+const TICK1='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L19 7"/></svg>';
+const TICK2='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12l5 5L15 9"/><path d="M10 15l2 2L22 7"/></svg>';
+function ticksHtml(m){
+  const s=m.state||'done';
+  const lbl={sent:'sent',delivered:'received',working:'working on it',done:'handled'}[s];
+  return '<span class="ticks '+s+'" title="'+lbl+'">'+(s==='sent'?TICK1:TICK2)+'<span>'+lbl+'</span></span>';
+}
+function fmtWhen(at){
+  const d=new Date(at), n=new Date(), hm=d.toTimeString().slice(0,5);
+  const sameDay=d.toDateString()===n.toDateString();
+  const y=new Date(n.getTime()-DAY).toDateString()===d.toDateString();
+  return (sameDay?'Today':y?'Yesterday':d.toLocaleDateString(undefined,{day:'numeric',month:'short'}))+' '+hm;
+}
+
+function quickHtml(t){
+  if(!t.needs)return '';
+  const k=t.needs.kind, id=t.id;
+  const more='<button class="qr" data-a="sheet" data-id="'+id+'">Read more</button>';
+  if(k==='spec')return '<button class="qr primary" data-a="approve" data-id="'+id+'">Approve spec</button><button class="qr" data-a="changes" data-id="'+id+'">Small change…</button>'+more;
+  if(k==='question')return t.needs.options.map(o=>'<button class="qr primary" data-a="answer" data-id="'+id+'" data-v="'+h(o.b)+'">'+h(o.k)+' · '+h(o.b)+'</button>').join('')+more;
+  if(k==='pr')return '<a class="qr primary" href="'+h(t.pr.url)+'" target="_blank" rel="noopener">Open PR #'+t.pr.n+'</a><button class="qr" data-a="merged" data-id="'+id+'">Merged it</button>'+more;
+  if(k==='after_deploy')return '<button class="qr primary" data-a="sheet" data-id="'+id+'">Open the '+t.afterDeploy.length+' steps</button>';
+  return more;
+}
+
+function navHtml(){
+  const n=needsCount('all');
+  const b=(name,label,icon,badge)=>'<button data-nav="'+name+'" '+(view.name===name||(name==='threads'&&view.name==='thread')||(name==='projects'&&view.name==='project')?'aria-current="page"':'')+'>'+icon+label+(badge?'<span class="badge nb">'+badge+'</span>':'')+'</button>';
+  return '<nav class="nav" aria-label="Main">'+
+    b('threads','Threads','<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/></svg>',n)+
+    b('projects','Projects','<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/></svg>',0)+
+    b('new','New task','<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',0)+
+  '</nav>';
+}
+
+/* ---------- screens ---------- */
+function threadsScreen(){
+  const f=S.filter;
+  const chips=[{id:'all',name:'All'}].concat(PROJECTS).map(p=>'<button class="chip" data-filter="'+p.id+'" aria-pressed="'+(f===p.id)+'">'+h(p.name)+(needsCount(p.id)?'<span class="n">'+needsCount(p.id)+'</span>':'')+'</button>').join('');
+  const inF=(pid)=>f==='all'||pid===f;
+  let rows=S.tasks.filter(t=>visible(t)&&inF(t.projectId)).map(t=>({kind:'task',t,at:t.updatedAt,needs:!!t.needs,unread:t.unread}));
+  PROJECTS.filter(p=>inF(p.id)).forEach(p=>{const o=openTodos(p.id); if(o.length)rows.push({kind:'james',p,o,at:Math.max(...o.map(d=>d.at)),needs:true,unread:o.some(d=>d.unread)})});
+  rows.sort((a,b)=>(b.needs-a.needs)||(b.unread-a.unread)||(b.at-a.at));
+  const needs=rows.filter(r=>r.needs), rest=rows.filter(r=>!r.needs);
+  const rowT=(t)=>{const p=proj(t.projectId);const m=lastMsg(t);
+    // The row is a div: the open button holds the text, the quick-reply chips sit beside it (no nested buttons).
+    return '<div class="row '+(t.unread?'unread':'')+'"><button class="rowbtn" data-open="'+t.id+'"><span class="tile" style="background:'+p.color+'">'+h(initials(p.name))+(p.live&&!isDone(t)?'<span class="live"></span>':'')+'</span><span class="main"><span class="top"><span class="title">'+h(t.title)+'</span><span class="time">'+rel(t.updatedAt)+'</span></span><span class="meta">'+h(p.name)+' · '+h(stageText(t))+(isDone(t)?' · gone in '+Math.max(1,7-Math.floor((now()-t.doneAt)/DAY))+' d':'')+'</span><span class="prev">'+h(m?m.text:'')+'</span></span></button>'+(t.needs?'<div class="quick">'+quickHtml(t)+'</div>':'')+'</div>'};
+  const rowJ=(r)=>'<div class="row me-thread '+(r.unread?'unread':'')+'"><button class="rowbtn" data-project="'+r.p.id+'" data-tab="james"><span class="tile" style="background:var(--accent);color:var(--accent-ink)">JD</span><span class="main"><span class="top"><span class="title">For James · '+h(r.p.name)+'</span><span class="time">'+rel(r.at)+'</span></span><span class="meta">'+r.o.length+' thing'+(r.o.length>1?'s':'')+' to do by hand</span><span class="prev">'+h(r.o.map(d=>d.body).join(' · '))+'</span></span></button></div>';
+  const list=(arr)=>arr.map(r=>r.kind==='task'?rowT(r.t):rowJ(r)).join('');
+  return '<section class="screen"><header class="hdr"><div class="hdr-row"><h1>Threads</h1>'+(needsCount(f)?'<span class="badge" aria-label="Needs you">'+needsCount(f)+' need you</span>':'<span class="sub">Nothing needs you</span>')+'</div><div class="chips" role="tablist">'+chips+'</div></header>'+
+    '<div class="body flush">'+(needs.length?'<div class="section-h">Needs you</div>'+list(needs):'')+(rest.length?'<div class="section-h">Quiet</div>'+list(rest):'')+(rows.length?'':'<div class="empty">No threads for this project.</div>')+
+    '<p class="demo">Demo: replies trigger the next step a few seconds later.</p></div></section>'+navHtml();
+}
+
+function threadScreen(t){
+  const p=proj(t.projectId);
+  const msgs=t.messages.map(m=>{
+    if(m.from==='system')return '<div class="sys">'+h(m.text)+'</div>';
+    if(m.from==='me')return '<div class="msg me"><div class="bub">'+h(m.text)+'</div><span class="lbl">'+rel(m.at)+' · '+ticksHtml(m)+'</span></div>';
+    const needs=['spec','question','pr','after_deploy'].includes(m.kind);
+    const lbl={spec:'Spec',question:'Question',pr:'PR ready',after_deploy:'After deploy',done:'Done',info:'Session'}[m.kind]||'Session';
+    const more=(needs&&t.needs&&t.needs.kind===m.kind&&m===t.messages.filter(x=>x.kind===m.kind).slice(-1)[0])?'<button class="more" data-a="sheet" data-id="'+t.id+'">Read more</button>':'';
+    return '<div class="msg session '+(needs?'needs':'')+'"><span class="lbl">'+h(lbl)+' · '+rel(m.at)+'</span><div class="bub">'+h(m.text)+more+'</div></div>';
+  }).join('');
+  const typing=t.working?'<div class="msg session"><span class="lbl">Session · working</span><div class="bub typing" aria-label="Session is working"><span></span><span></span><span></span></div></div>':'';
+  const chips=t.needs?'<div class="chips">'+quickHtml(t)+'</div>':'';
+  const histBtn='<button data-a="log" data-id="'+t.id+'" aria-label="Decision history" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--muted)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>';
+  const foot=isDone(t)
+    ?'<div style="display:flex;gap:10px;align-items:center"><span style="flex:1;font-size:14px;color:var(--muted)">Done '+fmtWhen(t.doneAt)+'. Gone from lists in '+Math.max(1,7-Math.floor((now()-t.doneAt)/DAY))+' d; still in History.</span><button class="btn ghost sm" data-a="reopen" data-id="'+t.id+'">Reopen</button></div>'
+    :'<form class="in" data-reply="'+t.id+'"><label for="reply" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Message to the session</label><input id="reply" name="reply" autocomplete="off" placeholder="Message the session…"><button class="send" type="submit" aria-label="Send"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></form>';
+  return '<section class="screen"><header class="hdr"><div class="hdr-row"><button class="btn ghost" style="width:44px;padding:0;border:0;background:none" data-nav="threads" aria-label="Back to threads">'+BACK+'</button><div style="flex:1;min-width:0"><h1 style="font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+h(t.title)+'</h1><div class="sub">'+h(p.name)+' · '+h(stageText(t))+(p.live&&!isDone(t)?' · session live':'')+'</div></div>'+histBtn+'</div><div>'+stepsHtml(t)+'</div></header>'+
+    '<div class="body"><div class="conv">'+msgs+typing+'</div></div>'+
+    '<div class="composer">'+chips+foot+'</div></section>';
+}
+
+function projectsScreen(){
+  const cards=PROJECTS.map(p=>{
+    const ts=S.tasks.filter(t=>t.projectId===p.id&&visible(t));
+    const live=ts.filter(t=>!isDone(t)).length, need=needsCount(p.id), done=ts.filter(isDone).length, todos=openTodos(p.id).length;
+    const next=ts.find(t=>t.needs);
+    return '<button class="card" data-project="'+p.id+'" style="text-align:left;width:100%"><div style="display:flex;align-items:center;gap:12px"><span class="tile" style="background:'+p.color+'">'+h(initials(p.name))+(p.live?'<span class="live"></span>':'')+'</span><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:17px">'+h(p.name)+'</div><div class="sub" style="font-size:12px;color:var(--muted)">'+h(p.host)+(p.live?' · session live':'')+'</div></div></div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">'+(need?'<span class="pill needs">'+need+' need you</span>':'')+'<span class="pill quiet">'+live+' live</span><span class="pill quiet">'+done+' done this week</span>'+(todos?'<span class="pill me">'+todos+' for James</span>':'')+'</div>'+
+      (next?'<div style="font-size:14px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px">'+h(stageText(next))+': '+h(next.title)+'</div>':'')+'</button>';
+  }).join('');
+  return '<section class="screen"><header class="hdr"><div class="hdr-row"><h1>Projects</h1><span class="sub">'+PROJECTS.filter(p=>p.live).length+' sessions live</span></div></header><div class="body">'+cards+'<button class="btn ghost sm" data-a="reset" style="align-self:center;margin-top:8px">Reset demo data</button></div></section>'+navHtml();
+}
+
+function projectScreen(p){
+  const tab=view.tab||'live';
+  const ts=S.tasks.filter(t=>t.projectId===p.id&&visible(t));
+  const live=ts.filter(t=>!isDone(t)).sort((a,b)=>(!!b.needs-!!a.needs)||(b.updatedAt-a.updatedAt));
+  const done=ts.filter(isDone).sort((a,b)=>b.doneAt-a.doneAt);
+  const hiddenOld=S.tasks.filter(t=>t.projectId===p.id&&isDone(t)&&!visibleDone(t)).length;
+  const todos=S.todos.filter(d=>d.projectId===p.id).sort((a,b)=>(a.done-b.done)||(b.at-a.at));
+  const seg='<div class="seg" role="tablist"><button role="tab" data-tab="live" aria-pressed="'+(tab==='live')+'">Live · '+live.length+'</button><button role="tab" data-tab="james" aria-pressed="'+(tab==='james')+'">For James · '+todos.filter(d=>!d.done).length+'</button><button role="tab" data-tab="done" aria-pressed="'+(tab==='done')+'">Done · '+done.length+'</button></div>';
+  let body='';
+  if(tab==='live')body=live.map(t=>'<button class="card" data-open="'+t.id+'" style="text-align:left;width:100%"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span class="pill quiet">'+h(t.type)+'</span>'+(t.needs?'<span class="pill needs">'+h(stageText(t))+'</span>':'<span class="pill quiet">'+h(stageText(t))+'</span>')+'</div><div style="font-weight:800;font-size:16px">'+h(t.title)+'</div>'+stepsHtml(t)+(t.afterDeploy.length?'<div style="font-size:12px;color:var(--muted)">'+t.afterDeploy.length+' after-deploy step'+(t.afterDeploy.length>1?'s':'')+' for you at the end</div>':'')+'</button>').join('')||'<div class="empty">Nothing live. Queue a task from New task.</div>';
+  if(tab==='james')body='<div class="card flat">'+(todos.map(d=>'<div class="lst"><button class="chk '+(d.done?'on':'')+'" data-todo="'+d.id+'" aria-label="'+(d.done?'Mark not done':'Mark done')+'"><span style="color:#fff;display:flex">'+CHECK+'</span></button><span style="flex:1;'+(d.done?'':'')+'" class="'+(d.done?'strike':'')+'">'+h(d.body)+'</span>'+(d.link&&!d.done?'<a class="btn ghost sm" href="'+h(d.link)+'" target="_blank" rel="noopener">Open</a>':'')+'</div>').join('')||'<div class="empty">Nothing for you here.</div>')+'</div><p class="demo">Sessions add items here when something must be done by hand.</p>';
+  if(tab==='done'){
+    const older=view.showOld?S.tasks.filter(t=>t.projectId===p.id&&isDone(t)&&!visibleDone(t)).sort((a,b)=>b.doneAt-a.doneAt):[];
+    const card=(t,old)=>'<div class="card"><button data-open="'+t.id+'" style="text-align:left;display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between;gap:8px;width:100%"><span style="font-weight:800;font-size:16px">'+h(t.title)+'</span><span class="pill '+(old?'quiet':'ok')+'">'+(old?'Archived':'Done')+'</span></div><div style="font-size:14px;color:var(--muted)">'+h(t.summary)+'</div><div style="font-size:12px;color:var(--muted)">'+(t.pr?'PR #'+t.pr.n+' · ':'')+'done '+fmtWhen(t.doneAt)+(old?'':' · leaves this list in '+Math.max(1,7-Math.floor((now()-t.doneAt)/DAY))+' d')+'</div></button><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost sm" data-a="log" data-id="'+t.id+'">History</button><button class="btn ghost sm" data-a="reopen" data-id="'+t.id+'">Reopen</button></div></div>';
+    body=(done.map(t=>card(t,false)).join('')||'<div class="empty">Nothing finished this week.</div>')+
+      (hiddenOld?'<button class="btn ghost sm" data-a="show-old" style="align-self:center">'+(view.showOld?'Hide':'Show')+' '+hiddenOld+' older'+'</button>':'')+older.map(t=>card(t,true)).join('');
+  }
+  return '<section class="screen"><header class="hdr"><div class="hdr-row"><button style="width:44px;height:44px;display:flex;align-items:center;justify-content:center" data-nav="projects" aria-label="Back to projects">'+BACK+'</button><div style="flex:1"><h1 style="font-size:22px">'+h(p.name)+'</h1><div class="sub">'+h(p.host)+(p.live?' · session live':' · no session')+'</div></div><button class="btn primary sm" data-nav="new" data-pre="'+p.id+'">+ Task</button></div>'+seg+'</header><div class="body">'+body+'</div></section>'+navHtml();
+}
+
+function newScreen(){
+  const f=view.form||(view.form={projectId:view.pre||'data-tracker',type:'feature',title:'',description:'',hasAfter:false,after:''});
+  const types=[['feature','Feature'],['bugfix','Bug fix'],['chore','Chore']].map(([k,l])=>'<button type="button" data-type="'+k+'" aria-pressed="'+(f.type===k)+'">'+l+'</button>').join('');
+  const stages=stagesFor(f.type,f.hasAfter).map(k=>STAGE_LABEL[k]).join(' → ');
+  return '<section class="screen"><header class="hdr"><div class="hdr-row"><h1>New task</h1></div></header><div class="body"><form id="newform" style="display:flex;flex-direction:column;gap:16px">'+
+    '<div class="field"><label for="f-project">Project</label><select id="f-project" name="projectId">'+PROJECTS.map(p=>'<option value="'+p.id+'" '+(f.projectId===p.id?'selected':'')+'>'+h(p.name)+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>Type</label><div class="seg">'+types+'</div></div>'+
+    '<div class="field"><label for="f-title">Title</label><input id="f-title" name="title" required placeholder="What should ship?" value="'+h(f.title)+'"></div>'+
+    '<div class="field"><label for="f-desc">Description for the session</label><textarea id="f-desc" name="description" placeholder="Enough for the session to write the spec. It will ask before building.">'+h(f.description)+'</textarea></div>'+
+    '<div class="card" style="gap:8px"><label style="display:flex;align-items:center;gap:12px;min-height:44px"><input type="checkbox" id="f-after" name="hasAfter" '+(f.hasAfter?'checked':'')+' style="width:22px;height:22px"> <span style="font-weight:700">I have steps to do after deploy</span></label>'+(f.hasAfter?'<div class="field"><label for="f-steps">One per line</label><textarea id="f-steps" name="after" placeholder="Flip the feature flag&#10;Tell the team">'+h(f.after)+'</textarea></div>':'')+'<div style="font-size:13px;color:var(--muted)">Steps: '+h(stages)+'</div></div>'+
+    '<button class="btn primary block" type="submit">Queue task</button><p class="demo">A session in that folder picks it up; you hear from it when the spec is ready.</p></form></div></section>'+navHtml();
+}
+
+function sheetHtml(){
+  if(String(view.sheet).startsWith('reopen:')){
+    const t=task(view.sheet.slice(7)); if(!t){view.sheet=null;return ''}
+    const p=proj(t.projectId); const after=t.afterDeploy.length>0;
+    return '<div class="scrim" data-a="close-sheet"><div class="sheet" role="dialog" aria-modal="true" aria-label="Reopen task" data-stop><span class="grab"></span><div class="sh-body"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="pill needs">Reopen</span><span style="font-size:12px;color:var(--muted);font-weight:700">'+h(p.name)+'</span></div><h2>'+h(t.title)+'</h2><p style="font-size:14px;color:var(--muted)">'+(after?'Goes back to the after-deploy checklist so you can untick a step. Your note is sent to the session.':'Goes back to Build. Your note is sent to the session as the first thing it reads.')+'</p><div class="field"><label for="reopen-note">What is wrong, or what should happen now?</label><textarea id="reopen-note" placeholder="'+(after?'e.g. Ticked the CNAME step by mistake, it is not live yet':'e.g. Export is missing the totals row on the production report')+'"></textarea></div></div><div class="sh-foot"><button class="btn primary block" data-a="reopen-send" data-id="'+t.id+'">Reopen and send</button><button class="btn ghost block" data-a="close-sheet">Cancel</button></div></div></div>';
+  }
+  if(String(view.sheet).startsWith('log:')){
+    const t=task(view.sheet.slice(4)); if(!t){view.sheet=null;return ''}
+    const p=proj(t.projectId);
+    const rows=(t.log||[]).slice().sort((a,b)=>a.at-b.at).map(e=>'<div class="e '+e.who+'"><span class="when">'+h(fmtWhen(e.at))+'</span><span class="what"><span style="color:var(--muted);font-weight:700">'+({me:'You',session:'Session',system:'Board'})[e.who]+' · </span>'+h(e.text)+'</span></div>').join('');
+    return '<div class="scrim" data-a="close-sheet"><div class="sheet" role="dialog" aria-modal="true" aria-label="Decision history" data-stop><span class="grab"></span><div class="sh-body"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="pill quiet">History</span><span style="font-size:12px;color:var(--muted);font-weight:700">'+h(p.name)+'</span></div><h2>'+h(t.title)+'</h2><p style="font-size:14px;color:var(--muted)">Decisions and hand-overs only, kept for as long as the task exists. The chat above is the conversation; this is the record.</p><div class="hist">'+(rows||'<div class="empty">Nothing recorded yet.</div>')+'</div></div><div class="sh-foot">'+(isDone(t)?'<button class="btn ghost block" data-a="reopen" data-id="'+t.id+'">Reopen task</button>':'')+'<button class="btn primary block" data-a="close-sheet">Close</button></div></div></div>';
+  }
+  const t=task(view.sheet); if(!t||!t.needs){view.sheet=null;return ''}
+  const k=t.needs.kind, p=proj(t.projectId);
+  let title='',tag='',body='',foot='';
+  if(k==='spec'){
+    title='Spec v'+(t.specVersion||1)+' — '+t.title; tag='<span class="pill needs">Approve spec</span>';
+    const s=t.spec||{goal:'',points:[],out:'',touches:''};
+    body='<div class="doc"><p><b>Goal.</b> '+h(s.goal)+'</p><ul>'+s.points.map(x=>x.startsWith('NEW · ')?'<li><span class="new"><b>New:</b> '+h(x.slice(6))+'</span></li>':'<li>'+h(x)+'</li>').join('')+'</ul>'+(s.out?'<p><b>Out of scope.</b> '+h(s.out)+'</p>':'')+(s.touches?'<p style="color:var(--muted);font-size:14px">Touches: '+h(s.touches)+'</p>':'')+'</div>'+
+      (t.afterDeploy.length?'<div class="card" style="gap:6px"><div style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">After deploy, for you</div><ul style="margin:0;padding-left:18px;font-size:14px">'+t.afterDeploy.map(x=>'<li>'+h(x)+'</li>').join('')+'</ul></div>':'')+
+      (view.changing?'<div class="field"><label for="chg">What should change?</label><textarea id="chg" placeholder="e.g. Also add a totals row at the bottom"></textarea></div>':'');
+    foot=view.changing?'<div style="display:flex;gap:10px"><button class="btn primary" style="flex:1" data-a="send-changes" data-id="'+t.id+'">Send to session</button><button class="btn ghost" data-a="cancel-changes">Cancel</button></div>':'<div style="display:flex;gap:10px"><button class="btn primary" style="flex:1.4" data-a="approve" data-id="'+t.id+'">Approve v'+(t.specVersion||1)+'</button><button class="btn ghost" style="flex:1" data-a="changes" data-id="'+t.id+'">Changes…</button></div>';
+  }
+  if(k==='question'){
+    title=t.needs.question; tag='<span class="pill needs">Question</span>';
+    body='<div class="opts">'+t.needs.options.map(o=>'<button class="opt" data-a="answer" data-id="'+t.id+'" data-v="'+h(o.b)+'"><b>'+h(o.k)+' · '+h(o.b)+'</b><span>'+h(o.s)+'</span></button>').join('')+'</div><div class="field"><label for="ans">Or answer in your words</label><textarea id="ans" placeholder="Type an answer"></textarea></div>';
+    foot='<button class="btn primary block" data-a="answer-free" data-id="'+t.id+'">Send answer</button>';
+  }
+  if(k==='pr'){
+    title='PR #'+t.pr.n+' is ready to merge'; tag='<span class="pill ok">CI green · mergeable</span>';
+    body='<div class="doc"><p>'+h(t.summary)+'</p><p style="color:var(--muted);font-size:14px">'+h(p.name)+' · '+(t.afterDeploy.length?'after merge: CI on main, then '+t.afterDeploy.length+' step'+(t.afterDeploy.length>1?'s':'')+' for you':'after merge: CI on main, then done')+'</p></div>';
+    foot='<a class="btn ok block" href="'+h(t.pr.url)+'" target="_blank" rel="noopener">Open PR #'+t.pr.n+' in GitHub</a><button class="btn ghost block" data-a="merged" data-id="'+t.id+'">I merged it</button>';
+  }
+  if(k==='after_deploy'){
+    title='Deployed. Your steps:'; tag='<span class="pill me">After deploy</span>';
+    body='<div class="card flat">'+t.afterDeploy.map((x,i)=>'<div class="lst"><button class="chk '+(t.afterDone[i]?'on':'')+'" data-a="tick" data-id="'+t.id+'" data-i="'+i+'" aria-label="Mark step done"><span style="color:#fff;display:flex">'+CHECK+'</span></button><span class="'+(t.afterDone[i]?'strike':'')+'" style="flex:1">'+h(x)+'</span></div>').join('')+'</div><p style="font-size:14px;color:var(--muted)">The task closes itself when every step is ticked.</p>';
+    foot='<button class="btn ghost block" data-a="close-sheet">Close</button>';
+  }
+  return '<div class="scrim" data-a="close-sheet"><div class="sheet" role="dialog" aria-modal="true" aria-label="'+h(title)+'" data-stop><span class="grab"></span><div class="sh-body"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'+tag+'<span style="font-size:12px;color:var(--muted);font-weight:700">'+h(p.name)+'</span></div><h2>'+h(title)+'</h2>'+body+'</div><div class="sh-foot">'+foot+'</div></div></div>';
+}
+
+/* ---------- render & events ---------- */
+const app=document.getElementById('app');
+function render(){
+  let html='';
+  if(view.name==='threads')html=threadsScreen();
+  else if(view.name==='thread'){const t=task(view.threadId); html=t?threadScreen(t):threadsScreen();}
+  else if(view.name==='projects')html=projectsScreen();
+  else if(view.name==='project'){const p=proj(view.projectId); html=p?projectScreen(p):projectsScreen();}
+  else if(view.name==='new')html=newScreen();
+  if(view.sheet)html+=sheetHtml();
+  if(view.toast)html+='<div class="toast" role="status">'+h(view.toast)+'</div>';
+  const scroller=app.querySelector('.body'); const top=scroller?scroller.scrollTop:0;
+  app.innerHTML=html;
+  const s2=app.querySelector('.body'); if(s2&&view.keepScroll)s2.scrollTop=top; view.keepScroll=false;
+  if(view.name==='thread'){const c=app.querySelector('.body'); if(c&&!view.sheet)c.scrollTop=c.scrollHeight;}
+}
+function go(name,extra){ view=Object.assign({name},extra||{}); if(['threads','projects','new'].includes(name)){try{history.replaceState(null,'','#'+name)}catch(e){}} render(); }
+function openThread(id){const t=task(id); if(!t)return; t.unread=false; save(); go('thread',{threadId:id});}
+
+app.addEventListener('click',(e)=>{
+  const el=e.target.closest('[data-nav],[data-filter],[data-open],[data-project],[data-tab],[data-todo],[data-a],[data-type]');
+  if(!el)return;
+  if(e.target.closest('a[href]'))return;
+  if(el.dataset.nav){ if(el.dataset.nav==='new')go('new',{pre:el.dataset.pre||null}); else go(el.dataset.nav); return; }
+  if(el.dataset.filter){ S.filter=el.dataset.filter; save(); view.keepScroll=true; render(); return; }
+  if(el.dataset.open){ openThread(el.dataset.open); return; }
+  if(el.dataset.project){ const tab=el.dataset.tab||'live'; const p=proj(el.dataset.project); if(p){ S.todos.filter(d=>d.projectId===p.id).forEach(d=>d.unread=false); save(); go('project',{projectId:p.id,tab}); } return; }
+  if(el.dataset.tab&&view.name==='project'){ view.tab=el.dataset.tab; render(); return; }
+  if(el.dataset.todo){ const d=S.todos.find(x=>x.id===el.dataset.todo); if(d){toggleTodo(d); save(); view.keepScroll=true; render();} return; }
+  if(el.dataset.type&&view.name==='new'){ captureForm(); view.form.type=el.dataset.type; render(); return; }
+  const a=el.dataset.a, t=el.dataset.id?task(el.dataset.id):null;
+  if(a==='close-sheet'){ if(e.target.closest('[data-stop]')&&!el.closest('.sh-foot'))return; view.sheet=null; view.changing=false; render(); return; }
+  if(a==='sheet'){ view.sheet=t.id; view.changing=false; render(); return; }
+  if(a==='approve'){ approveSpec(t); view.sheet=null; save(); toast('Approved. Session is building.'); return; }
+  if(a==='changes'){ view.sheet=t.id; view.changing=true; render(); return; }
+  if(a==='cancel-changes'){ view.changing=false; render(); return; }
+  if(a==='send-changes'){ const v=(document.getElementById('chg')||{}).value||''; if(!v.trim()){toast('Say what should change');return;} requestChanges(t,v.trim()); view.sheet=null; view.changing=false; save(); toast('Sent. Session is revising.'); return; }
+  if(a==='answer'){ answer(t,el.dataset.v); view.sheet=null; save(); toast('Answer delivered.'); return; }
+  if(a==='answer-free'){ const v=(document.getElementById('ans')||{}).value||''; if(!v.trim()){toast('Type an answer first');return;} answer(t,v.trim()); view.sheet=null; save(); toast('Answer delivered.'); return; }
+  if(a==='merged'){ merged(t); view.sheet=null; save(); toast('Merged. Waiting for CI on main.'); return; }
+  if(a==='tick'){ tickAfter(t,Number(el.dataset.i)); if(isDone(t))view.sheet=null; save(); render(); return; }
+  if(a==='log'){ view.sheet='log:'+t.id; render(); return; }
+  if(a==='reopen'){ view.sheet='reopen:'+t.id; render(); return; }
+  if(a==='reopen-send'){ const v=(document.getElementById('reopen-note')||{}).value||''; if(!v.trim()){toast('Add a note for the session');return;} reopen(t,v.trim()); view.sheet=null; save(); toast('Reopened and sent.'); if(view.name!=='thread')openThread(t.id); else render(); return; }
+  if(a==='show-old'){ view.showOld=!view.showOld; render(); return; }
+  if(a==='reset'){ timers.forEach(clearTimeout); S=seed(); normalise(); save(); toast('Demo data reset'); return; }
+});
+app.addEventListener('submit',(e)=>{
+  e.preventDefault();
+  const f=e.target;
+  if(f.dataset.reply){ const t=task(f.dataset.reply); const v=f.reply.value.trim(); if(!t||!v)return; if(t.needs&&t.needs.kind==='question')answer(t,v); else if(t.needs&&t.needs.kind==='spec')requestChanges(t,v); else {fromMe(t,v); sys(t,'Delivered to the session.');} save(); render(); return; }
+  if(f.id==='newform'){ captureForm(); const v=view.form; if(!v.title.trim())return; const t=createTask({projectId:v.projectId,type:v.type,title:v.title.trim(),description:v.description.trim(),after:v.hasAfter?v.after.split('\n').map(s=>s.trim()).filter(Boolean):[]}); save(); view.form=null; toast('Queued in '+t.projectId); openThread(t.id); }
+});
+app.addEventListener('change',(e)=>{ if(view.name==='new'){ captureForm(); if(e.target.id==='f-after')render(); } });
+function captureForm(){ const f=document.getElementById('newform'); if(!f||!view.form)return; view.form.projectId=f.projectId.value; view.form.title=f.title.value; view.form.description=f.description.value; view.form.hasAfter=!!f.hasAfter.checked; if(f.after)view.form.after=f.after.value; }
+window.addEventListener('hashchange',()=>{ go(viewFromHash()); });
+
+load(); view.name=viewFromHash(); render();
+})();
+</script>
