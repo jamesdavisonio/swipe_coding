@@ -1,0 +1,12 @@
+# Alerts-only: Dependabot still raises alerts in the Security tab, but opens no PRs.
+# Humans bump dependencies on cadence (docs/security/OPERATIONS_MAINTENANCE.md).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+  # One npm entry covers the workspaces: packages/* share the root lockfile.
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 0

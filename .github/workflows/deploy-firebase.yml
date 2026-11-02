@@ -1,0 +1,45 @@
+# Production deploy of Hosting + Firestore rules/indexes to kanban-nullnoise.
+#
+# Manual only for now (workflow_dispatch): the board is still being built and nothing is
+# ready to ship on every merge. When it is, add `push: branches: [main]` here — the
+# `production` environment then gates it, where the plan allows (SECURITY.md).
+#
+# Authenticates keylessly through Workload Identity Federation as the dedicated
+# github-deploy service account; no JSON key is stored anywhere in GitHub.
+name: Deploy Firebase
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write # OIDC token for Workload Identity Federation
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+env:
+  PROJECT_ID: kanban-nullnoise
+  # Firebase web config: public identifiers, not secrets, kept as repository variables
+  # so the build does not need packages/web/.env (SECURITY.md → Secret handling).
+  VITE_FIREBASE_PROJECT_ID: kanban-nullnoise
+  VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+  VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
+  VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: node scripts/check-firestore-rules.mjs
+      - run: npm run build:web
+      - name: Authenticate to Google Cloud (keyless)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/809905218632/locations/global/workloadIdentityPools/github/providers/github-oidc
+          service_account: github-deploy@kanban-nullnoise.iam.gserviceaccount.com
+      - name: firebase deploy
+        run: npx firebase-tools deploy --only hosting,firestore --project "$PROJECT_ID" --force

@@ -1,0 +1,28 @@
+# Fast feedback on every PR: the same checks the pre-commit hook and `check --fast` run.
+# No build, no deploy, no live Firestore — must stay under a few minutes.
+name: CI fast feedback
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  fast-feedback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+      # Agent stdio protocol test. With no emulator and no KANBAN_TEST_LIVE it runs the
+      # offline path, which needs no credentials.
+      - run: npm run test:agent
+      - name: firestore rules lint
+        run: node scripts/check-firestore-rules.mjs

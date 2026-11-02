@@ -81,9 +81,9 @@ export default tseslint.config(
     files: ['tests/**', '**/*.test.*', '**/*.spec.*', 'packages/agent/test/**'],
     rules: { 'no-console': 'off' },
   },
-  // Config files and scripts are tooling, not product code.
+  // Config files, scripts and Claude Code hooks are tooling, not product code.
   {
-    files: ['**/*.config.*', 'scripts/**', '*.mjs', '*.cjs'],
+    files: ['**/*.config.*', 'scripts/**', '.claude/hooks/**', '*.mjs', '*.cjs'],
     languageOptions: { globals: globals.node },
     rules: { 'no-console': 'off' },
   },

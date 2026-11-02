@@ -60,6 +60,6 @@ principles_enforced:
   - observability
   - traceability
 
-gate_stage: tooling
+gate_stage: security
 
 overlays: []

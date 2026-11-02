@@ -12,6 +12,7 @@
     "test": "vitest run tests",
     "test:agent": "npm run test -w @kanban/agent",
     "lint": "eslint .",
+    "audit": "node scripts/check-audit.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
