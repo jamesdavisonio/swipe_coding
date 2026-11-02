@@ -1,0 +1,21 @@
+{
+  "name": "kanban",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "agent": "npm run start -w @kanban/agent",
+    "web": "npm run dev -w @kanban/web",
+    "build:web": "npm run build -w @kanban/web",
+    "typecheck": "npm run typecheck -w @kanban/agent && npm run typecheck -w @kanban/web",
+    "test:agent": "npm run test -w @kanban/agent",
+    "emulators": "firebase emulators:start --only firestore,auth --project demo-kanban",
+    "deploy": "npm run build:web && firebase deploy"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "firebase-tools": "^14.0.0",
+    "typescript": "^5.9.0"
+  }
+}

@@ -1,0 +1,32 @@
+rules_version = '2';
+
+// Single-owner board. The browser signs in with Google as the owner; desktop agents
+// and hooks use the Admin SDK, which bypasses these rules entirely. So anything an
+// authenticated client can do here is James acting from the UI.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner() {
+      return request.auth != null
+        && request.auth.token.email in ['j@nullnoise.ai', 'james@nullnoise.ai']
+        && request.auth.token.email_verified == true;
+    }
+
+    // The UI may never impersonate an agent.
+    function authoredByJames() {
+      return request.resource.data.author == 'james';
+    }
+
+    match /projects/{id}  { allow read, write: if isOwner(); }
+    match /agents/{id}    { allow read: if isOwner(); allow write: if false; }
+    match /tasks/{id}     { allow read, write: if isOwner(); }
+    match /todos/{id}     { allow read, write: if isOwner(); }
+
+    match /comments/{id} {
+      allow read: if isOwner();
+      allow create: if isOwner() && authoredByJames();
+      // Edits/deletes of own comments only; agent comments are immutable from the UI.
+      allow update, delete: if isOwner() && resource.data.author == 'james' && authoredByJames();
+    }
+  }
+}
