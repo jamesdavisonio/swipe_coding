@@ -1,0 +1,15 @@
+{
+  "context_keys_version": 1,
+  "governance": "Shared dictionary of governed context keys — the same concept uses the same key in every app. Agents READ this file; only humans WRITE it. Extra app-specific keys are allowed (context is semi-open) but must be snake_case, flat, primitive-valued. Recurring un-governed concepts get proposed to the human, same flow as taxonomy rule R3.",
+  "value_conventions": "Values for action, milestone, and target are snake_case, verb- or outcome-based, and generic over app-specific (quiz_passed, not safety101_quiz_passed — the app is identified by app_id).",
+  "keys": {
+    "feature": "name of the feature emitting the event (snake_case)",
+    "target": "external system called: 'firestore', 'postgres', 'stripe', …",
+    "status": "HTTP or system status code (number)",
+    "field": "input field that failed validation",
+    "action": "user action, snake_case verb phrase: 'clicked_next', 'opened_menu'",
+    "milestone": "business milestone, snake_case outcome: 'quiz_passed', 'module_completed'",
+    "duration_s": "duration in seconds (number)",
+    "proposed_type": "R3 fallback — proposed new event type"
+  }
+}

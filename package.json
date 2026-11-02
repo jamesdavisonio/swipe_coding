@@ -9,6 +9,7 @@
     "web": "npm run dev -w @kanban/web",
     "build:web": "npm run build -w @kanban/web",
     "typecheck": "npm run typecheck -w @kanban/agent && npm run typecheck -w @kanban/web",
+    "test": "vitest run tests",
     "test:agent": "npm run test -w @kanban/agent",
     "emulators": "firebase emulators:start --only firestore,auth --project demo-kanban",
     "deploy": "npm run build:web && firebase deploy"
@@ -16,6 +17,7 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "firebase-tools": "^14.0.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.7"
   }
 }

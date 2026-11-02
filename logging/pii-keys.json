@@ -1,0 +1,18 @@
+{
+  "pii_keys_version": 1,
+  "governance": "One PII denylist everywhere — vendored into every app and loaded by the ingestion endpoint, so server logger, browser logger, and endpoint can never diverge on what gets stripped. Stripping is a safety net, not permission: the instrumentation rules still forbid logging PII in the first place.",
+  "strip": [
+    "email",
+    "name",
+    "first_name",
+    "last_name",
+    "phone",
+    "ip",
+    "address",
+    "token",
+    "password",
+    "authorization",
+    "cookie",
+    "ssn"
+  ]
+}

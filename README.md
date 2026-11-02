@@ -56,7 +56,11 @@ Run an agent against the emulator from any folder:
 set FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 && claude --dangerously-load-development-channels server:kanban
 ```
 
-Checks: `npm run typecheck`, `npm run test:agent` (full flow only when the emulator is up).
+Checks: `npm test` (vitest, `tests/`), `npm run typecheck`, `npm run test:agent`
+(`KANBAN_TEST_LIVE=1` runs the full flow against the real project).
+
+Project conventions for agents and humans: [AGENTS.md](AGENTS.md); profile the skills read:
+`.project-profile.yaml`; brief, architecture, error schema, logging and ADRs under `docs/`.
 
 ## Deploy
 

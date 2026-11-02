@@ -1,0 +1,65 @@
+# .project-profile.yaml — source of truth read by every skill. Schema: setup-project/references/project-profile-schema.md
+
+name: kanban
+display_name: Kanban
+description: Phone-first board where James follows and steers his local Claude Code sessions.
+
+stack:
+  primary_language: typescript
+  runtime: node
+  runtime_version: "24"
+  frontend:
+    - react
+    - vite
+    - tailwind
+    - typescript
+  backend:
+    - firestore
+    - firebase-admin          # desktop agent process, not Cloud Functions
+    - mcp                     # Claude Code channel MCP server
+  ai_providers: []
+  package_manager: npm
+
+tests:
+  unit: vitest
+  integration: none           # emulator-backed once Java is installed
+  e2e: none
+  coverage_report: false
+
+deploy:
+  targets:
+    - firebase-hosting
+    - firestore-rules
+  environments:
+    - production
+  ci: github-actions
+  deploy_workflow_needed: true
+
+compliance:
+  gdpr: false                 # internal, single owner; only James's own account data
+  ccpa: false
+  age_restricted: false
+  scorm: false
+  regulated: []
+  data_sensitivity: minimal
+
+ai:
+  enabled: false
+  external_input_reaches_model: false
+  ai_output_affects_state: false
+  cost_budget_per_month_usd: 0
+  fallback_strategy: none
+
+ops:
+  tracker: none               # this app is the tracker
+  observability: stdout
+  alerting_tiers_enabled: []
+
+principles_enforced:
+  - error-schema
+  - observability
+  - traceability
+
+gate_stage: setup
+
+overlays: []

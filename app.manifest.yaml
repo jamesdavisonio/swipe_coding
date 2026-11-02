@@ -1,0 +1,15 @@
+# App logging manifest — generated at project setup from the registry entry
+# instrument/registry/jamesdavisonio.json → apps.kanban (never typed freehand).
+# Feature code never hardcodes any of these values.
+
+app_id: "kanban"
+client_id: "jamesdavisonio"
+env_var: "APP_ENV"
+audience_default: "internal"
+log_endpoint: null                 # browser source; set once the client logging project is provisioned
+
+# Pinned versions of the vendored governed files in logging/.
+taxonomy_version: 6
+registry_version: 2
+context_keys_version: 1
+pii_keys_version: 1

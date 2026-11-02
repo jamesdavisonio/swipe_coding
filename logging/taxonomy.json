@@ -1,0 +1,66 @@
+{
+  "taxonomy_version": 6,
+  "governance": "Single source of truth for event_type values. Agents READ this file; only humans WRITE it. New types are born only through rule R3 in instrument/SKILL.md (log unclassified + context.proposed_type, human commits the entry here).",
+  "event_types": {
+    "feature_error": {
+      "severity_hint": "ERROR",
+      "desc": "Unhandled error inside a feature",
+      "required_context": ["feature"]
+    },
+    "api_call_failed": {
+      "severity_hint": "ERROR",
+      "desc": "External call (API/DB/3rd party) failed",
+      "required_context": ["target", "status"]
+    },
+    "validation_failed": {
+      "severity_hint": "WARNING",
+      "desc": "User or data input rejected",
+      "required_context": ["field"]
+    },
+    "session_start": {
+      "severity_hint": "INFO",
+      "desc": "User/learner session begins",
+      "required_context": []
+    },
+    "session_end": {
+      "severity_hint": "INFO",
+      "desc": "Session ends (incl. abrupt close)",
+      "required_context": ["duration_s"]
+    },
+    "user_action": {
+      "severity_hint": "INFO",
+      "desc": "Meaningful user interaction",
+      "required_context": ["action"]
+    },
+    "milestone_reached": {
+      "severity_hint": "INFO",
+      "desc": "Business milestone (module completed, quiz passed…)",
+      "required_context": ["milestone"]
+    },
+    "cache_miss": {
+      "severity_hint": "INFO",
+      "desc": "Requested item not found in cache, fetched from source",
+      "required_context": ["target"]
+    },
+    "duplicate_suppressed": {
+      "severity_hint": "INFO",
+      "desc": "Idempotency guard dropped a repeat delivery of an already-processed event",
+      "required_context": ["tracker_id", "event_id", "source"]
+    },
+    "write_conflict": {
+      "severity_hint": "WARNING",
+      "desc": "Optimistic-concurrency write rejected: the caller's revision no longer matches the stored one",
+      "required_context": ["feature", "entity_type", "entity_id", "expected_revision", "actual_revision"]
+    },
+    "access_denied": {
+      "severity_hint": "WARNING",
+      "desc": "Request refused by identity or authorisation checks (unauthenticated, pending, archived, role, client_scope)",
+      "required_context": ["feature", "actor_role", "route", "reason"]
+    },
+    "unclassified": {
+      "severity_hint": "INFO",
+      "desc": "Fallback ONLY — see rule R3 in instrument/SKILL.md",
+      "required_context": ["proposed_type"]
+    }
+  }
+}
