@@ -31,6 +31,7 @@ npm run typecheck
 ## Conventions
 
 - Shared types and stage templates live in `packages/shared`; both packages import `@kanban/shared`.
+- UI: tokens in `packages/web/src/styles/tokens.css` (never hardcode colours/sizes), primitives in `src/components/ui/`, icons only via `src/lib/icons.ts`, dark mode = `.dark` class. WCAG AA: focus ring, name, keyboard path, 44px targets; `docs/design-system.md`.
 - The agent never writes to stdout except MCP; log with `log()` (stderr + `agent.log`).
 - All Firestore timestamps are numeric ms; all collections are top-level.
 - Logging goes through `logging/logger.*.js`; event types only from `logging/taxonomy.json`.
@@ -56,5 +57,5 @@ npm run typecheck
 
 ## Skills used in this repo
 
-- `setup-project` ✓ · `setup-tooling` ✓ · `setup-security`, `bootstrap-design-system` next (see `.project-profile.yaml`)
+- Setup chain done: `setup-project` · `setup-tooling` · `setup-security` · `bootstrap-design-system` (`gate_stage: ui-ready`)
 - `ship` / `implement-feature` for behaviour · `change-ui` for UI · `check` before every commit · `pre-deploy-check` before deploy

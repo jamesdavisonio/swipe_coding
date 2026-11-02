@@ -1,0 +1,17 @@
+{
+  "$comment": "Advisories scripts/check-audit.mjs may ignore. Every entry needs a reason and an expiry; an expired entry fails the gate again. Mirror each row in docs/security/DEPENDENCY_INVENTORY.md.",
+  "allow": [
+    {
+      "id": "GHSA-m9gg-hp2v-232j",
+      "package": "@grpc/grpc-js",
+      "reason": "Pinned ~1.9.0 by @firebase/firestore's Node build inside the firebase web SDK; the browser bundle never loads gRPC and nothing in this repo runs the web SDK on Node. npm overrides do not reach workspace dependency trees, so it cannot be forced. Re-check on every firebase bump.",
+      "expires": "2027-02-01"
+    },
+    {
+      "id": "GHSA-f596-whhp-79r4",
+      "package": "@grpc/grpc-js",
+      "reason": "Same package and reasoning as GHSA-m9gg-hp2v-232j (server-side gRPC status leakage; no gRPC server exists here).",
+      "expires": "2027-02-01"
+    }
+  ]
+}
