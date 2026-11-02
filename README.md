@@ -70,6 +70,10 @@ Project conventions for agents and humans: [AGENTS.md](AGENTS.md); profile the s
 npm run deploy             # builds the web app and deploys hosting + rules + indexes
 ```
 
+Or from GitHub: Actions → **Deploy Firebase** → Run workflow (keyless, as `github-deploy`;
+setup in `SECURITY.md`). CI runs lint/tests/rules-lint on every PR and a dependency audit
+on `main`; controls and gaps are listed in [SECURITY.md](SECURITY.md).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

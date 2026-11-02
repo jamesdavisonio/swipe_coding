@@ -28,5 +28,10 @@ service cloud.firestore {
       // Edits/deletes of own comments only; agent comments are immutable from the UI.
       allow update, delete: if isOwner() && resource.data.author == 'james' && authoredByJames();
     }
+
+    // Default deny: anything not matched above (scripts/check-firestore-rules.mjs insists).
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }

@@ -1,0 +1,43 @@
+# Dependency audit + SBOM on every push to main and nightly. Alerts-only Dependabot
+# (.github/dependabot.yml) covers the rest; no GitHub Advanced Security features are used
+# (private repo, no paid tier — see SECURITY.md).
+name: Security gatekeeper
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # High+ advisories fail unless listed, with reason and expiry, in scripts/audit-allowlist.json.
+      - run: npm run audit
+  sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: install cyclonedx
+        run: npm install -g @cyclonedx/cyclonedx-npm
+      # --ignore-npm-errors: cyclonedx runs `npm ls`, and firebase-admin's peer-dep noise
+      # would otherwise fail the job on a healthy tree.
+      - name: generate SBOM
+        run: cyclonedx-npm --ignore-npm-errors --omit dev --output-file sbom.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sbom
+          path: sbom.json
