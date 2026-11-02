@@ -1,0 +1,110 @@
+/* Design tokens — the single source of truth for the web app.
+ *
+ * Colours are HSL triplets so alpha works: hsl(var(--primary) / 0.4). Light values live in
+ * :root, dark overrides in .dark (toggled on <html> by src/lib/theme.ts from the system
+ * preference or a saved choice). index.css maps these onto Tailwind utilities with @theme.
+ * Values come from the agreed prototype (prototype/index.html). Verified pairs:
+ * scripts/check-contrast.mjs (WCAG AA). Components never hardcode a colour or a size.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* --- colour: surfaces & text --- */
+  --background: 48 20% 95%; /* #F5F4F0 page */
+  --foreground: 240 5% 11%; /* #1A1A1D ink */
+  --card: 0 0% 100%; /* #FFFFFF surface */
+  --card-foreground: 240 5% 11%;
+  --muted: 51 11% 88%; /* #E3E2DC quiet fills */
+  --muted-foreground: 240 3% 39%; /* #606066 secondary text (prototype #66666D, darkened a step so it reads on --muted at AA) */
+  --border: 51 11% 88%; /* #E3E2DC */
+  --input: 51 11% 88%;
+
+  /* --- colour: brand / accent (links, "my turn" highlights) --- */
+  --primary: 222 76% 50%; /* #1F5AE0 */
+  --primary-foreground: 0 0% 100%;
+  --primary-soft: 222 77% 95%; /* #E8EEFC */
+
+  /* --- colour: status --- */
+  --needs: 35 100% 28%; /* #8F5300 needs James */
+  --needs-foreground: 0 0% 100%;
+  --needs-soft: 40 100% 92%; /* #FFF1D6 */
+  --ok: 147 64% 29%; /* #1B7A45 done / live */
+  --ok-foreground: 0 0% 100%;
+  --ok-soft: 139 40% 92%; /* #E3F3E8 */
+  --me: 240 5% 11%; /* #1A1A1D James's own messages, primary button */
+  --me-foreground: 0 0% 100%;
+
+  /* --- colour: focus --- */
+  --ring: 222 76% 50%;
+
+  /* --- radius (prototype: pill 8, button 12, tile 14, chip 18, sheet 20) --- */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+
+  /* --- type --- */
+  --font-sans: 'Manrope Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, Menlo, Consolas, monospace;
+  --text-xs: 0.75rem; /* 12 */
+  --text-sm: 0.8125rem; /* 13 */
+  --text-base: 0.9375rem; /* 15 — the prototype's body size */
+  --text-lg: 1.0625rem; /* 17 */
+  --text-xl: 1.25rem; /* 20 */
+  --text-2xl: 1.625rem; /* 26 — screen titles */
+
+  /* --- layout --- */
+  --content-max: 35rem; /* 560px: phone-first column, centred on wider screens */
+  --tap-min: 2.75rem; /* 44px minimum target */
+
+  /* --- motion --- */
+  --motion-fast: 120ms;
+  --motion-med: 200ms;
+  --motion-slow: 320ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- z-index --- */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 20;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-toast: 60;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: 240 5% 7%; /* #121214 */
+  --foreground: 60 10% 94%; /* #F1F1EE */
+  --card: 240 7% 12%; /* #1C1C20 */
+  --card-foreground: 60 10% 94%;
+  --muted: 240 6% 18%; /* #2C2C32 */
+  --muted-foreground: 240 3% 65%; /* #A4A4AA */
+  --border: 240 6% 18%;
+  --input: 240 6% 18%;
+
+  --primary: 223 100% 75%; /* #7FA3FF */
+  --primary-foreground: 223 70% 15%; /* #0B1A3F */
+  --primary-soft: 224 42% 18%; /* #1A2440 */
+
+  --needs: 39 87% 62%; /* #F2B84B */
+  --needs-foreground: 240 5% 7%;
+  --needs-soft: 40 73% 12%; /* #332508 */
+  --ok: 145 49% 63%; /* #71CF98 */
+  --ok-foreground: 240 5% 7%;
+  --ok-soft: 146 50% 13%; /* #10301E */
+  --me: 60 10% 94%; /* #F1F1EE */
+  --me-foreground: 240 5% 7%;
+
+  --ring: 223 100% 75%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-med: 0ms;
+    --motion-slow: 0ms;
+  }
+}

@@ -4,6 +4,7 @@ import tseslint from 'typescript-eslint'
 import globals from 'globals'
 import prettier from 'eslint-config-prettier'
 import reactHooks from 'eslint-plugin-react-hooks'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
 
 export default tseslint.config(
   {
@@ -69,12 +70,34 @@ export default tseslint.config(
     files: ['packages/agent/**/*.ts', 'packages/shared/**/*.ts', 'tests/**/*.ts'],
     languageOptions: { globals: globals.node },
   },
-  // The web app runs in the browser; hooks rules catch stale closures and misordered hooks.
+  // The web app runs in the browser; hooks rules catch stale closures and misordered hooks;
+  // jsx-a11y enforces the WCAG AA baseline (docs/security/A11Y_CHECKLIST.md).
   {
     files: ['packages/web/src/**/*.{ts,tsx}'],
     languageOptions: { globals: globals.browser },
-    plugins: { 'react-hooks': reactHooks },
-    rules: reactHooks.configs.recommended.rules,
+    plugins: { 'react-hooks': reactHooks, 'jsx-a11y': jsxA11y },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      ...jsxA11y.flatConfigs.recommended.rules,
+      // Sometimes right on a phone (the one input on a sheet); the PR states why.
+      'jsx-a11y/no-autofocus': 'warn',
+      // Icons go through src/lib/icons.ts so the icon set is a one-file swap.
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'lucide-react',
+              message: 'Import icons from src/lib/icons.ts, not from lucide-react directly.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['packages/web/src/lib/icons.ts'],
+    rules: { 'no-restricted-imports': 'off' },
   },
   // Tests may log and use vitest globals; the agent's protocol test drives a child process.
   {
