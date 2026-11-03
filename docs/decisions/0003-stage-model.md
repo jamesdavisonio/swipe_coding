@@ -25,8 +25,9 @@ Defined once in `packages/shared` and consumed by web and agent:
 - **Stage chain** `Stage = spec | approved | build | fix | do | pr | merged | main_ci |
 after_deploy | done`; `stagesFor(type, hasAfterDeploy)` gives `feature` →
   `spec, approved, build, pr, merged, main_ci, [after_deploy], done`; `bugfix` → `fix, pr,
-…`; `chore` → `do, done`; `for_james` → `[]`. `status` and `subtasks` are retired;
-  "queued" is derived (`stage` is the first stage and `agentId` is null).
+…`; `chore` → `do, done`; `for_james` → `[]` (its document rests at stage `do` and is
+  never queued or advanced). `status` and `subtasks` are retired; "queued" is derived
+  (`stage` is the first stage and `agentId` is null).
 - **Needs** — `task.needs: { kind: spec | question | pr | after_deploy, question?,
 options? } | null` is the only thing the home screen reads to decide "needs you"; the
   session sets it, James's decision clears it.
@@ -63,6 +64,7 @@ after_deploy | done | info | system`. Firestore rules only let the browser creat
   only; it never infers state from message text.
 - A task document grows with its history; the 200-entry cap keeps it far below Firestore's
   1 MiB limit while B6 can page the archive on demand.
-- `firestore.rules` gains a `log_archive` subcollection rule and the comment-kind check;
-  rules-lint and `pre-deploy-check` cover them; an emulator-based rules test is deferred
-  until a machine with Java is available (AGENTS.md gotcha).
+- `firestore.rules` gains a `log_archive` subcollection rule and the comment-kind check
+  (create limited to the James kinds; `author` and `kind` frozen on update); they are
+  tested behaviourally in the Firestore emulator (`npm run test:rules`,
+  `tests/rules/web-threads-b1-4.rules.test.ts`), with rules-lint as the cheap guard.

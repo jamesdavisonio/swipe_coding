@@ -121,10 +121,10 @@ On start it:
 | `kanban_list_tasks`     | tasks in this project (open first) so the session can pick one up                                               |
 | `kanban_create_task`    | `{title, type, description?}` → creates task at its chain's first stage, binds to this agent                    |
 | `kanban_start_task`     | `{task_id}` → binds existing task to this agent, `working: true`                                                |
-| `kanban_update_task`    | `{task_id, status? (in_progress                                                                                 | done), summary?, pr_url?}`—`done`sets stage`done`; `pr_url`sets`pr` |
+| `kanban_update_task`    | `{task_id, status? (in_progress or done), summary?, pr_url?}` — `done` sets stage `done`; `pr_url` sets `pr`    |
 | `kanban_subtask`        | `{task_id, key, status, note?}` — `key` is a stage; `awaiting_approval` on `spec` arms `needs`, `done` advances |
 | `kanban_comment`        | `{task_id, body}` — the session's narrative, visible to me                                                      |
-| `kanban_ask`            | `{task_id, question}` — sets `needs_james`, pushes notification to me; the answer comes back as a channel event |
+| `kanban_ask`            | `{task_id, question}` — sets `needs {kind: question}`, pushes notification to me; the answer is a channel event |
 | `kanban_todo_for_james` | `{project, body, link?}` — appends to the project's "For James" task                                            |
 | `kanban_get_task`       | full task with comments, so a fresh session can resume one                                                      |
 
