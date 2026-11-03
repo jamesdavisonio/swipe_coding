@@ -5,10 +5,12 @@ import {
   TASK_TYPES,
   taskStages,
   type Comment,
+  type CommentKind,
   type Stage,
   type Task,
   type TaskNeed,
 } from '@kanban/shared'
+import { MAX_COMMENT_CHARS } from './limits.ts'
 import { isDateable, relativeTime } from './threads.ts'
 
 const KIND_LABEL: Record<string, string> = {
@@ -51,17 +53,28 @@ export function readMoreId(comments: readonly Comment[], need: TaskNeed | null):
   return null
 }
 
-// James's reply as the screen shows it before the snapshot has it: the same shape as a saved
-// comment, with no delivery stamps, so it reads "sent".
-export function pendingComment(task: Task, id: string, body: string, at: number): Comment {
+// What a reply from the composer is: the answer when the task waits on a question, else a
+// plain comment.
+export const replyKind = (task: Pick<Task, 'needs'>): CommentKind =>
+  task.needs?.kind === 'question' ? 'answer' : 'comment'
+
+// James's comment in the one shape every writer and the screen's optimistic copy use: body
+// trimmed and capped, no delivery stamps (the agent's to set), so it reads "sent".
+export function jamesComment(
+  task: Pick<Task, 'id' | 'projectId' | 'agentId'>,
+  kind: CommentKind,
+  body: string,
+  at: number,
+  id: string
+): Comment {
   return {
     id,
     taskId: task.id,
     projectId: task.projectId,
     agentId: task.agentId,
     author: 'james',
-    kind: 'comment',
-    body,
+    kind,
+    body: body.trim().slice(0, MAX_COMMENT_CHARS),
     createdAt: at,
     deliveredAt: null,
     workingAt: null,

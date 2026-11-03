@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import type { Comment, Task } from '@kanban/shared'
 import { newCommentId, sendReply } from '../data.ts'
 import { MAX_COMMENT_CHARS } from './limits.ts'
-import { mergeMessages, pendingComment } from './messages.ts'
+import { jamesComment, mergeMessages, replyKind } from './messages.ts'
 import { track } from './use-thread-actions.ts'
 
 export function useReply(task: Task, saved: readonly Comment[]) {
@@ -26,7 +26,7 @@ export function useReply(task: Task, saved: readonly Comment[]) {
   function send() {
     if (body === '') return
     const id = newCommentId()
-    setPending((list) => [...list, pendingComment(task, id, body, Date.now())])
+    setPending((list) => [...list, jamesComment(task, replyKind(task), body, Date.now(), id)])
     setText('')
     setFailed(false)
     void track('reply', task.id, () => sendReply(task, { id, body })).then((ok) => {

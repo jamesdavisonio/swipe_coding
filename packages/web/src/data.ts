@@ -28,8 +28,8 @@ import {
   type Todo,
 } from '@kanban/shared'
 import { db } from './firebase.ts'
-import { MAX_COMMENT_CHARS } from './lib/limits.ts'
 import { log } from './lib/log.ts'
+import { jamesComment, replyKind } from './lib/messages.ts'
 import { newRequestId } from './lib/request-id.ts'
 
 export interface Live<T> {
@@ -202,23 +202,6 @@ export async function createTask(
   return ref.id
 }
 
-// James's comment in the shape every writer uses; delivery stamps are the agent's to set.
-function jamesComment(task: Task, kind: CommentKind, body: string, t: number, id: string): Comment {
-  return {
-    id,
-    taskId: task.id,
-    projectId: task.projectId,
-    agentId: task.agentId,
-    author: 'james',
-    kind,
-    body: body.trim().slice(0, MAX_COMMENT_CHARS),
-    createdAt: t,
-    deliveredAt: null,
-    workingAt: null,
-    handledAt: null,
-  }
-}
-
 // A stage transition James owns: read the task inside a transaction and write only when
 // `plan` accepts its current state, so a double tap (or a stale screen) is a no-op. The
 // optional comment is created in the same transaction. Returns whether anything was written.
@@ -260,7 +243,7 @@ export const newCommentId = (): string => doc(collection(db, COLLECTIONS.comment
 // cleared in the same write; otherwise it is a plain `comment` and the need stays. A batch, not
 // a transaction: a transaction cannot run offline, a batch is queued and committed on return.
 export async function sendReply(task: Task, reply: { id: string; body: string }) {
-  const kind: CommentKind = task.needs?.kind === 'question' ? 'answer' : 'comment'
+  const kind = replyKind(task)
   const t = now()
   const batch = writeBatch(db)
   batch.set(
