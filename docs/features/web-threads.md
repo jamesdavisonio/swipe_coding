@@ -392,7 +392,81 @@ body })`, `markRead(task)`, `approveSpec`, `answerQuestion` and `markMerged`. Th
   failed projects or agents read is logged by `data.ts` and degrades the header (no project
   name, no `session live`) without an error state or Retry.
 
-**Unresolved:** none for B1, B2 or B3 (open questions 1–4 answered at confirmation).
+**B4 contract details fixed at test time** (planner decisions, 2026-11-03):
+
+- Writes (`packages/web/src/data.ts`), each tested in the Firestore emulator as James
+  (`tests/emulator/`, `npm run test:rules`), reading back the task, its comments and its
+  `log` / `tasks/{id}/log_archive`. Except for `tickStep`, each write is a transaction guarded
+  on the task's current state, so a double tap or a stale screen writes nothing; history
+  entries go through `appendLog` with `who: 'james'`, and any overflow past `LOG_CAP` is moved
+  to `tasks/{id}/log_archive` in the same transaction. James's messages are comments with
+  `author: 'james'` built by the shared `jamesComment`:
+  - `approveSpec(task)`: only while the need is `spec` and the stage is `spec` or `approved`.
+    Stage `build`, need `null`, history `Approved spec v<N>` (N = `spec.version`, 1 when there
+    is no spec), message kind `approve` with body `Approved.`.
+  - `requestChange(task, text)`: only while the need is `spec`; `text` is trimmed, must be
+    non-empty (otherwise nothing is written) and is capped at 4000 characters. Need `null`,
+    stage unchanged, history `Asked for a change to spec v<N>: <text>`, message kind
+    `change_request` with body `Change: <text>`.
+  - `answerQuestion(task, answer: { key?: string; label: string })`: only while the need is
+    `question`, and, when `key` is given, only while that key is still one of
+    `needs.options` (a stale option writes nothing). Free text passes `{ label: text }`,
+    trimmed, non-empty, capped. Need `null`, history `Answered <question>: <label>` (or
+    `Answered: <label>` when the need has no question text), message kind `answer` with body
+    `<label>`.
+  - `markMerged(task)`: only at stage `pr`. Stage `merged`, need `null`, history
+    `Merged PR #<n>` (or `Merged the PR` when `pr` is null), message kind `merged` with body
+    `Merged it.`.
+  - `tickStep(task, index)`: a batch, not a transaction, so a tick made offline is queued
+    (criterion 28). Only while the stage is `after_deploy` and `index` is a step; otherwise
+    nothing is written. It flips `afterDone[index]` (from the task as the screen has it) and
+    appends history `Step done: <step>` or `Step unticked: <step>` with `arrayUnion` (the cap is
+    enforced by the next transactional writer). When the tick makes every step done, the same
+    batch also sets stage `done`, `doneAt` now, need `null`, `working: false`, adds the
+    history `Done` (`who: 'system'`) and James's message kind `comment` with body
+    `After-deploy steps done.`.
+  - `sendReply`, `markRead` (B2/B3) get their emulator tests here too: what each writes, and
+    that the rules accept it.
+- Decision sheet (`packages/web/src/components/DecisionSheet.tsx`, same props
+  `{ task, mode, onClose }`; it renders for the task's current need and closes itself, by
+  calling `onClose`, when the task no longer has the need it opened for). A dialog named by
+  its title:
+  - spec: title `Spec v<N> — <task title>`; shows the goal, each point, `Out of scope` with
+    `spec.out`, `Touches` with `spec.touches` (when the spec is null: `The session hasn't
+attached the spec yet.`). Buttons `Approve v<N>` and `Changes…`; in mode `change` (or after
+    `Changes…`) a textarea labelled `What should change?`, a button `Send to session` disabled
+    while the trimmed text is empty, and `Cancel` back to the spec.
+  - question: title the question (`Question` when it has none); one button per option labelled
+    `<key> · <label>`; a textarea labelled `Or answer in your words` and a button
+    `Send answer` disabled while the trimmed text is empty.
+  - pr: title `PR #<n> is ready to merge` (`PR is ready to merge` without a PR); the task's
+    summary; a link `Open PR #<n> in GitHub` (`target="_blank"`, `rel` containing `noopener`,
+    http/https only) and a button `Merged it`.
+  - after_deploy: title `Deployed. Your steps:`; one checkbox per step, labelled by the step's
+    text, checked from `afterDone`, in a row at least 44 px tall; the note
+    `The task closes itself when every step is ticked.`
+  - Every sheet has a `Close` button. Escape or Close dismisses it without calling any write;
+    focus returns to the control that opened it (criterion 20).
+- Outcomes: approve, send change, answer (option or free text) and merged call the write
+  once and close the sheet when it resolves; if it rejects, the sheet stays open with an
+  inline `role="alert"` `Couldn't save. Try again.` and the typed text kept. A tick shows the
+  new checkbox state at once (before the snapshot) and keeps it while the write is pending;
+  if it rejects, the checkbox reverts and the same alert shows. Buttons are disabled while
+  their write is pending, so one tap writes once.
+- Instrumentation, through the existing `track` helper (one `request_id` per tap):
+  `user_action` with action `approve_spec`, `request_change`, `answer`, `merged`, `tick_step`
+  or `untick_step` and target the task id; a failed write logs `api_call_failed` with the
+  Firestore code; when a tick resolves and completed the steps, `milestone_reached` with
+  `milestone: 'task_done'` and target the task id. Quick replies on Threads and the thread
+  keep calling `approveSpec`, `answerQuestion` and `markMerged`, now with the B4 effects.
+
+- Fidelity round 1 decisions (B4): `milestone_reached` is logged with
+  `log.event('milestone_reached', { feature, milestone: 'task_done', target })`, only after the
+  completing tick's write resolves, never while it is pending or after it fails. The step
+  checkboxes are controlled by the task's `afterDone`, so a later snapshot (a tick from
+  another device) updates any step without a pending tick of its own.
+
+**Unresolved:** none for B1–B4 (open questions 1–4 answered at confirmation).
 
 ## Files & modules affected
 

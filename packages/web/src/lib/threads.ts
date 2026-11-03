@@ -49,8 +49,11 @@ function stepCount(task: Pick<Task, 'afterDeploy'>): number {
   return Array.isArray(task.afterDeploy) ? task.afterDeploy.length : 0
 }
 
+// The version the spec sheet and its history lines call the spec: 1 while there is no spec.
+export const specVersion = (task: Pick<Task, 'spec'>): number => task.spec?.version ?? 1
+
 // Only web links may leave the app from a Firestore-supplied URL (never javascript:, data:).
-function webUrl(value: unknown): string | null {
+export function webUrl(value: unknown): string | null {
   if (typeof value !== 'string') return null
   try {
     const { protocol } = new URL(value)
@@ -201,7 +204,7 @@ export type QuickReply =
   | { kind: 'merged'; label: string }
   | { kind: 'read'; label: string }
 
-function questionOptions(need: TaskNeed): { key: string; label: string }[] {
+export function questionOptions(need: TaskNeed): { key: string; label: string }[] {
   if (!Array.isArray(need.options)) return []
   return need.options.filter(
     (o) => o && typeof o.key === 'string' && typeof o.label === 'string' && o.label.trim() !== ''

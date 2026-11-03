@@ -46,7 +46,13 @@ after_deploy | done | info | system`. Firestore rules only let the browser creat
 - **Delivery state** is derived, never stored: `deliveryState()` reads `deliveredAt`,
   `workingAt`, `handledAt` and returns `sent → delivered → working → handled`,
   monotonic (a later stamp wins even if an earlier one is missing).
-- **Transitions James owns** (approve, merged, after-deploy complete, reopen) are
+- **After-deploy ticks** (amended with B4, 2026-11-03) are a write batch, not a
+  transaction, so a tick made offline is queued: the batch writes `afterDone` as the screen
+  shows it and appends history with `arrayUnion`, and the tick that completes every step
+  sets `done` in the same batch. The log can therefore run past `LOG_CAP` until the next
+  transactional writer archives the overflow, and two devices ticking at once can lose one
+  tick (single owner; accepted).
+- **Transitions James owns** (approve, change request, answer, merged, reopen) are
   Firestore transactions guarded on the expected current stage, so a double tap is a
   no-op (`_principles/idempotency.md`).
 - **Indexes**: `tasks(projectId, stage, updatedAt desc)` for project tabs and

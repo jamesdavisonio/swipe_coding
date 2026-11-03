@@ -28,22 +28,25 @@ export function reportFailure(action: string, requestId: string, err: unknown) {
 // Records a tap, then runs the write. A failed write is logged with the same request id so the
 // tap can be followed to its failure, and the result says whether it went through (true when
 // there was no write): the row stays as it was (the snapshot is the truth), while the thread's
-// composer uses the result to take its optimistic message back.
+// composer and the decision sheet use the result to take their optimistic copy back. `onSuccess`
+// runs once the write has gone through, with the tap's request id, for events that follow it.
 export async function track(
   action: string,
   target: string,
-  write?: () => Promise<unknown>
+  write?: () => Promise<unknown>,
+  onSuccess?: (requestId: string) => void
 ): Promise<boolean> {
   const requestId = newRequestId()
   log.event('user_action', { feature: FEATURE, action, target, request_id: requestId })
   if (!write) return true
   try {
     await write()
-    return true
   } catch (err) {
     reportFailure(action, requestId, err)
     return false
   }
+  onSuccess?.(requestId)
+  return true
 }
 
 // The Firestore error code ('permission-denied', 'unavailable', ...) when `err` is a

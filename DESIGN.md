@@ -152,7 +152,9 @@ React + Vite + Tailwind PWA, installable on the phone.
   by need; bottom nav. Spec: `docs/features/web-threads.md`.
 - `/t/:task` **thread** (B3): stage stepper, the conversation with kind labels and delivery
   ticks, typing indicator, composer (Ctrl/⌘+Enter; a reply queued offline keeps one tick),
-  quick replies, Decision history button. Phase 1's mark done / re-queue menu and the
+  quick replies, Decision history button. Read more and the quick replies open the decision
+  sheet (B4): approve or change a spec, answer, merge, tick after-deploy steps (ticks work
+  offline), each recorded in the task's history. Phase 1's mark done / re-queue menu and the
   `claude --resume` copy button were retired with the old task page; Reopen returns in B6.
 - `/projects` the Phase 1 project list and `/p/:project` the Phase 1 board, until the
   Projects screen (B5) replaces them.
