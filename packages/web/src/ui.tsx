@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { isAgentOnline, TASK_TYPE_LABELS, type AgentDoc, type Task } from '@kanban/shared'
+import { TASK_TYPE_LABELS, type Task } from '@kanban/shared'
 import { useUser, logOut } from './auth.tsx'
 import { legacyStatus, legacySteps, needText, type LegacyStatus } from './lib/legacy-status.ts'
 import { Sheet as SheetRoot, SheetContent } from './components/ui/sheet.tsx'
@@ -74,22 +74,6 @@ export function TaskCard({ task, projectName }: { task: Task; projectName?: stri
         <span className="ml-auto">{timeAgo(task.updatedAt)}</span>
       </div>
     </Link>
-  )
-}
-
-export function AgentDot({ agent }: { agent: AgentDoc | null }) {
-  const online = agent ? isAgentOnline(agent) : false
-  return (
-    <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
-      <span
-        className={`h-2 w-2 rounded-full ${online ? 'bg-emerald-500' : agent ? 'bg-slate-400' : 'bg-slate-300 dark:bg-slate-700'}`}
-      />
-      {agent
-        ? online
-          ? `online · ${agent.hostname}`
-          : `offline · last seen ${timeAgo(agent.lastSeen)}`
-        : 'no session'}
-    </span>
   )
 }
 

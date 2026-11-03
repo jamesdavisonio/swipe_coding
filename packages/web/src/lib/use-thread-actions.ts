@@ -1,6 +1,6 @@
 // What a tap on Threads does: log it (with one request id per operation), run the write,
 // navigate, or open the decision sheet. The sheet state itself stays with the screen.
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import type { Task } from '@kanban/shared'
 import { answerQuestion, approveSpec, markMerged, markRead } from '../data.ts'
 import { log } from './log.ts'
@@ -11,25 +11,38 @@ export const FEATURE = 'web-threads'
 
 export type SheetMode = 'read' | 'change'
 
-// Records a tap, then runs the write; a failed write is logged with the same request id so
-// the tap can be followed to its failure: a Firestore error is api_call_failed with its code,
-// anything else is feature_error. The row stays as it was (the snapshot is the truth).
-export async function track(action: string, target: string, write?: () => Promise<unknown>) {
+// Logs a failed write under the request id of the tap that caused it: a Firestore error is
+// api_call_failed with its code, anything else is feature_error.
+export function reportFailure(action: string, requestId: string, err: unknown) {
+  const context = { feature: FEATURE, action, request_id: requestId }
+  const code = firestoreCode(err)
+  if (code !== null)
+    log.error('api_call_failed', `Firestore write failed: ${action}`, {
+      ...context,
+      target: 'firestore',
+      status: code,
+    })
+  else log.error('feature_error', `${action} failed`, context)
+}
+
+// Records a tap, then runs the write. A failed write is logged with the same request id so the
+// tap can be followed to its failure, and the result says whether it went through (true when
+// there was no write): the row stays as it was (the snapshot is the truth), while the thread's
+// composer uses the result to take its optimistic message back.
+export async function track(
+  action: string,
+  target: string,
+  write?: () => Promise<unknown>
+): Promise<boolean> {
   const requestId = newRequestId()
   log.event('user_action', { feature: FEATURE, action, target, request_id: requestId })
-  if (!write) return
+  if (!write) return true
   try {
     await write()
+    return true
   } catch (err) {
-    const context = { feature: FEATURE, action, request_id: requestId }
-    const code = firestoreCode(err)
-    if (code !== null)
-      log.error('api_call_failed', `Firestore write failed: ${action}`, {
-        ...context,
-        target: 'firestore',
-        status: code,
-      })
-    else log.error('feature_error', `${action} failed`, context)
+    reportFailure(action, requestId, err)
+    return false
   }
 }
 
@@ -42,11 +55,13 @@ function firestoreCode(err: unknown): string | null {
 
 export function useThreadActions(openSheet: (task: Task, mode: SheetMode) => void) {
   const navigate = useNavigate()
+  const location = useLocation()
 
   return {
+    // The thread's Back button returns to where James came from, project filter included.
     openThread: (task: Task) => {
       void track('open_thread', task.id, task.unread ? () => markRead(task) : undefined)
-      void navigate(`/t/${task.id}`)
+      void navigate(`/t/${task.id}`, { state: { from: location.pathname + location.search } })
     },
     openForJames: (projectId: string) => {
       void navigate(`/p/${projectId}?tab=james`)

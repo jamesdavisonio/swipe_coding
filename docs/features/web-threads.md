@@ -322,7 +322,77 @@ todo createdAt, needs: true, unread: false }`. It holds every visible task
   only `useAllTasks`, `useOpenTodos`, `useProjects`, `useAgents`, `approveSpec`,
   `answerQuestion`, `markMerged` and `markRead` from `data.ts`.
 
-**Unresolved:** none for B1 or B2 (open questions 1–4 answered at confirmation).
+**B3 contract details fixed at test time** (planner decisions, 2026-11-03):
+
+- Screen and route: `packages/web/src/pages/Thread.tsx` (default export, no props) is the
+  `/t/:taskId` route and replaces the Phase 1 `pages/Task.tsx`. It renders any task opened by
+  id, however long ago it finished (criterion 2's "opened by id" clause).
+- Data layer (`packages/web/src/data.ts`): the screen reads `useTask(id)`,
+  `useTaskComments(id)`, `useProjects()` and `useAgents()` (all `Live`, with `retry()`), and
+  calls `newCommentId()` (a fresh comment id, generated client-side), `sendReply(task, { id,
+body })`, `markRead(task)`, `approveSpec`, `answerQuestion` and `markMerged`. Those are the
+  only `data.ts` names the screen and its components import. `sendReply` writes James's
+  comment under the given id (so a retried write cannot duplicate it), with the body trimmed
+  and capped at 4000 characters: kind `answer` with the question need cleared in the same
+  write when the task's need is a question, otherwise kind `comment` with the need left as it
+  is. It replaces the Phase 1 `addComment`. Its Firestore effects are tested in the emulator
+  with B4's writes; B3 tests the screen.
+- Offline (criterion 28, the reply half; ticking a step is B4's): Firestore is initialised
+  with a persistent local cache (`persistentLocalCache` with the multi-tab manager), so a reply
+  written offline is queued and the write's promise stays pending until the server accepts
+  it. That configuration is checked at review; jsdom cannot exercise it.
+- Messages, in `createdAt` order: a session comment of kind `system` is a centred quiet line
+  with its text only. Other session comments carry a label `<Kind> · <relative time>`, where
+  Kind is `Spec`, `Question`, `PR ready`, `After deploy`, `Done` for spec, question, pr,
+  after_deploy, done, and `Session` for info or anything else. James's comments sit on the
+  right with their relative time and a tick label from `deliveryState`: `sent`, `received`,
+  `working on it`, `handled`. Only the latest session message whose kind equals the task's
+  active need carries a `Read more` button, which opens `DecisionSheet` in mode `read`. While
+  `task.working` is true, an element with `role="status"` named `Session is working` shows
+  after the last message.
+- Composer: a textarea labelled `Message to the session` and a button `Send`, disabled while
+  the trimmed text is empty. Enter inserts a newline; Ctrl+Enter or ⌘+Enter sends; empty or
+  whitespace-only text is never sent. Sending clears the box and shows the message at once
+  as James's message with the `sent` label, before the snapshot has it; it is shown once,
+  however many snapshots then contain it. If `sendReply` rejects, that message disappears,
+  the text returns to the box, and an inline `role="alert"` says `Couldn't send. Try again.`
+  While the write is pending (offline), the message stays with `sent`.
+- While the task needs James, the composer area shows the same quick replies as Threads
+  (`QuickReplies`, same actions and labels), and acting on one keeps James on the thread. A
+  done task has no composer: the footer starts with `Done`. Reopen is B6's.
+- Header: a button `Back to threads` goes to `location.state.from` when it is a path
+  starting with `/`, else to `/`. Threads now navigates to a thread with
+  `state: { from: <Threads path + search> }`, so back keeps the project filter (criterion
+  15). The heading is the task title; under it `<project name> · <stageText>`, plus
+  ` · session live` when one of the project's agents is online and the task is not done. A
+  button `Decision history` opens `packages/web/src/components/HistorySheet.tsx` (default
+  export, props `{ task: Task; onClose: () => void }`; its contents are B6's, so B3 tests
+  may mock it).
+- Stage stepper: `packages/web/src/components/StageStepper.tsx` (default export, props
+  `{ task: Task }`) renders a list named `Stages` with one item per stage of
+  `taskStages(task)`, labelled with `STAGE_LABEL`. The current stage's item has
+  `aria-current="step"`; a done task, a task whose stage is not in its chain, and a
+  `for_james` task (empty chain, no list rendered) have none.
+- Unread: whenever the shown task has `unread: true`, the screen calls `markRead(task)` once
+  for that change (a session message arriving while James reads clears again).
+- States (criterion 29 for this screen): while the task or its comments load, an element
+  with `role="status"` named `Loading thread`; on a read error, `Couldn't load this thread`
+  and a `Retry` button that calls `retry()` on each failed source; a task that does not exist
+  shows `This task no longer exists.` and a link `Back to threads` to `/`.
+- Instrumentation: sending logs `user_action` with action `reply` and target the task id,
+  and a failed send logs `api_call_failed` with the Firestore code, through the existing
+  `track` helper (one `request_id` per send); quick replies log as on Threads.
+
+- Fidelity round 1 decisions (B3): every send takes a fresh id from `newCommentId()` (when
+  the id is generated is free, but two sends never share one), and the optimistic message is
+  matched to the snapshot by id, never by text, so the same text sent twice shows twice. As in
+  the prototype, a session message's label sits above its body and James's relative time and
+  tick label sit below his body. A thread with no messages shows the quiet line
+  `No messages yet.` above the composer. Only the task and comments reads gate the screen: a
+  failed projects or agents read is logged by `data.ts` and degrades the header (no project
+  name, no `session live`) without an error state or Retry.
+
+**Unresolved:** none for B1, B2 or B3 (open questions 1–4 answered at confirmation).
 
 ## Files & modules affected
 

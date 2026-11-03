@@ -157,6 +157,11 @@ export function stageText(task: Task): string {
   return (STAGES.includes(task.stage) && STAGE_TEXT[task.stage]) || UNKNOWN_STAGE_TEXT
 }
 
+// A usable timestamp: a number a Date can represent. A document without one still renders, just
+// without a time (toISOString would throw and take the whole screen down).
+export const isDateable = (at: unknown): at is number =>
+  typeof at === 'number' && Number.isFinite(at) && !Number.isNaN(new Date(at).getTime())
+
 // "now", "12 min", the clock time earlier today, "Yesterday", "3 d".
 export function relativeTime(at: number, now: number): string {
   const age = now - at
@@ -165,6 +170,15 @@ export function relativeTime(at: number, now: number): string {
   if (age < DAY_MS) return new Date(at).toTimeString().slice(0, CLOCK_TEXT_CHARS)
   const days = Math.floor(age / DAY_MS)
   return days === 1 ? 'Yesterday' : `${days} d`
+}
+
+// "Today 14:05", "Yesterday 09:30", "24 Oct 18:00".
+export function dayAndTime(at: number, now: number): string {
+  const day = new Date(at)
+  const time = day.toTimeString().slice(0, CLOCK_TEXT_CHARS)
+  if (day.toDateString() === new Date(now).toDateString()) return `Today ${time}`
+  if (day.toDateString() === new Date(now - DAY_MS).toDateString()) return `Yesterday ${time}`
+  return `${day.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} ${time}`
 }
 
 // "1 thing to do by hand", "3 things to do by hand".

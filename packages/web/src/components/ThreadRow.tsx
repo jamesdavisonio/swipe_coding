@@ -5,6 +5,7 @@ import { cn } from '../lib/cn.ts'
 import {
   daysUntilHidden,
   forJamesSummary,
+  isDateable,
   quickReplies,
   relativeTime,
   stageText,
@@ -21,11 +22,6 @@ function initials(name: string): string {
     .map((word) => word[0].toUpperCase())
   return letters.join('') || '?'
 }
-
-// A usable timestamp: a number a Date can represent. A task without one still renders, just
-// without a time (toISOString would throw and take the whole screen down).
-const isDateable = (at: unknown): at is number =>
-  typeof at === 'number' && Number.isFinite(at) && !Number.isNaN(new Date(at).getTime())
 
 // The row's open control is a button whose accessible name starts with the title: the tile
 // is decorative (aria-hidden) and the meta and preview lines follow the title and time. The

@@ -1,0 +1,53 @@
+=== npm run build:web
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.03s
+exit 0
+=== npm run typecheck
+
+> @kanban/web@0.0.1 typecheck
+> tsc -p tsconfig.json
+
+exit 0
+=== npm run lint
+  115:13  warning  The autoFocus prop should not be used, as it can reduce usability and accessibility for users  jsx-a11y/no-autofocus
+
+✖ 2 problems (0 errors, 2 warnings)
+
+exit 0
+=== npm test
+      Tests  205 passed (205)
+   Start at  10:10:59
+   Duration  8.82s (transform 1.77s, setup 0ms, collect 21.23s, tests 21.60s, environment 28.62s, prepare 5.33s)
+
+exit 0
+=== npm run test:rules
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+exit 0
+=== npx firebase emulators:exec --only firestore --project demo-kanban "npm run test:agent"
+all good
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+exit 0
+=== npm run audit
+> node scripts/check-audit.mjs
+
+· accepted high GHSA-m9gg-hp2v-232j (@grpc/grpc-js) until 2027-02-01 — Pinned ~1.9.0 by @firebase/firestore's Node build inside the firebase web SDK; the browser bundle never loads gRPC and nothing in this repo runs the web SDK on Node. npm overrides do not reach workspace dependency trees, so it cannot be forced. Re-check on every firebase bump.
+✓ audit gate passed: 1 high+ advisory (all allowlisted), 12 findings in total at any severity.
+exit 0
+=== node scripts/check-firestore-rules.mjs
+✓ firestore.rules passed lint.
+exit 0
+=== node scripts/check-contrast.mjs
+✓ contrast passes WCAG AA for 38 pairs (:root + .dark).
+exit 0
+=== npx prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+exit 0
