@@ -68,7 +68,7 @@ export default tseslint.config(
   },
   // Node packages and the test scaffold run on Node 24.
   {
-    files: ['packages/agent/**/*.ts', 'packages/shared/**/*.ts', 'tests/**/*.ts'],
+    files: ['packages/agent/**/*.ts', 'packages/shared/**/*.ts', 'tests/**/*.{ts,tsx}'],
     languageOptions: { globals: globals.node },
   },
   // The web app runs in the browser; hooks rules catch stale closures and misordered hooks;
