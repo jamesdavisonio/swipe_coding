@@ -313,6 +313,13 @@ todo createdAt, needs: true, unread: false }`. It holds every visible task
   from `app.manifest.yaml`). Threads emits `log.event('user_action', { feature:
 'web-threads', action, target })` with action `filter` (target: project id or `all`),
   `open_thread`, `approve_spec`, `answer` or `merged` (target: task id).
+- Fidelity round 1 decisions: a rejected read is logged by the read hooks in `data.ts`
+  (`log.error('api_call_failed', …, { feature: 'web-threads', target: 'firestore', action:
+'read', status: <error code> })`), not by the screen, so the Threads tests (which mock
+  `data.ts`) assert no read-error logging. Chips are labelled by project name and keep the
+  order `useProjects()` returns (most recently updated first). Threads and BottomNav import
+  only `useAllTasks`, `useOpenTodos`, `useProjects`, `useAgents`, `approveSpec`,
+  `answerQuestion`, `markMerged` and `markRead` from `data.ts`.
 
 **Unresolved:** none for B1 or B2 (open questions 1–4 answered at confirmation).
 
