@@ -5,6 +5,8 @@ export const ALL_PROJECTS = 'all'
 
 // The filter row under the Threads header: All, then one chip per project, each showing how
 // many things need James there. aria-pressed marks the active one; the count is visible text.
+// The scroller pads by 4px (p-1) and cancels it with -m-1: the chips' 2px ring plus 2px offset
+// reaches 4px outside them and overflow-x-auto would clip it otherwise.
 export default function ProjectChips({
   projects,
   filter,
@@ -18,7 +20,7 @@ export default function ProjectChips({
 }) {
   const chips = [{ id: ALL_PROJECTS, name: 'All' }, ...projects]
   return (
-    <div className="-mx-0.5 flex gap-2 overflow-x-auto px-0.5 pb-0.5 [scrollbar-width:none]">
+    <div className="-m-1 flex gap-2 overflow-x-auto p-1 [scrollbar-width:none]">
       {chips.map((chip) => {
         const pressed = chip.id === filter
         const count = countFor(chip.id)
