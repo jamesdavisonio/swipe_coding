@@ -16,17 +16,17 @@ import {
 import {
   COLLECTIONS,
   forJamesTaskId,
-  subtasksFor,
+  initialTaskFields,
+  stagesFor,
   type AgentDoc,
   type Comment,
   type Project,
-  type Subtask,
   type Task,
-  type TaskStatus,
   type TaskType,
   type Todo,
 } from '@kanban/shared'
 import { db } from './firebase.ts'
+import type { LegacyStatus } from './lib/legacy-status.ts'
 
 export interface Live<T> {
   data: T
@@ -92,14 +92,6 @@ export function useDocument<T>(name: string, id: string | null | undefined): Liv
 export const useProjects = () =>
   useCollection<Project>(COLLECTIONS.projects, [orderBy('updatedAt', 'desc')], [])
 
-// Everything waiting on James across projects — composite index tasks(status, updatedAt desc).
-export const useWaitingTasks = () =>
-  useCollection<Task>(
-    COLLECTIONS.tasks,
-    [where('status', '==', 'waiting_on_james'), orderBy('updatedAt', 'desc')],
-    []
-  )
-
 // Recent tasks across all projects for the home-page counters (single-field orderBy).
 export const useRecentTasks = (max = 500) =>
   useCollection<Task>(COLLECTIONS.tasks, [orderBy('updatedAt', 'desc'), limit(max)], [max])
@@ -153,39 +145,34 @@ export async function createTask(
   input: { title: string; type: TaskType; description: string }
 ) {
   const ref = doc(collection(db, COLLECTIONS.tasks))
-  const t = now()
-  const task: Task = {
-    id: ref.id,
+  const task = initialTaskFields({
     projectId,
-    agentId: null,
     type: input.type,
     title: input.title.trim(),
     description: input.description.trim(),
-    status: 'queued',
-    summary: '',
-    prUrl: null,
-    branch: null,
     createdBy: 'james',
-    createdAt: t,
-    updatedAt: t,
-    subtasks: subtasksFor(input.type),
-    openQuestion: null,
-    lastCommentAt: null,
-  }
+    afterDeploy: [],
+    now: now(),
+  })
   await setDoc(ref, task)
   await touchProject(projectId)
   return ref.id
 }
 
-export async function setTaskStatus(task: Task, status: TaskStatus) {
-  await updateDoc(doc(db, COLLECTIONS.tasks, task.id), {
-    status,
-    updatedAt: now(),
-    ...(status === 'queued' ? { agentId: null } : {}),
-  })
+// The Phase 1 menu actions (mark done, re-queue, reopen) expressed on stage and doneAt.
+export async function setTaskStatus(task: Task, status: LegacyStatus) {
+  const t = now()
+  const chain = stagesFor(task.type, task.afterDeploy.length > 0)
+  const patch: Partial<Task> = { updatedAt: t }
+  if (status === 'done') Object.assign(patch, { stage: 'done', doneAt: t, needs: null })
+  if (status === 'queued')
+    Object.assign(patch, { stage: chain[0], agentId: null, needs: null, doneAt: null })
+  if (status === 'in_progress')
+    Object.assign(patch, { stage: chain.at(-2) ?? task.stage, doneAt: null, reopenedAt: t })
+  await updateDoc(doc(db, COLLECTIONS.tasks, task.id), patch)
 }
 
-// A comment from James. If the task was waiting on him, it is now unblocked.
+// A comment from James. If the task was waiting on him, it is now unblocked (need cleared).
 export async function addComment(task: Task, body: string) {
   const ref = doc(collection(db, COLLECTIONS.comments))
   const t = now()
@@ -195,27 +182,26 @@ export async function addComment(task: Task, body: string) {
     projectId: task.projectId,
     agentId: task.agentId,
     author: 'james',
-    kind: task.openQuestion ? 'answer' : 'comment',
+    kind: task.needs?.kind === 'question' ? 'answer' : 'comment',
     body: body.trim(),
     createdAt: t,
     deliveredAt: null,
+    workingAt: null,
+    handledAt: null,
   }
   await setDoc(ref, comment)
   const patch: Partial<Task> = { lastCommentAt: t, updatedAt: t }
-  if (task.status === 'waiting_on_james') {
-    patch.status = 'in_progress'
-    patch.openQuestion = null
-  }
+  if (task.needs) patch.needs = null
   await updateDoc(doc(db, COLLECTIONS.tasks, task.id), patch)
 }
 
-export async function approveSubtask(task: Task, key: string) {
-  const subtasks: Subtask[] = task.subtasks.map((s) =>
-    s.key === key ? { ...s, status: 'done' } : s
-  )
-  const label = task.subtasks.find((s) => s.key === key)?.label ?? key
-  await updateDoc(doc(db, COLLECTIONS.tasks, task.id), { subtasks, updatedAt: now() })
-  await addComment({ ...task, openQuestion: task.openQuestion ?? 'approval' }, `Approved: ${label}`)
+export async function approveSpec(task: Task) {
+  await updateDoc(doc(db, COLLECTIONS.tasks, task.id), {
+    stage: 'build',
+    needs: null,
+    updatedAt: now(),
+  })
+  await addComment({ ...task, needs: null }, 'Approved: spec')
 }
 
 export async function toggleTodo(todo: Todo) {

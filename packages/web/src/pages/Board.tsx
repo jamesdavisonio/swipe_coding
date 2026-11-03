@@ -9,6 +9,7 @@ import {
   useProjectTasks,
   useProjectTodos,
 } from '../data.ts'
+import { legacyStatus } from '../lib/legacy-status.ts'
 import { Empty, Page, Section, Sheet, TaskCard, TopBar } from '../ui.tsx'
 
 const CREATABLE: TaskType[] = ['feature', 'bugfix', 'chore']
@@ -27,9 +28,10 @@ export default function Board() {
       done: Task[] = []
     for (const t of tasks.data) {
       if (t.type === 'for_james') continue
-      if (t.status === 'waiting_on_james') waiting.push(t)
-      else if (t.status === 'queued') queued.push(t)
-      else if (t.status === 'done') done.push(t)
+      const status = legacyStatus(t)
+      if (status === 'waiting_on_james') waiting.push(t)
+      else if (status === 'queued') queued.push(t)
+      else if (status === 'done') done.push(t)
       else progress.push(t)
     }
     return { waiting, progress, queued, done: done.slice(0, 20) }

@@ -1,20 +1,21 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Project, Task } from '@kanban/shared'
-import {
-  renameProject,
-  useOpenTodos,
-  useProjects,
-  useRecentTasks,
-  useWaitingTasks,
-} from '../data.ts'
+import { renameProject, useOpenTodos, useProjects, useRecentTasks } from '../data.ts'
+import { legacyStatus } from '../lib/legacy-status.ts'
 import { Empty, Page, Section, TaskCard, TopBar } from '../ui.tsx'
 
 export default function Home() {
   const projects = useProjects()
-  const waiting = useWaitingTasks()
   const recent = useRecentTasks()
   const todos = useOpenTodos()
+  const waiting = useMemo(
+    () => ({
+      loading: recent.loading,
+      data: recent.data.filter((t) => legacyStatus(t) === 'waiting_on_james'),
+    }),
+    [recent.loading, recent.data]
+  )
 
   const nameOf = useMemo(() => new Map(projects.data.map((p) => [p.id, p.name])), [projects.data])
 
@@ -25,15 +26,11 @@ export default function Home() {
     >()
     for (const t of recent.data) {
       const c = m.get(t.projectId) ?? { in_progress: 0, waiting: 0, queued: 0, done: 0 }
-      if (
-        t.status === 'in_progress' ||
-        t.status === 'blocked_on_permission' ||
-        t.status === 'orphaned'
-      )
-        c.in_progress++
-      else if (t.status === 'waiting_on_james') c.waiting++
-      else if (t.status === 'queued') c.queued++
-      else if (t.status === 'done') c.done++
+      const status = legacyStatus(t)
+      if (status === 'in_progress') c.in_progress++
+      else if (status === 'waiting_on_james') c.waiting++
+      else if (status === 'queued') c.queued++
+      else c.done++
       m.set(t.projectId, c)
     }
     return m
