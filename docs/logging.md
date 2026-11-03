@@ -18,7 +18,11 @@ The client's logging block in the registry is still `TBD-jamesdavisonio-logging-
 ## Identity
 
 `app.manifest.yaml` carries `app_id: kanban`, `client_id: jamesdavisonio` and the pinned
-versions of the vendored governed files in `logging/`. Feature code never hardcodes these.
+versions of the vendored governed files in `logging/`. Feature code never hardcodes these. The web
+bundle reads them through the Vite virtual module `virtual:app-manifest` (parsed from the YAML
+at build time in `packages/web/vite.config.ts`), which adds `env` from the Vite mode: `prod`
+for a production build, `dev` otherwise. `packages/web/src/lib/log.ts` is the only place the
+browser logger is created.
 
 ## Event types
 
