@@ -460,6 +460,12 @@ attached the spec yet.`). Buttons `Approve v<N>` and `Changes…`; in mode `chan
   `milestone: 'task_done'` and target the task id. Quick replies on Threads and the thread
   keep calling `approveSpec`, `answerQuestion` and `markMerged`, now with the B4 effects.
 
+- Fidelity round 1 decisions (B4): `milestone_reached` is logged with
+  `log.event('milestone_reached', { feature, milestone: 'task_done', target })`, only after the
+  completing tick's write resolves, never while it is pending or after it fails. The step
+  checkboxes are controlled by the task's `afterDone`, so a later snapshot (a tick from
+  another device) updates any step without a pending tick of its own.
+
 **Unresolved:** none for B1–B4 (open questions 1–4 answered at confirmation).
 
 ## Files & modules affected
