@@ -243,8 +243,12 @@ async function transitionTask(
   })
 }
 
-// Free text from James: trimmed and capped before it is written anywhere.
-const cleanText = (text: string): string => text.trim().slice(0, MAX_COMMENT_CHARS)
+// Free text from James: trimmed and capped before it is written anywhere. A text that gets a
+// prefix in his message is capped so the whole message fits, which keeps the message and the
+// history line on the same words.
+const cleanText = (text: string, max = MAX_COMMENT_CHARS): string =>
+  text.trim().slice(0, max).trimEnd()
+const CHANGE_PREFIX = 'Change: '
 
 // A fresh comment id, generated on the device before anything is written, so the screen can show
 // the message at once and a retried write lands on the same document instead of a duplicate.
@@ -286,14 +290,14 @@ export async function approveSpec(task: Task) {
 // "Small change…": the need is cleared and the stage stays, so the session revises the spec.
 // Empty text writes nothing.
 export async function requestChange(task: Task, text: string) {
-  const change = cleanText(text)
+  const change = cleanText(text, MAX_COMMENT_CHARS - CHANGE_PREFIX.length)
   if (change === '') return
   await transitionTask(task.id, (cur) =>
     cur.needs?.kind === 'spec'
       ? {
           patch: { needs: null },
           history: `Asked for a change to spec v${specVersion(cur)}: ${change}`,
-          comment: { kind: 'change_request', body: `Change: ${change}` },
+          comment: { kind: 'change_request', body: `${CHANGE_PREFIX}${change}` },
         }
       : null
   )
