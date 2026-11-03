@@ -249,7 +249,72 @@ doneAt DESC)` (a single-field `doneAt` index is automatic; the Done tab queries 
   current time; the agent's task brief carries `mine: true` for the calling session; a
   cleared need is the literal `null`, never a missing field.
 
-**Unresolved:** none for B1 (open questions 1–4 answered at confirmation).
+**B2 contract details fixed at test time** (planner decisions, 2026-11-03):
+
+- Screen and routes: `packages/web/src/pages/Threads.tsx` (default export, no props) is the
+  `/` route. The project filter lives in the `project` search param of `/` (`/?project=<id>`,
+  absent = All), so going back from a thread keeps it (criterion 15). Until B5 the Phase 1
+  project list moves to `/projects`; `/new` is B5's screen and the nav already links to it.
+- Pure helpers in `packages/web/src/lib/threads.ts`:
+  - `threadRows({ tasks, todos, filter, now? })` returns `ThreadRow[]`, where a row is
+    `{ kind: 'task', task, at: task.updatedAt, needs: task.needs !== null, unread: task.unread }`
+    or `{ kind: 'for_james', projectId, todos (the open ones, newest first), at: newest open
+todo createdAt, needs: true, unread: false }`. It holds every visible task
+    (`isTaskVisible`, show older off) except type `for_james`, plus one `for_james` row per
+    project with at least one open todo; `filter` is `'all'` or a project id; order is needs
+    first, then unread, then `at` newest first.
+  - `needsCount({ tasks, todos, projectId?, now? })` counts visible non-`for_james` tasks
+    with a need plus open todos, for one project or for all (`projectId` absent or `'all'`).
+  - `stageText(task)`: `Done` when done; with a need, spec `Spec · needs you`, question
+    `Question for you`, pr `PR ready · needs you`, after_deploy `After deploy · needs you`;
+    otherwise spec `Writing spec`, approved `Approved`, build `Building`, fix `Fixing`, do
+    `Doing`, pr `PR open`, merged `Merged`, main_ci `Waiting for CI on main`, after_deploy
+    `After deploy`; a stage outside `STAGES` gives `Unknown stage` (shape guard, no crash).
+- Data layer (`packages/web/src/data.ts`): `Live<T>` gains `retry(): void` (re-subscribes);
+  new `useAllTasks()` (`Live<Task[]>`, every task, filtered client-side) and `useAgents()`
+  (`Live<AgentDoc[]>`, for the live dot); existing `useProjects()` and `useOpenTodos()`.
+  Actions: existing `approveSpec(task)`; new `answerQuestion(task, option: { key, label })`,
+  `markMerged(task)` and `markRead(task)`. B2 asserts that the right action is called with
+  the right task and value and that Threads stays on screen. What each action records
+  (history entries, message bodies) is B4's criteria 16–19, tested there in the emulator.
+  B2's minimal writes: answer creates James's comment of kind `answer` with the option label
+  and clears the need; merged is a transaction guarded on stage `pr` that moves to `merged`,
+  creates kind `merged` "Merged it." and clears the need; markRead sets `unread: false`.
+- Rows: a task row's open control is a button whose name contains the title; tapping it
+  navigates to `/t/:id` and calls `markRead(task)` only when `task.unread`. Its meta line is
+  `<project name> · <stageText>` with a relative time. The For James row is a button named
+  `For James · <project name>` showing `N thing(s) to do by hand` ("1 thing", "2 things") and
+  the newest time; tapping it navigates to `/p/:projectId?tab=james`.
+- Quick replies (criterion 9): spec gives buttons `Approve spec`, `Small change…` (U+2026)
+  and `Read more`; question gives one button per option labelled `<key> · <label>`, then
+  `Read more` (no options: `Read more` only); pr gives the link `Open PR #<n>` (href
+  `pr.url`, `target="_blank"`, `rel` containing `noopener`) only when `pr` is set, then
+  buttons `Merged it` and `Read more`; after_deploy gives the button `Open the N steps`
+  (`Open the 1 step` for one). `Read more` and `Open the N steps` open the decision sheet in
+  mode `read`, `Small change…` in mode `change`. `packages/web/src/components/DecisionSheet.tsx`
+  has a default export with props `{ task: Task; mode: 'read' | 'change'; onClose: () => void }`,
+  rendered by Threads while open; its contents are B4's, so B2 tests may mock the module.
+- Header and chips: heading `Threads`; `N need you` for the current filter, or
+  `Nothing needs you`. Sections headed `Needs you` and `Quiet`, each only when non-empty.
+  Chips are `All` then one per project (`useProjects`, by name), each a button with
+  `aria-pressed`, showing its needs count when it is above zero.
+- States (criterion 29, this screen): while tasks, todos or projects are loading, an element
+  with `role="status"` named `Loading threads`; on a read error, the text
+  `Couldn't load threads` and a `Retry` button that calls `retry()` on each failed source;
+  with no rows, `No threads for this project.`
+- `packages/web/src/components/BottomNav.tsx`: default export, no props, rendered by Threads
+  and the later list screens but not the thread view. A `nav` named `Main` with links
+  `Threads` (`/`), `Projects` (`/projects`) and `New task` (`/new`); `aria-current="page"` on
+  Threads for `/` and `/t/*`, Projects for `/projects` and `/p/*`, New task for `/new`. The
+  Threads link shows the all-projects needs count when above zero; the nav reads the hooks
+  itself.
+- Instrumentation: `packages/web/src/lib/log.ts` exports `log`, the shared browser logger
+  (`initLogger` from `logging/logger.browser.js`, `source: 'web_client'`, manifest values
+  from `app.manifest.yaml`). Threads emits `log.event('user_action', { feature:
+'web-threads', action, target })` with action `filter` (target: project id or `all`),
+  `open_thread`, `approve_spec`, `answer` or `merged` (target: task id).
+
+**Unresolved:** none for B1 or B2 (open questions 1–4 answered at confirmation).
 
 ## Files & modules affected
 
