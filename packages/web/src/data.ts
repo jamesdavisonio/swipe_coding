@@ -1,6 +1,6 @@
 // Typed live queries over Firestore onSnapshot, plus the handful of writes the UI makes.
 // Every write here is James acting from the UI: author is always 'james'.
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   collection,
   doc,
@@ -31,11 +31,35 @@ import {
 } from '@kanban/shared'
 import { db } from './firebase.ts'
 import type { LegacyStatus } from './lib/legacy-status.ts'
+import { log } from './lib/log.ts'
+import { newRequestId } from './lib/request-id.ts'
 
 export interface Live<T> {
   data: T
   loading: boolean
   error: string | null
+  // Re-subscribe after a failed read.
+  retry: () => void
+}
+
+// A rejected read is logged here, once per rejection, so every screen gets it for free.
+// Only the error code goes into the context: messages can quote document paths and ids.
+function logReadFailed(source: string, err: { code?: string }) {
+  log.error('api_call_failed', `Firestore read failed: ${source}`, {
+    feature: 'web-threads',
+    target: 'firestore',
+    action: 'read',
+    status: err.code ?? 'unknown',
+    request_id: newRequestId(),
+  })
+}
+
+// Each hook keeps `{ data, loading, error }` in state; `retry` bumps a counter that is part
+// of the effect's dependencies, which tears the listener down and subscribes again.
+type LiveState<T> = Omit<Live<T>, 'retry'>
+function useRetry(): [number, () => void] {
+  const [attempt, setAttempt] = useState(0)
+  return [attempt, useCallback(() => setAttempt((n) => n + 1), [])]
 }
 
 // --- read hooks ---------------------------------------------------------------
@@ -47,7 +71,8 @@ export function useCollection<T>(
   deps: unknown[],
   enabled = true
 ): Live<T[]> {
-  const [state, setState] = useState<Live<T[]>>({ data: [], loading: enabled, error: null })
+  const [state, setState] = useState<LiveState<T[]>>({ data: [], loading: enabled, error: null })
+  const [attempt, retry] = useRetry()
   useEffect(() => {
     if (!enabled) {
       setState({ data: [], loading: false, error: null })
@@ -63,15 +88,23 @@ export function useCollection<T>(
           loading: false,
           error: null,
         }),
-      (err) => setState({ data: [], loading: false, error: err.message })
+      (err) => {
+        logReadFailed(name, err)
+        setState({ data: [], loading: false, error: err.message })
+      }
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, enabled, ...deps])
-  return state
+  }, [name, enabled, attempt, ...deps])
+  return { ...state, retry }
 }
 
 export function useDocument<T>(name: string, id: string | null | undefined): Live<T | null> {
-  const [state, setState] = useState<Live<T | null>>({ data: null, loading: !!id, error: null })
+  const [state, setState] = useState<LiveState<T | null>>({
+    data: null,
+    loading: !!id,
+    error: null,
+  })
+  const [attempt, retry] = useRetry()
   useEffect(() => {
     if (!id) {
       setState({ data: null, loading: false, error: null })
@@ -86,15 +119,25 @@ export function useDocument<T>(name: string, id: string | null | undefined): Liv
           loading: false,
           error: null,
         }),
-      (err) => setState({ data: null, loading: false, error: err.message })
+      (err) => {
+        logReadFailed(name, err)
+        setState({ data: null, loading: false, error: err.message })
+      }
     )
-  }, [name, id])
-  return state
+  }, [name, id, attempt])
+  return { ...state, retry }
 }
 
 // Projects, most recently touched first (single-field index).
 export const useProjects = () =>
   useCollection<Project>(COLLECTIONS.projects, [orderBy('updatedAt', 'desc')], [])
+
+// Every task, newest first (single-field index). Visibility and filters are client-side.
+export const useAllTasks = () =>
+  useCollection<Task>(COLLECTIONS.tasks, [orderBy('updatedAt', 'desc')], [])
+
+// Every agent, for the live dot on a project (online = recent heartbeat).
+export const useAgents = () => useCollection<AgentDoc>(COLLECTIONS.agents, [], [])
 
 // Recent tasks across all projects for the home-page counters (single-field orderBy).
 export const useRecentTasks = (max = 500) =>
@@ -163,6 +206,9 @@ export async function createTask(
   return ref.id
 }
 
+// The longest message body written from the UI (io-validation: capped before write).
+const MAX_COMMENT_CHARS = 4000
+
 // James's comment in the shape every writer uses; delivery stamps are the agent's to set.
 function jamesComment(task: Task, kind: CommentKind, body: string, t: number, id: string): Comment {
   return {
@@ -172,7 +218,7 @@ function jamesComment(task: Task, kind: CommentKind, body: string, t: number, id
     agentId: task.agentId,
     author: 'james',
     kind,
-    body: body.trim(),
+    body: body.trim().slice(0, MAX_COMMENT_CHARS),
     createdAt: t,
     deliveredAt: null,
     workingAt: null,
@@ -255,6 +301,33 @@ export async function approveSpec(task: Task) {
         }
       : null
   )
+}
+
+// A quick-reply answer: James's comment of kind `answer` carrying the option's label, and the
+// need cleared. Only while the task is still waiting on a question, so a double tap is a no-op.
+export async function answerQuestion(task: Task, option: { key: string; label: string }) {
+  await transitionTask(task.id, (cur) =>
+    cur.needs?.kind === 'question'
+      ? { patch: { needs: null }, comment: { kind: 'answer', body: option.label } }
+      : null
+  )
+}
+
+// "Merged it": only from stage `pr`, so a second tap (or a stale row) writes nothing.
+export async function markMerged(task: Task) {
+  await transitionTask(task.id, (cur) =>
+    cur.stage === 'pr'
+      ? {
+          patch: { stage: 'merged', needs: null },
+          comment: { kind: 'merged', body: 'Merged it.' },
+        }
+      : null
+  )
+}
+
+// Opening a thread clears its unread flag. updatedAt stays put so the row does not jump.
+export async function markRead(task: Task) {
+  await updateDoc(doc(db, COLLECTIONS.tasks, task.id), { unread: false })
 }
 
 export async function toggleTodo(todo: Todo) {
