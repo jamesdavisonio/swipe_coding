@@ -22,6 +22,11 @@ function initials(name: string): string {
   return letters.join('') || '?'
 }
 
+// A usable timestamp: a number a Date can represent. A task without one still renders, just
+// without a time (toISOString would throw and take the whole screen down).
+const isDateable = (at: unknown): at is number =>
+  typeof at === 'number' && Number.isFinite(at) && !Number.isNaN(new Date(at).getTime())
+
 // The row's open control is a button whose accessible name starts with the title: the tile
 // is decorative (aria-hidden) and the meta and preview lines follow the title and time. The
 // spaces between the parts are no-ops in the flex layout but keep the row's text readable
@@ -55,15 +60,17 @@ function RowButton({
       <span className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="flex items-baseline justify-between gap-2">
           <span className="truncate text-lg font-bold">{title}</span>{' '}
-          <time
-            dateTime={new Date(at).toISOString()}
-            className={cn(
-              'shrink-0 text-xs tabular-nums',
-              unread ? 'font-bold text-needs' : 'text-muted-foreground'
-            )}
-          >
-            {relativeTime(at, now)}
-          </time>
+          {isDateable(at) ? (
+            <time
+              dateTime={new Date(at).toISOString()}
+              className={cn(
+                'shrink-0 text-xs tabular-nums',
+                unread ? 'font-bold text-needs' : 'text-muted-foreground'
+              )}
+            >
+              {relativeTime(at, now)}
+            </time>
+          ) : null}
         </span>{' '}
         <span className="text-xs font-semibold text-muted-foreground">{meta}</span>{' '}
         {preview ? (
