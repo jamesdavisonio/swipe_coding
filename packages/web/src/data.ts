@@ -221,7 +221,7 @@ export async function setTaskStatus(task: Task, status: LegacyStatus) {
     if (status === 'done')
       return isDone(cur) ? null : { patch: { stage: 'done', doneAt: now(), needs: null } }
     if (status === 'queued')
-      return chain.length === 0 || isQueued({ ...cur, agentId: null })
+      return chain.length === 0 || isQueued(cur)
         ? null
         : {
             patch: { stage: chain[0], agentId: null, needs: null, doneAt: null, working: false },
