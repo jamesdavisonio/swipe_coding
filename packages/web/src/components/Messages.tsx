@@ -1,6 +1,6 @@
 import { cn } from '../lib/cn.ts'
 import type { Comment } from '@kanban/shared'
-import { sentTime, sessionLabel } from '../lib/messages.ts'
+import { bodyText, sentTime, sessionLabel } from '../lib/messages.ts'
 import Ticks from './Ticks.tsx'
 
 const LABEL = 'mx-2.5 text-xs font-bold text-muted-foreground'
@@ -27,7 +27,7 @@ export function SessionMessage({
           readMore ? 'border-needs/50' : 'border-border'
         )}
       >
-        <p>{comment.body}</p>
+        <p>{bodyText(comment)}</p>
         {readMore ? (
           <button
             type="button"
@@ -46,7 +46,7 @@ export function JamesMessage({ comment, now }: { comment: Comment; now: number }
   return (
     <div className="flex max-w-[80%] flex-col items-end gap-1 self-end">
       <div className={cn(BUBBLE, 'rounded-br-sm bg-me text-me-foreground')}>
-        <p>{comment.body}</p>
+        <p>{bodyText(comment)}</p>
       </div>
       <span className={cn(LABEL, 'inline-flex items-center gap-1')}>
         {sentTime(comment, now)} · <Ticks comment={comment} />
@@ -59,7 +59,7 @@ export function JamesMessage({ comment, now }: { comment: Comment; now: number }
 export function SystemLine({ comment }: { comment: Comment }) {
   return (
     <p className="max-w-[85%] self-center text-center text-xs font-semibold text-muted-foreground">
-      {comment.body}
+      {bodyText(comment)}
     </p>
   )
 }

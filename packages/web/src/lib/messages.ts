@@ -53,6 +53,11 @@ export function readMoreId(comments: readonly Comment[], need: TaskNeed | null):
   return null
 }
 
+// The comment's text; a document with a missing or non-string body shows an empty bubble
+// instead of taking the thread down.
+export const bodyText = (comment: Pick<Comment, 'body'>): string =>
+  typeof comment.body === 'string' ? comment.body : ''
+
 // What a reply from the composer is: the answer when the task waits on a question, else a
 // plain comment.
 export const replyKind = (task: Pick<Task, 'needs'>): CommentKind =>
