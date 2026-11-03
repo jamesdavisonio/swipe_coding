@@ -26,8 +26,9 @@ export default tseslint.config(
     languageOptions: {
       parserOptions: {
         projectService: {
-          // Files outside any package tsconfig still get type-aware rules.
-          allowDefaultProject: ['packages/shared/src/*.ts', 'tests/*.ts', '*.mjs', '*.cjs'],
+          // tests/, packages/shared and the root *.ts configs belong to the root tsconfig.json;
+          // only plain JS files outside every tsconfig need the default project.
+          allowDefaultProject: ['*.mjs', '*.cjs'],
         },
         tsconfigRootDir: import.meta.dirname,
       },
@@ -103,6 +104,19 @@ export default tseslint.config(
   {
     files: ['tests/**', '**/*.test.*', '**/*.spec.*', 'packages/agent/test/**'],
     rules: { 'no-console': 'off' },
+  },
+  // Acceptance tests are committed red before the exports they import exist (implement-feature's
+  // red checkpoint), so type-aware "unsafe" rules cannot resolve those types until green. The
+  // tests still typecheck once the feature lands; `npm run typecheck` covers that.
+  {
+    files: ['tests/**'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+    },
   },
   // Config files, scripts and Claude Code hooks are tooling, not product code.
   {

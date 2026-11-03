@@ -7,8 +7,8 @@ Remote Control.
 ## Goals
 
 - See every **project** (= a folder on the desktop) and its tasks: done, in progress, queued.
-- Each **task** has a type (feature, bugfix, chore, …). A type comes with templated
-  **subtasks** (feature: `spec` → `spec approved` → `implement` → `PR open` → `done`).
+- Each **task** has a type (feature, bugfix, chore, …). A type fixes its **stage chain**
+  (feature: `spec` → `approved` → `build` → `pr` → `merged` → `main_ci` → `done`; ADR 0003).
 - Sessions write into their own task: plan, progress, questions, summary, PR link.
 - I comment on a task from my phone; the session that owns the task receives it in
   **< 10 s** and treats it as coming from me (destructive actions still need a real
@@ -119,12 +119,12 @@ On start it:
 | tool                    | purpose                                                                                                         |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `kanban_list_tasks`     | tasks in this project (open first) so the session can pick one up                                               |
-| `kanban_create_task`    | `{title, type, description?}` → creates task + templated subtasks, binds to this agent                          |
-| `kanban_start_task`     | `{task_id}` → binds existing task to this agent, status `in_progress`                                           |
-| `kanban_update_task`    | `{task_id, status?, summary?, pr_url?, branch?}`                                                                |
-| `kanban_subtask`        | `{task_id, key, status, note?}` — advance a templated step (e.g. `spec: awaiting_approval`)                     |
+| `kanban_create_task`    | `{title, type, description?}` → creates task at its chain's first stage, binds to this agent                    |
+| `kanban_start_task`     | `{task_id}` → binds existing task to this agent, `working: true`                                                |
+| `kanban_update_task`    | `{task_id, status? (in_progress or done), summary?, pr_url?}` — `done` sets stage `done`; `pr_url` sets `pr`    |
+| `kanban_subtask`        | `{task_id, key, status, note?}` — `key` is a stage; `awaiting_approval` on `spec` arms `needs`, `done` advances |
 | `kanban_comment`        | `{task_id, body}` — the session's narrative, visible to me                                                      |
-| `kanban_ask`            | `{task_id, question}` — sets `needs_james`, pushes notification to me; the answer comes back as a channel event |
+| `kanban_ask`            | `{task_id, question}` — sets `needs {kind: question}`, pushes notification to me; the answer is a channel event |
 | `kanban_todo_for_james` | `{project, body, link?}` — appends to the project's "For James" task                                            |
 | `kanban_get_task`       | full task with comments, so a fresh session can resume one                                                      |
 
@@ -159,30 +159,42 @@ React + Vite + Tailwind PWA, installable on the phone.
 ### Data model (Firestore)
 
 ```
-projects/{id}              hostname, cwd, name, createdAt
-agents/{id}                projectId, hostname, pid, claudeSessionId?, lastSeen
-tasks/{id}                 projectId, agentId?, type, title, description, status, summary,
-                           prUrl, branch, createdBy (james|agent), createdAt, updatedAt,
-                           subtasks: [{key, label, status, note}]      -- embedded, small & ordered
-                           status: queued | in_progress | waiting_on_james | blocked_on_permission | done | orphaned
+projects/{id}              hostname, cwd, name, createdAt, updatedAt
+agents/{id}                projectId, hostname, cwd, pid, claudeSessionId?, startedAt, lastSeen
+tasks/{id}                 projectId, agentId?, type, title, description, summary,
+                           stage, needs {kind, question?, options?} | null,
+                           spec {goal, points, out, touches, version} | null,
+                           afterDeploy: string[], afterDone: boolean[], pr {number, url} | null,
+                           createdBy (james|agent), createdAt, updatedAt, doneAt?, reopenedAt?,
+                           unread, working, lastCommentAt?, log: [{at, who, text}] (≤ 200)
+tasks/{id}/log_archive/{e} overflow of log, oldest first (owner read/write)
 comments/{id}              taskId, projectId, agentId (denormalised; routing key for delivery),
-                           author (james|agent), body, kind (comment|question|answer|system),
-                           createdAt, deliveredAt?
-todos/{id}                 projectId, body, link, done, sourceTaskId
+                           author (james|agent), body, kind, createdAt,
+                           deliveredAt?, workingAt?, handledAt?    -- the delivery ticks
+todos/{id}                 projectId, body, link, done, sourceTaskId, createdAt, doneAt?
 ```
+
+Stage chain per type (ADR 0003, `stagesFor(type, hasAfterDeploy)` in `packages/shared`):
+
+- `feature`: spec → approved → build → pr → merged → main_ci → [after_deploy] → done
+- `bugfix`: fix → pr → merged → main_ci → [after_deploy] → done
+- `chore`: do → [after_deploy] → done
+- `for_james`: no chain (one per project, auto-created)
+
+`needs` says what the task waits on from James (`spec`, `question`, `pr`,
+`after_deploy`); `null` once he has decided. Comment kinds are split by author: James
+sends `comment | answer | approve | change_request | merged | reopen`, the session
+`spec | question | pr | after_deploy | done | info | system`; the rules enforce the
+split on create and freeze `author`/`kind` on update. Delivery state of a James
+comment is derived from the stamps (sent → delivered → working → handled, never
+backwards). Done tasks leave the lists 7 days after `doneAt`.
 
 All collections are top-level (comments too, rather than a subcollection) so
 "everything waiting on me" and "undelivered comments for agent X" are plain queries
 with no collection-group indexes. Timestamps are numeric ms. Security rules: owner
-email (`j@nullnoise.ai`, verified) only; agents use Admin and bypass rules. Types and
-subtask templates live in `packages/shared`.
-
-Task type templates live in `packages/shared/templates.ts`:
-
-- `feature`: spec → spec_approved → implement → pr_open → done
-- `bugfix`: reproduce → fix → pr_open → done
-- `chore`: do → done
-- `for_james`: free-form checklist (one per project, auto-created)
+email (`j@nullnoise.ai`, verified) only; agents use Admin and bypass rules; tested in
+the emulator (`npm run test:rules`). Indexes: `tasks(projectId, stage, updatedAt desc)`,
+`tasks(projectId, doneAt desc)`, and the two `comments` delivery indexes.
 
 ### Trust rules given to sessions (in the channel `instructions`)
 

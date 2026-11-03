@@ -8,6 +8,7 @@ import {
   onSnapshot,
   orderBy,
   query,
+  runTransaction,
   setDoc,
   updateDoc,
   where,
@@ -16,17 +17,20 @@ import {
 import {
   COLLECTIONS,
   forJamesTaskId,
-  subtasksFor,
+  initialTaskFields,
+  isDone,
+  isQueued,
+  taskStages,
   type AgentDoc,
   type Comment,
+  type CommentKind,
   type Project,
-  type Subtask,
   type Task,
-  type TaskStatus,
   type TaskType,
   type Todo,
 } from '@kanban/shared'
 import { db } from './firebase.ts'
+import type { LegacyStatus } from './lib/legacy-status.ts'
 
 export interface Live<T> {
   data: T
@@ -92,14 +96,6 @@ export function useDocument<T>(name: string, id: string | null | undefined): Liv
 export const useProjects = () =>
   useCollection<Project>(COLLECTIONS.projects, [orderBy('updatedAt', 'desc')], [])
 
-// Everything waiting on James across projects — composite index tasks(status, updatedAt desc).
-export const useWaitingTasks = () =>
-  useCollection<Task>(
-    COLLECTIONS.tasks,
-    [where('status', '==', 'waiting_on_james'), orderBy('updatedAt', 'desc')],
-    []
-  )
-
 // Recent tasks across all projects for the home-page counters (single-field orderBy).
 export const useRecentTasks = (max = 500) =>
   useCollection<Task>(COLLECTIONS.tasks, [orderBy('updatedAt', 'desc'), limit(max)], [max])
@@ -153,69 +149,112 @@ export async function createTask(
   input: { title: string; type: TaskType; description: string }
 ) {
   const ref = doc(collection(db, COLLECTIONS.tasks))
-  const t = now()
-  const task: Task = {
-    id: ref.id,
+  const task = initialTaskFields({
     projectId,
-    agentId: null,
     type: input.type,
     title: input.title.trim(),
     description: input.description.trim(),
-    status: 'queued',
-    summary: '',
-    prUrl: null,
-    branch: null,
     createdBy: 'james',
-    createdAt: t,
-    updatedAt: t,
-    subtasks: subtasksFor(input.type),
-    openQuestion: null,
-    lastCommentAt: null,
-  }
+    afterDeploy: [],
+    now: now(),
+  })
   await setDoc(ref, task)
   await touchProject(projectId)
   return ref.id
 }
 
-export async function setTaskStatus(task: Task, status: TaskStatus) {
-  await updateDoc(doc(db, COLLECTIONS.tasks, task.id), {
-    status,
-    updatedAt: now(),
-    ...(status === 'queued' ? { agentId: null } : {}),
-  })
-}
-
-// A comment from James. If the task was waiting on him, it is now unblocked.
-export async function addComment(task: Task, body: string) {
-  const ref = doc(collection(db, COLLECTIONS.comments))
-  const t = now()
-  const comment: Comment = {
-    id: ref.id,
+// James's comment in the shape every writer uses; delivery stamps are the agent's to set.
+function jamesComment(task: Task, kind: CommentKind, body: string, t: number, id: string): Comment {
+  return {
+    id,
     taskId: task.id,
     projectId: task.projectId,
     agentId: task.agentId,
     author: 'james',
-    kind: task.openQuestion ? 'answer' : 'comment',
+    kind,
     body: body.trim(),
     createdAt: t,
     deliveredAt: null,
+    workingAt: null,
+    handledAt: null,
   }
-  await setDoc(ref, comment)
+}
+
+// A stage transition James owns: read the task inside a transaction and write only when
+// `plan` accepts its current state, so a double tap (or a stale screen) is a no-op. The
+// optional comment is created in the same transaction. Returns whether anything was written.
+interface Transition {
+  patch: Partial<Task>
+  comment?: { kind: CommentKind; body: string }
+}
+async function transitionTask(
+  taskId: string,
+  plan: (current: Task) => Transition | null
+): Promise<boolean> {
+  const taskRef = doc(db, COLLECTIONS.tasks, taskId)
+  const commentRef = doc(collection(db, COLLECTIONS.comments))
+  return runTransaction(db, async (tx) => {
+    const snap = await tx.get(taskRef)
+    if (!snap.exists()) return false
+    const current = { ...(snap.data() as Task), id: snap.id }
+    const next = plan(current)
+    if (!next) return false
+    const t = now()
+    const { comment } = next
+    tx.update(taskRef, {
+      ...next.patch,
+      updatedAt: t,
+      ...(comment ? { lastCommentAt: t } : {}),
+    })
+    if (comment)
+      tx.set(commentRef, jamesComment(current, comment.kind, comment.body, t, commentRef.id))
+    return true
+  })
+}
+
+// The Phase 1 menu actions (mark done, re-queue, reopen) expressed on stage and doneAt, each
+// guarded on the stage it expects: done only when not done, reopen only from done, re-queue
+// only when the type has a stage chain and the task is not already queued.
+export async function setTaskStatus(task: Task, status: LegacyStatus) {
+  await transitionTask(task.id, (cur) => {
+    const chain = taskStages(cur)
+    if (status === 'done')
+      return isDone(cur) ? null : { patch: { stage: 'done', doneAt: now(), needs: null } }
+    if (status === 'queued')
+      return chain.length === 0 || isQueued(cur)
+        ? null
+        : {
+            patch: { stage: chain[0], agentId: null, needs: null, doneAt: null, working: false },
+          }
+    if (status === 'in_progress')
+      return isDone(cur) && chain.length > 1
+        ? { patch: { stage: chain[chain.length - 2], doneAt: null, reopenedAt: now() } }
+        : null
+    return null
+  })
+}
+
+// A comment from James. If the task was waiting on him, it is now unblocked (need cleared).
+export async function addComment(task: Task, body: string) {
+  const ref = doc(collection(db, COLLECTIONS.comments))
+  const t = now()
+  const kind = task.needs?.kind === 'question' ? 'answer' : 'comment'
+  await setDoc(ref, jamesComment(task, kind, body, t, ref.id))
   const patch: Partial<Task> = { lastCommentAt: t, updatedAt: t }
-  if (task.status === 'waiting_on_james') {
-    patch.status = 'in_progress'
-    patch.openQuestion = null
-  }
+  if (task.needs) patch.needs = null
   await updateDoc(doc(db, COLLECTIONS.tasks, task.id), patch)
 }
 
-export async function approveSubtask(task: Task, key: string) {
-  const subtasks: Subtask[] = task.subtasks.map((s) =>
-    s.key === key ? { ...s, status: 'done' } : s
+// Approve only while the spec is what the task waits on (stage spec or approved).
+export async function approveSpec(task: Task) {
+  await transitionTask(task.id, (cur) =>
+    (cur.stage === 'spec' || cur.stage === 'approved') && cur.needs?.kind === 'spec'
+      ? {
+          patch: { stage: 'build', needs: null },
+          comment: { kind: 'approve', body: 'Approved: spec' },
+        }
+      : null
   )
-  const label = task.subtasks.find((s) => s.key === key)?.label ?? key
-  await updateDoc(doc(db, COLLECTIONS.tasks, task.id), { subtasks, updatedAt: now() })
-  await addComment({ ...task, openQuestion: task.openQuestion ?? 'approval' }, `Approved: ${label}`)
 }
 
 export async function toggleTodo(todo: Todo) {

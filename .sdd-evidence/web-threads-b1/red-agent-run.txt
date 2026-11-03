@@ -1,0 +1,41 @@
+$ npx firebase emulators:exec --only firestore --project demo-kanban "npm run test:agent"   (exit 1; FIRESTORE_EMULATOR_HOST set by emulators:exec, no KANBAN_SA, no KANBAN_TEST_LIVE)
+i  emulators: Starting emulators: firestore
+i  emulators: Detected demo project ID "demo-kanban", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Firestore Emulator logging to firestore-debug.log
++  firestore: Firestore Emulator UI websocket is running on 9150.
+i  Running script: npm run test:agent
+> test:agent
+> npm run test -w @kanban/agent
+> @kanban/agent@0.0.1 test
+> node test/protocol.ts
+  [agent] 2026-11-03T06:10:34.453Z [22068] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+  [agent] 2026-11-03T06:10:34.458Z [22068] mcp connected cwd=C:\Users\Intel\Documents\code\kanban board=emulator
+ok - initialize advertises claude/channel
+ok - initialize advertises tools
+ok - instructions mention from="james"
+ok - instructions describe the workflow
+ok - all 10 tools listed
+  [agent] 2026-11-03T06:10:35.148Z [22068] registered agent=Fg7NS9ZAWozUR7MoqS37 project=kanban-514bdcf5 cwd=C:\Users\Intel\Documents\code\kanban
+ok - whoami works (board emulator)
+  [agent] 2026-11-03T06:10:35.612Z [22068] created task 6wee6gFhbTKAwmROqYBt "Protocol test task"
+file:///C:/Users/Intel/Documents/code/kanban/packages/agent/test/protocol.ts:113
+  if (!cond) throw new Error(`FAIL: ${msg}`)
+                   ^
+Error: FAIL: create_task → 6wee6gFhbTKAwmROqYBt
+    at assert (file:///C:/Users/Intel/Documents/code/kanban/packages/agent/test/protocol.ts:113:20)
+    at file:///C:/Users/Intel/Documents/code/kanban/packages/agent/test/protocol.ts:191:5
+Node.js v24.15.0
+npm error Lifecycle script `test` failed with error:
+npm error code 1
+npm error path C:\Users\Intel\Documents\code\kanban\packages\agent
+npm error workspace @kanban/agent@0.0.1
+npm error location C:\Users\Intel\Documents\code\kanban\packages\agent
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c node test/protocol.ts
+!  Script exited unsuccessfully (code 1)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+Error: Script "npm run test:agent" exited with code 1

@@ -17,16 +17,28 @@ service cloud.firestore {
       return request.resource.data.author == 'james';
     }
 
+    // The browser writes only the kinds James sends; session kinds are the agent's.
+    function isJamesKind() {
+      return request.resource.data.kind in ['comment', 'answer', 'approve', 'change_request', 'merged', 'reopen'];
+    }
+
     match /projects/{id}  { allow read, write: if isOwner(); }
     match /agents/{id}    { allow read: if isOwner(); allow write: if false; }
-    match /tasks/{id}     { allow read, write: if isOwner(); }
+    match /tasks/{id} {
+      allow read, write: if isOwner();
+      // Overflow of the task's decision log (appendLog moves the oldest entries here).
+      match /log_archive/{entry} { allow read, write: if isOwner(); }
+    }
     match /todos/{id}     { allow read, write: if isOwner(); }
 
     match /comments/{id} {
       allow read: if isOwner();
-      allow create: if isOwner() && authoredByJames();
-      // Edits/deletes of own comments only; agent comments are immutable from the UI.
-      allow update, delete: if isOwner() && resource.data.author == 'james' && authoredByJames();
+      allow create: if isOwner() && authoredByJames() && isJamesKind();
+      // Edits of own comments only; agent comments are immutable from the UI, and a sent
+      // comment keeps its author and kind (no rewriting a James comment into a session kind).
+      allow update: if isOwner() && resource.data.author == 'james' && authoredByJames()
+        && request.resource.data.kind == resource.data.kind;
+      allow delete: if isOwner() && resource.data.author == 'james' && authoredByJames();
     }
 
     // Default deny: anything not matched above (scripts/check-firestore-rules.mjs insists).

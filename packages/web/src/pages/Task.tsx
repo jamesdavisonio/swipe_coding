@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { isAgentOnline, type Comment, type Subtask } from '@kanban/shared'
+import { isAgentOnline, type Comment } from '@kanban/shared'
 import {
   addComment,
-  approveSubtask,
+  approveSpec,
   setTaskStatus,
   useAgent,
   useProject,
   useTask,
   useTaskComments,
 } from '../data.ts'
+import { legacyStatus, legacySteps, needText, type LegacyStep } from '../lib/legacy-status.ts'
 import { AgentDot, Page, StatusPill, timeAgo, TopBar, TypePill } from '../ui.tsx'
 
 export default function TaskPage() {
@@ -43,6 +44,9 @@ export default function TaskPage() {
     setMenu(false)
     void fn()
   }
+  const status = legacyStatus(t)
+  const steps = legacySteps(t)
+  const need = needText(t)
   const agentOnline = agent.data ? isAgentOnline(agent.data) : false
   const resumeCmd = agent.data?.claudeSessionId
     ? `claude --resume ${agent.data.claudeSessionId}`
@@ -64,15 +68,15 @@ export default function TaskPage() {
             </button>
             {menu && (
               <div role="menu" className="card absolute right-0 top-9 z-30 w-44 p-1 text-sm">
-                {t.status !== 'done' && (
+                {status !== 'done' && (
                   <MenuItem onClick={() => act(() => setTaskStatus(t, 'done'))}>Mark done</MenuItem>
                 )}
-                {t.status !== 'queued' && (
+                {status !== 'queued' && (
                   <MenuItem onClick={() => act(() => setTaskStatus(t, 'queued'))}>
                     Re-queue (unbind session)
                   </MenuItem>
                 )}
-                {t.status === 'done' && (
+                {status === 'done' && (
                   <MenuItem onClick={() => act(() => setTaskStatus(t, 'in_progress'))}>
                     Reopen
                   </MenuItem>
@@ -87,7 +91,7 @@ export default function TaskPage() {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <TypePill type={t.type} />
-              <StatusPill status={t.status} />
+              <StatusPill status={status} />
               <span className="text-xs text-slate-500">updated {timeAgo(t.updatedAt)}</span>
             </div>
             <h1 className="mt-2 text-xl font-semibold leading-tight">{t.title}</h1>
@@ -103,57 +107,39 @@ export default function TaskPage() {
               <AgentDot agent={agent.data} />
               {resumeCmd && <CopyButton text={resumeCmd} label="copy resume cmd" />}
             </div>
-            {(t.prUrl || t.branch) && (
+            {t.pr && (
               <div className="flex flex-wrap items-center gap-2">
-                {t.prUrl && (
-                  <a className="btn-primary py-1.5" href={t.prUrl} target="_blank" rel="noreferrer">
-                    Open PR ↗
-                  </a>
-                )}
-                {t.branch && (
-                  <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs dark:bg-slate-800">
-                    {t.branch}
-                  </code>
-                )}
+                <a className="btn-primary py-1.5" href={t.pr.url} target="_blank" rel="noreferrer">
+                  Open PR ↗
+                </a>
               </div>
             )}
-            {t.openQuestion && (
+            {need && (
               <div className="rounded-lg bg-amber-50 p-2 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100">
                 <div className="text-[11px] font-semibold uppercase tracking-wide">
                   Question for you
                 </div>
-                <div className="whitespace-pre-wrap">{t.openQuestion}</div>
+                <div className="whitespace-pre-wrap">{need}</div>
               </div>
             )}
           </div>
 
-          {t.subtasks.length > 0 && (
+          {steps.length > 0 && (
             <div className="card p-3">
               <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Steps
               </h2>
               <ol className="space-y-1.5">
-                {t.subtasks.map((s) => (
+                {steps.map((s) => (
                   <li key={s.key} className="flex items-start gap-2 text-sm">
                     <StepDot status={s.status} />
                     <div className="min-w-0 flex-1">
-                      <div
-                        className={
-                          s.status === 'done'
-                            ? 'text-slate-500 line-through'
-                            : s.status === 'skipped'
-                              ? 'text-slate-400 line-through'
-                              : ''
-                        }
-                      >
+                      <div className={s.status === 'done' ? 'text-slate-500 line-through' : ''}>
                         {s.label}
                       </div>
-                      {s.note && (
-                        <div className="whitespace-pre-wrap text-xs text-slate-500">{s.note}</div>
-                      )}
                     </div>
                     {s.status === 'awaiting_approval' && (
-                      <button className="btn-primary py-1" onClick={() => approveSubtask(t, s.key)}>
+                      <button className="btn-primary py-1" onClick={() => approveSpec(t)}>
                         Approve
                       </button>
                     )}
@@ -176,7 +162,7 @@ export default function TaskPage() {
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
               Thread
             </h2>
-            {!agentOnline && t.status !== 'done' && (
+            {!agentOnline && status !== 'done' && (
               <p className="mb-2 text-xs text-slate-500">
                 No session is online for this task. Your comments are saved and delivered when one
                 picks it up.
@@ -189,7 +175,7 @@ export default function TaskPage() {
 
       <Composer
         onSend={(body) => addComment(t, body)}
-        placeholder={t.openQuestion ? 'Answer…' : 'Comment to the session…'}
+        placeholder={t.needs?.kind === 'question' ? 'Answer…' : 'Comment to the session…'}
       />
     </>
   )
@@ -207,7 +193,7 @@ function MenuItem({ onClick, children }: { onClick: () => void; children: string
   )
 }
 
-function StepDot({ status }: { status: Subtask['status'] }) {
+function StepDot({ status }: { status: LegacyStep['status'] }) {
   const cls =
     status === 'done'
       ? 'bg-emerald-500 border-emerald-500'
@@ -215,9 +201,7 @@ function StepDot({ status }: { status: Subtask['status'] }) {
         ? 'border-sky-500 bg-sky-500/30'
         : status === 'awaiting_approval'
           ? 'border-amber-500 bg-amber-400'
-          : status === 'skipped'
-            ? 'border-slate-300 bg-transparent'
-            : 'border-slate-400 bg-transparent'
+          : 'border-slate-400 bg-transparent'
   return <span className={`mt-1 h-3 w-3 shrink-0 rounded-full border-2 ${cls}`} />
 }
 

@@ -1,34 +1,25 @@
 import { Link } from 'react-router-dom'
-import {
-  isAgentOnline,
-  TASK_TYPE_LABELS,
-  type AgentDoc,
-  type Task,
-  type TaskStatus,
-} from '@kanban/shared'
+import { isAgentOnline, TASK_TYPE_LABELS, type AgentDoc, type Task } from '@kanban/shared'
 import { useUser, logOut } from './auth.tsx'
+import { legacyStatus, legacySteps, needText, type LegacyStatus } from './lib/legacy-status.ts'
 import { Sheet as SheetRoot, SheetContent } from './components/ui/sheet.tsx'
 import type { ReactNode } from 'react'
 
-export const STATUS_LABEL: Record<TaskStatus, string> = {
+export const STATUS_LABEL: Record<LegacyStatus, string> = {
   queued: 'Queued',
   in_progress: 'In progress',
   waiting_on_james: 'Waiting on me',
-  blocked_on_permission: 'Needs permission',
   done: 'Done',
-  orphaned: 'Orphaned',
 }
 
-const STATUS_CLASS: Record<TaskStatus, string> = {
+const STATUS_CLASS: Record<LegacyStatus, string> = {
   queued: 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
   in_progress: 'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-200',
   waiting_on_james: 'bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-200',
-  blocked_on_permission: 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-200',
   done: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200',
-  orphaned: 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200',
 }
 
-export function StatusPill({ status }: { status: TaskStatus }) {
+export function StatusPill({ status }: { status: LegacyStatus }) {
   return <span className={`pill ${STATUS_CLASS[status]}`}>{STATUS_LABEL[status]}</span>
 }
 
@@ -52,7 +43,9 @@ export function timeAgo(ts: number | null | undefined): string {
 }
 
 export function TaskCard({ task, projectName }: { task: Task; projectName?: string }) {
-  const doneSteps = task.subtasks.filter((s) => s.status === 'done').length
+  const steps = legacySteps(task)
+  const doneSteps = steps.filter((s) => s.status === 'done').length
+  const need = needText(task)
   return (
     <Link
       to={`/t/${task.id}`}
@@ -63,21 +56,21 @@ export function TaskCard({ task, projectName }: { task: Task; projectName?: stri
           {projectName && <div className="truncate text-xs text-slate-500">{projectName}</div>}
           <div className="font-medium leading-snug">{task.title}</div>
         </div>
-        <StatusPill status={task.status} />
+        <StatusPill status={legacyStatus(task)} />
       </div>
-      {task.openQuestion && (
+      {need && (
         <div className="mt-2 rounded-lg bg-amber-50 p-2 text-sm text-amber-900 dark:bg-amber-900/30 dark:text-amber-100">
-          {task.openQuestion}
+          {need}
         </div>
       )}
       <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
         <TypePill type={task.type} />
-        {task.subtasks.length > 0 && (
+        {steps.length > 0 && (
           <span>
-            {doneSteps}/{task.subtasks.length} steps
+            {doneSteps}/{steps.length} steps
           </span>
         )}
-        {task.prUrl && <span className="text-sky-600 dark:text-sky-400">PR</span>}
+        {task.pr && <span className="text-sky-600 dark:text-sky-400">PR</span>}
         <span className="ml-auto">{timeAgo(task.updatedAt)}</span>
       </div>
     </Link>

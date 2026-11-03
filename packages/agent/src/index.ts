@@ -17,15 +17,15 @@ import {
   ListToolsRequestSchema,
   type Tool,
 } from '@modelcontextprotocol/sdk/types.js'
+import { STAGES, type Comment, type Stage, type Task, type TaskType } from '@kanban/shared'
 import {
-  TASK_STATUSES,
-  type Comment,
+  Board,
+  BoardError,
+  SUBTASK_STATUSES,
+  UPDATE_STATUSES,
   type SubtaskStatus,
-  type Task,
-  type TaskStatus,
-  type TaskType,
-} from '@kanban/shared'
-import { Board, BoardError } from './board.ts'
+  type UpdateStatus,
+} from './board.ts'
 import { BoardOfflineError, boardStatus, log } from './firestore.ts'
 
 const INSTRUCTIONS = `
@@ -48,12 +48,15 @@ WORKFLOW.
    session can be resumed with kanban_start_task; read kanban_get_task first.
 2. Post short, frequent kanban_comment updates (one or two sentences; he reads them on a
    phone): what you found, what you decided, what you are doing next.
-3. Advance template steps with kanban_subtask. For a feature, write the spec first, set
-   subtask "spec" to awaiting_approval and kanban_ask James to approve it. Do not implement
-   until his answer arrives (then set "spec_approved" done). Use kanban_ask whenever only
-   James can decide something; keep working on anything that does not depend on it.
-4. When a PR is open, kanban_update_task with pr_url (and branch). When everything is
-   finished, kanban_update_task with status "done" and a summary of what shipped.
+3. Advance the task's stages with kanban_subtask; the key is a stage: spec, approved, build,
+   pr, merged, main_ci, after_deploy, done (feature), fix instead of spec/approved/build (bugfix),
+   do (chore). Marking a stage done moves the task to the next one. For a feature, write the
+   spec first and set "spec" to awaiting_approval; that is how James is asked to approve it,
+   so do not also kanban_ask. His approval arrives as a channel event: do not implement until
+   it does (then mark "spec" and "approved" done). Use kanban_ask for real questions only, when
+   something else needs his decision; keep working on anything that does not depend on it.
+4. When a PR is open, kanban_update_task with pr_url. When everything is finished,
+   kanban_update_task with status "done" and a summary of what shipped.
 5. Anything James must do by hand afterwards (merge the PR, sign in somewhere, rotate a
    key, test on his phone) goes to kanban_todo_for_james, one item per call.
 `.trim()
@@ -66,10 +69,10 @@ const tools: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        status: {
+        stage: {
           type: 'string',
-          enum: [...TASK_STATUSES],
-          description: 'Only tasks with this status',
+          enum: [...STAGES],
+          description: 'Only tasks at this stage',
         },
       },
     },
@@ -77,7 +80,7 @@ const tools: Tool[] = [
   {
     name: 'kanban_get_task',
     description:
-      'Full task with its subtasks and the last 30 comments. Use before resuming an orphaned task.',
+      'Full task (stage, what it needs from James, decision log) and the last 30 comments. Use before resuming a task from a previous session.',
     inputSchema: {
       type: 'object',
       properties: { task_id: { type: 'string' } },
@@ -87,7 +90,7 @@ const tools: Tool[] = [
   {
     name: 'kanban_create_task',
     description:
-      'Create a task for the work this session is doing and bind it to this session. Creates the subtask template for the type.',
+      'Create a task for the work this session is doing and bind it to this session. It starts at the first stage of its type.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -101,7 +104,7 @@ const tools: Tool[] = [
   {
     name: 'kanban_start_task',
     description:
-      'Bind an existing (queued or orphaned) task to this session and mark it in progress. Refused if another live session owns it.',
+      'Bind an existing (queued or left-behind) task to this session. Refused if another live session owns it.',
     inputSchema: {
       type: 'object',
       properties: { task_id: { type: 'string' } },
@@ -111,15 +114,14 @@ const tools: Tool[] = [
   {
     name: 'kanban_update_task',
     description:
-      'Update status, summary, PR link, branch or title of a task bound to this session. status "done" releases the task.',
+      'Update summary, PR link, title or status of a task bound to this session. status "done" finishes and releases the task; status "in_progress" clears whatever it was waiting on from James.',
     inputSchema: {
       type: 'object',
       properties: {
         task_id: { type: 'string' },
-        status: { type: 'string', enum: [...TASK_STATUSES] },
+        status: { type: 'string', enum: [...UPDATE_STATUSES] },
         summary: { type: 'string', description: 'Running or final summary, a few sentences' },
-        pr_url: { type: 'string' },
-        branch: { type: 'string' },
+        pr_url: { type: 'string', description: 'Pull request URL ending in its number' },
         title: { type: 'string' },
       },
       required: ['task_id'],
@@ -128,7 +130,7 @@ const tools: Tool[] = [
   {
     name: 'kanban_subtask',
     description:
-      'Set the status of one templated subtask (e.g. spec → awaiting_approval, implement → in_progress).',
+      'Advance one stage of the task (e.g. spec → awaiting_approval asks James to approve the spec; done moves the task to its next stage).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -136,13 +138,13 @@ const tools: Tool[] = [
         key: {
           type: 'string',
           description:
-            'Subtask key from the task (spec, spec_approved, implement, pr_open, done, reproduce, fix, do)',
+            'Stage of the task: spec, approved, build, pr, merged, main_ci, after_deploy, done (feature); fix (bugfix); do (chore)',
         },
         status: {
           type: 'string',
-          enum: ['pending', 'in_progress', 'awaiting_approval', 'done', 'skipped'],
+          enum: [...SUBTASK_STATUSES],
         },
-        note: { type: 'string' },
+        note: { type: 'string', description: 'Posted to the thread as a short update' },
       },
       required: ['task_id', 'key', 'status'],
     },
@@ -160,7 +162,7 @@ const tools: Tool[] = [
   {
     name: 'kanban_ask',
     description:
-      'Ask James a question on a task. The task shows as waiting on him; his answer arrives as a <channel kind="answer"> event.',
+      'Ask James a question on a task. The task shows as needing him; his answer arrives as a <channel kind="answer"> event.',
     inputSchema: {
       type: 'object',
       properties: { task_id: { type: 'string' }, question: { type: 'string' } },
@@ -252,15 +254,13 @@ async function announceQueued(t: Task): Promise<void> {
 }
 
 function taskBrief(t: Task) {
-  const steps = t.subtasks.map((s) => `${s.key}:${s.status}`).join(' ')
   return {
     id: t.id,
     type: t.type,
     title: t.title,
-    status: t.status,
-    subtasks: steps || undefined,
-    openQuestion: t.openQuestion ?? undefined,
-    prUrl: t.prUrl ?? undefined,
+    stage: t.stage,
+    needs: t.needs,
+    pr: t.pr ?? undefined,
     mine: t.agentId === board?.id.agentId || undefined,
   }
 }
@@ -269,16 +269,15 @@ function taskBrief(t: Task) {
 // against those schemas before they reach us, so required fields are typed as present; the
 // Board re-checks anything that matters (ids, statuses, ownership).
 interface ToolArgs {
-  kanban_list_tasks: { status?: TaskStatus }
+  kanban_list_tasks: { stage?: Stage }
   kanban_get_task: { task_id: string }
   kanban_create_task: { title: string; type: TaskType; description?: string }
   kanban_start_task: { task_id: string }
   kanban_update_task: {
     task_id: string
-    status?: TaskStatus
+    status?: UpdateStatus
     summary?: string
     pr_url?: string
-    branch?: string
     title?: string
   }
   kanban_subtask: { task_id: string; key: string; status: SubtaskStatus; note?: string }
@@ -305,7 +304,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
     switch (name) {
       case 'kanban_list_tasks': {
         const a = argsOf(args, name)
-        return ok((await b.listTasks(a.status)).map(taskBrief))
+        return ok((await b.listTasks(a.stage)).map(taskBrief))
       }
       case 'kanban_get_task': {
         const a = argsOf(args, name)
@@ -337,7 +336,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         return ok(taskBrief(await b.updateTask(argsOf(args, name))))
       case 'kanban_subtask': {
         const a = argsOf(args, name)
-        return ok(await b.setSubtask(a.task_id, a.key, a.status, a.note))
+        return ok(taskBrief(await b.setSubtask(a.task_id, a.key, a.status, a.note)))
       }
       case 'kanban_comment': {
         const a = argsOf(args, name)

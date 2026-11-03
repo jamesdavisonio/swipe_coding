@@ -10,21 +10,25 @@ import {
 import {
   AGENT_HEARTBEAT_MS,
   COLLECTIONS as C,
-  TASK_STATUSES,
   TASK_TYPES,
   forJamesTaskId,
+  initialTaskFields,
   isAgentOnline,
+  isDone,
+  isQueued,
   projectIdFor,
   projectNameFor,
-  subtasksFor,
+  taskPhase,
+  taskStages,
   type AgentDoc,
   type Comment,
-  type CommentKind,
+  type NeedKind,
   type Project,
-  type Subtask,
-  type SubtaskStatus,
+  type SessionCommentKind,
+  type Stage,
   type Task,
-  type TaskStatus,
+  type TaskNeed,
+  type TaskPhase,
   type TaskType,
   type Todo,
 } from '@kanban/shared'
@@ -37,14 +41,35 @@ export class BoardError extends Error {
   }
 }
 
-const OPEN_STATUSES: TaskStatus[] = [
-  'waiting_on_james',
-  'blocked_on_permission',
+// ---- Phase 1 tool compatibility ------------------------------------------------
+// The ten tools keep their shape in B1; these map their old vocabulary onto stage/needs.
+// DESIGN.md Phase 2 package 2 replaces the mapping with the four-moment tools.
+
+export type SubtaskStatus = 'pending' | 'in_progress' | 'awaiting_approval' | 'done' | 'skipped'
+export const SUBTASK_STATUSES: readonly SubtaskStatus[] = [
+  'pending',
   'in_progress',
-  'queued',
-  'orphaned',
+  'awaiting_approval',
+  'done',
+  'skipped',
 ]
-const ACTIVE_STATUSES: TaskStatus[] = ['in_progress', 'waiting_on_james', 'blocked_on_permission']
+// kanban_update_task still accepts these two; every other Phase 1 status is retired.
+export type UpdateStatus = 'in_progress' | 'done'
+export const UPDATE_STATUSES: readonly UpdateStatus[] = ['in_progress', 'done']
+
+// Step keys sessions used before stages existed.
+const LEGACY_STEP_KEYS: Partial<Record<string, Stage>> = {
+  spec_approved: 'approved',
+  implement: 'build',
+  pr_open: 'pr',
+  reproduce: 'fix',
+}
+// The decision a stage waits on; finishing the stage clears a need of that kind.
+const NEED_OF_STAGE: Partial<Record<Stage, NeedKind>> = {
+  spec: 'spec',
+  pr: 'pr',
+  after_deploy: 'after_deploy',
+}
 
 function now() {
   return Date.now()
@@ -106,23 +131,15 @@ export class Board {
       batch.update(projectRef, { updatedAt: t })
     }
     if (!forJamesSnap.exists) {
-      const task: Omit<Task, 'id'> = {
+      const task = initialTaskFields({
         projectId,
-        agentId: null,
         type: 'for_james',
         title: 'For James',
         description: 'Things James has to do by hand for this project.',
-        status: 'in_progress',
-        summary: '',
-        prUrl: null,
-        branch: null,
         createdBy: 'james',
-        createdAt: t,
-        updatedAt: t,
-        subtasks: [],
-        openQuestion: null,
-        lastCommentAt: null,
-      }
+        afterDeploy: [],
+        now: t,
+      })
       batch.set(forJamesRef, task)
     }
     const agent: Omit<AgentDoc, 'id'> = {
@@ -159,18 +176,13 @@ export class Board {
 
   // ---- reads ----------------------------------------------------------------
 
-  async listTasks(status?: TaskStatus): Promise<Task[]> {
+  async listTasks(stage?: Stage): Promise<Task[]> {
     let q = this.db.collection(C.tasks).where('projectId', '==', this.id.projectId)
-    if (status) q = q.where('status', '==', status)
+    if (stage) q = q.where('stage', '==', stage)
     const snap = await q.orderBy('updatedAt', 'desc').limit(100).get()
-    const tasks = snap.docs.map(taskOf)
-    const rank = (t: Task) =>
-      t.type === 'for_james'
-        ? -1
-        : OPEN_STATUSES.indexOf(t.status) === -1
-          ? 99
-          : OPEN_STATUSES.indexOf(t.status)
-    return tasks.sort((a, b) => rank(a) - rank(b) || b.updatedAt - a.updatedAt)
+    return snap.docs
+      .map(taskOf)
+      .sort((a, b) => listRank(a) - listRank(b) || b.updatedAt - a.updatedAt)
   }
 
   async getTask(taskId: string): Promise<Task> {
@@ -200,21 +212,17 @@ export class Board {
     const t = now()
     const ref = this.db.collection(C.tasks).doc()
     const task: Omit<Task, 'id'> = {
-      projectId: this.id.projectId,
+      ...initialTaskFields({
+        projectId: this.id.projectId,
+        type: input.type,
+        title: input.title.trim(),
+        description: input.description?.trim() ?? '',
+        createdBy: 'agent',
+        afterDeploy: [],
+        now: t,
+      }),
       agentId: this.id.agentId,
-      type: input.type,
-      title: input.title.trim(),
-      description: input.description?.trim() ?? '',
-      status: 'in_progress',
-      summary: '',
-      prUrl: null,
-      branch: null,
-      createdBy: 'agent',
-      createdAt: t,
-      updatedAt: t,
-      subtasks: subtasksFor(input.type),
-      openQuestion: null,
-      lastCommentAt: null,
+      working: true,
     }
     await ref.set(task)
     log(`created task ${ref.id} "${task.title}"`)
@@ -223,7 +231,7 @@ export class Board {
 
   async startTask(taskId: string): Promise<Task> {
     const task = await this.getTask(taskId)
-    if (task.status === 'done') throw new BoardError(`task ${taskId} is done; create a new one`)
+    if (isDone(task)) throw new BoardError(`task ${taskId} is done; create a new one`)
     if (task.agentId && task.agentId !== this.id.agentId) {
       const other = (await this.db.collection(C.agents).doc(task.agentId).get()).data() as
         AgentDoc | undefined
@@ -236,12 +244,8 @@ export class Board {
     }
     const t = now()
     const batch = this.db.batch()
-    const status: TaskStatus = task.openQuestion ? 'waiting_on_james' : 'in_progress'
-    batch.update(this.db.collection(C.tasks).doc(taskId), {
-      agentId: this.id.agentId,
-      status,
-      updatedAt: t,
-    })
+    const bound = { agentId: this.id.agentId, working: true, updatedAt: t }
+    batch.update(this.db.collection(C.tasks).doc(taskId), bound)
     // Route any undelivered comments on this task to us so they flow through the listener.
     const pending = await this.db
       .collection(C.comments)
@@ -253,62 +257,51 @@ export class Board {
     }
     await batch.commit()
     log(`started task ${taskId} (${pending.size} pending comments rerouted)`)
-    return { ...task, agentId: this.id.agentId, status, updatedAt: t }
+    return { ...task, ...bound }
   }
 
   async updateTask(input: {
     task_id: string
-    status?: TaskStatus
+    status?: UpdateStatus
     summary?: string
     pr_url?: string
-    branch?: string
     title?: string
   }): Promise<Task> {
     const task = await this.getTask(input.task_id)
     this.assertMine(task)
-    if (input.status && !TASK_STATUSES.includes(input.status))
-      throw new BoardError(`bad status ${input.status}`)
+    if (input.status && !UPDATE_STATUSES.includes(input.status))
+      throw new BoardError(`status must be one of ${UPDATE_STATUSES.join(', ')}`)
     const t = now()
     const patch: Record<string, unknown> = { updatedAt: t }
-    if (input.status) patch.status = input.status
     if (input.summary !== undefined) patch.summary = input.summary
-    if (input.pr_url !== undefined) patch.prUrl = input.pr_url || null
-    if (input.branch !== undefined) patch.branch = input.branch || null
     if (input.title) patch.title = input.title.trim()
-    let subtasks = task.subtasks
-    if (input.pr_url) subtasks = setSubtask(subtasks, 'pr_open', 'done')
-    if (input.status === 'done') {
-      patch.agentId = null
-      patch.openQuestion = null
-      subtasks = setSubtask(subtasks, 'done', 'done')
-    }
-    if (subtasks !== task.subtasks) patch.subtasks = subtasks
+    if (input.pr_url !== undefined) Object.assign(patch, prPatch(task, input.pr_url))
+    if (input.status === 'in_progress') patch.needs = null
+    if (input.status === 'done') Object.assign(patch, donePatch(t))
     await this.db.collection(C.tasks).doc(task.id).update(patch)
     log(`updated task ${task.id}: ${Object.keys(patch).join(',')}`)
     return { ...task, ...(patch as Partial<Task>) }
   }
 
+  // Phase 1 step API: `key` is a stage name (or a retired step key) of the task's own chain.
   async setSubtask(
     taskId: string,
     key: string,
     status: SubtaskStatus,
     note?: string
-  ): Promise<Subtask[]> {
+  ): Promise<Task> {
     const task = await this.getTask(taskId)
     this.assertMine(task)
-    if (!task.subtasks.some((s) => s.key === key)) {
-      throw new BoardError(
-        `task ${taskId} has no subtask "${key}" (has: ${task.subtasks.map((s) => s.key).join(', ') || 'none'})`
-      )
-    }
-    const subtasks = setSubtask(task.subtasks, key, status, note)
-    await this.db.collection(C.tasks).doc(taskId).update({ subtasks, updatedAt: now() })
-    return subtasks
+    const t = now()
+    const patch = { updatedAt: t, ...subtaskPatch(task, resolveStage(task, key), status, t) }
+    if (note) await this.writeAgentComment(task, note, 'info', patch)
+    else await this.db.collection(C.tasks).doc(taskId).update(patch)
+    return { ...task, ...(patch as Partial<Task>) }
   }
 
   // ---- comments -------------------------------------------------------------
 
-  async comment(taskId: string, body: string, kind: CommentKind = 'comment'): Promise<Comment> {
+  async comment(taskId: string, body: string, kind: SessionCommentKind = 'info'): Promise<Comment> {
     const task = await this.getTask(taskId)
     if (task.type !== 'for_james') this.assertMine(task)
     return this.writeAgentComment(task, body, kind)
@@ -317,10 +310,8 @@ export class Board {
   async ask(taskId: string, question: string): Promise<Comment> {
     const task = await this.getTask(taskId)
     this.assertMine(task)
-    const c = await this.writeAgentComment(task, question, 'question', {
-      openQuestion: question,
-      status: 'waiting_on_james',
-    })
+    const needs: TaskNeed = { kind: 'question', question }
+    const c = await this.writeAgentComment(task, question, 'question', { needs })
     log(`asked on ${taskId}: ${question.slice(0, 80)}`)
     return c
   }
@@ -351,7 +342,7 @@ export class Board {
   private async writeAgentComment(
     task: Task,
     body: string,
-    kind: CommentKind,
+    kind: SessionCommentKind,
     taskPatch: Record<string, unknown> = {}
   ): Promise<Comment> {
     const t = now()
@@ -365,6 +356,8 @@ export class Board {
       body: body.trim(),
       createdAt: t,
       deliveredAt: t, // our own words never come back to us
+      workingAt: null,
+      handledAt: null,
     }
     const batch = this.db.batch()
     batch.set(ref, c)
@@ -381,7 +374,7 @@ export class Board {
 
   // Streams James's undelivered comments for tasks bound to this agent. `deliver`
   // must push the event into the session; once it resolves we mark delivery and
-  // move the task out of waiting_on_james.
+  // clear the question James just answered.
   listenForJames(deliver: (c: Comment) => Promise<void>): () => void {
     const inflight = new Set<string>()
     const q = this.db
@@ -416,18 +409,19 @@ export class Board {
 
   // Streams tasks James queues from the board for this project (including ones queued
   // before this session started) so an idle session can pick them up. Each task is
-  // announced once per session; binding is still an explicit kanban_start_task.
+  // announced once per session; binding is still an explicit kanban_start_task. Queued is
+  // derived (first stage, no agent): the query narrows to unbound tasks, isQueued decides.
   listenForQueued(announce: (t: Task) => Promise<void>): () => void {
     const announced = new Set<string>()
     const q = this.db
       .collection(C.tasks)
       .where('projectId', '==', this.id.projectId)
-      .where('status', '==', 'queued')
+      .where('agentId', '==', null)
     const onChanges = async (snap: QuerySnapshot) => {
       for (const change of snap.docChanges()) {
         if (change.type === 'removed') continue
         const t = taskOf(change.doc)
-        if (t.agentId || announced.has(t.id)) continue
+        if (!isQueued(t) || announced.has(t.id)) continue
         announced.add(t.id)
         try {
           await announce(t)
@@ -454,8 +448,7 @@ export class Board {
       tx.update(this.db.collection(C.comments).doc(c.id), { deliveredAt: t })
       if (!task) return
       const patch: Record<string, unknown> = { updatedAt: t }
-      if (c.kind === 'answer' || task.openQuestion) patch.openQuestion = null
-      if (task.status === 'waiting_on_james') patch.status = 'in_progress'
+      if (c.kind === 'answer' || task.needs?.kind === 'question') patch.needs = null
       tx.update(taskRef, patch)
     })
   }
@@ -469,17 +462,18 @@ export class Board {
   }
 }
 
-// Shared by Board.shutdown and the SessionEnd hook.
+// Shared by Board.shutdown and the SessionEnd hook. The agent goes offline and its tasks stop
+// being worked on; agentId stays so a new session can resume them with kanban_start_task.
 export async function orphanAgent(db: Firestore, agentId: string): Promise<number> {
   const batch: WriteBatch = db.batch()
   batch.update(db.collection(C.agents).doc(agentId), { lastSeen: 0 })
   const active = await db
     .collection(C.tasks)
     .where('agentId', '==', agentId)
-    .where('status', 'in', ACTIVE_STATUSES)
+    .where('working', '==', true)
     .get()
   const t = now()
-  for (const d of active.docs) batch.update(d.ref, { status: 'orphaned', updatedAt: t })
+  for (const d of active.docs) batch.update(d.ref, { working: false, updatedAt: t })
   await batch.commit()
   log(`agent ${agentId} shut down; ${active.size} task(s) orphaned`)
   return active.size
@@ -503,16 +497,79 @@ export async function findLiveAgent(
   return live[0] ?? null
 }
 
-function setSubtask(
-  subtasks: Subtask[],
-  key: string,
+// Order in kanban_list_tasks: the pinned For James task, then what needs James, then work in
+// flight, then queued, then done.
+const PHASE_RANK: Record<TaskPhase, number> = {
+  waiting_on_james: 0,
+  in_progress: 1,
+  queued: 2,
+  done: 3,
+}
+function listRank(t: Task): number {
+  return t.type === 'for_james' ? -1 : PHASE_RANK[taskPhase(t)]
+}
+
+// A step key from the tool is a stage of this task's chain, or a retired Phase 1 step key.
+function resolveStage(task: Task, key: string): Stage {
+  const wanted = LEGACY_STEP_KEYS[key] ?? key
+  const stage = taskStages(task).find((s) => s === wanted)
+  if (!stage) {
+    const has = taskStages(task).join(', ') || 'none'
+    throw new BoardError(`task ${task.id} has no step "${key}" (has: ${has})`)
+  }
+  return stage
+}
+
+// Finishing a task: done, stamped, unbound, nothing left for James to decide.
+function donePatch(t: number): Record<string, unknown> {
+  return { stage: 'done', doneAt: t, agentId: null, needs: null, working: false }
+}
+
+// pr_url sets the PR (its number is the last number in the URL) and brings the task to the
+// pr stage when it is still earlier; an empty url clears the PR.
+function prPatch(task: Task, url: string): Record<string, unknown> {
+  if (!url) return { pr: null }
+  const number = /(\d+)\/?(?:[?#].*)?$/.exec(url)?.[1]
+  if (!number) throw new BoardError('pr_url must end in the pull request number')
+  const chain = taskStages(task)
+  const earlier = chain.indexOf(task.stage) < chain.indexOf('pr')
+  const stage = chain.includes('pr') && earlier ? { stage: 'pr' } : {}
+  return { pr: { number: Number(number), url }, ...stage }
+}
+
+// Moves the task past `stage`: to the next stage of its chain (done after the last), clearing
+// the need that stage was waiting on. A task already beyond it is left alone.
+function advancePast(task: Task, stage: Stage, t: number): Record<string, unknown> {
+  const chain = taskStages(task)
+  const next = chain.at(chain.indexOf(stage) + 1)
+  if (next === undefined || next === 'done') return donePatch(t)
+  if (chain.indexOf(task.stage) > chain.indexOf(stage)) return {}
+  const waitingOn = NEED_OF_STAGE[stage]
+  return { stage: next, ...(waitingOn && task.needs?.kind === waitingOn ? { needs: null } : {}) }
+}
+
+// What kanban_subtask changes on the task for each Phase 1 step status.
+function subtaskPatch(
+  task: Task,
+  stage: Stage,
   status: SubtaskStatus,
-  note?: string
-): Subtask[] {
-  if (!subtasks.some((s) => s.key === key)) return subtasks
-  return subtasks.map((s) =>
-    s.key === key ? { ...s, status, ...(note !== undefined ? { note } : {}) } : s
-  )
+  t: number
+): Record<string, unknown> {
+  switch (status) {
+    case 'awaiting_approval':
+      if (stage !== 'spec') throw new BoardError('awaiting_approval only applies to the spec step')
+      return { needs: { kind: 'spec' } satisfies TaskNeed }
+    case 'done':
+    case 'skipped':
+      return advancePast(task, stage, t)
+    case 'in_progress': {
+      const chain = taskStages(task)
+      const ahead = stage !== 'done' && chain.indexOf(stage) > chain.indexOf(task.stage)
+      return ahead ? { stage } : {}
+    }
+    case 'pending':
+      return {}
+  }
 }
 
 export { FieldValue }
