@@ -234,6 +234,9 @@ doneAt DESC)` (a single-field `doneAt` index is automatic; the Done tab queries 
   `kanban_update_task { status: 'done' }` sets `stage: 'done'`, `doneAt`, unbinds the
   agent; `status: 'in_progress'` clears `needs`. Replaced wholesale by the four-moment tools
   in DESIGN.md Phase 2 package 2.
+- Comment kinds are restricted on create, and a browser `update` of a comment may not change
+  its `author` or `kind` (editing sent messages stays out of scope; this only closes the
+  impersonation path where a James comment is rewritten into a session kind).
 - Criterion 2's "opened by id" clause is B3's: its thread-view tests must open `/t/:id`
   for a done task older than 7 days and render it.
 - The live protocol test (`packages/agent/test/protocol.ts`) keeps its pre-existing
