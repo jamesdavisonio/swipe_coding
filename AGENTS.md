@@ -23,9 +23,11 @@ npm run web                # Vite dev server; packages/web/.env holds the Fireba
 ## How to run tests
 
 ```
-npm test                   # vitest, tests/
-npm run test:agent         # agent stdio protocol test; KANBAN_TEST_LIVE=1 runs against real Firestore
-npm run typecheck
+npm test                   # vitest unit suite, tests/ (excludes tests/rules)
+npm run test:rules         # Firestore rules in the emulator (needs Java 21 on PATH)
+npm run test:agent         # agent stdio protocol test; offline by default. Board path:
+                           #   firebase emulators:exec --only firestore --project demo-kanban "npm run test:agent"
+npm run typecheck          # agent, web and the root tsconfig (tests/, packages/shared)
 ```
 
 ## Conventions
@@ -48,7 +50,7 @@ npm run typecheck
 - The desktop app is an MSIX package: its child processes see a virtualised `%APPDATA%`. The service-account key lives at `..\kanban-secrets\sa.json`, never in AppData.
 - Sessions must start with `claude --dangerously-load-development-channels server:kanban`; channel events are dropped silently if the Claude Team org has channels disabled.
 - Claude Code currently spawns the agent twice per session (open issue, DESIGN.md Phase 1).
-- Firestore emulator needs Java, which is not installed; tests use fakes.
+- The Firestore emulator needs Java 21: on James's PC it is a zip install at `Documents\tools\jdk-21` (on the user PATH; older shells need it prefixed). Never run `KANBAN_TEST_LIVE=1` from an agent; use the emulator form above.
 
 ## Documentation
 
