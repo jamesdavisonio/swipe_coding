@@ -41,6 +41,24 @@ function SpecBody({ spec }: { spec: TaskSpec | null }) {
   )
 }
 
+// The free text of a change request.
+function ChangeBox({ text, onText }: { text: string; onText: (text: string) => void }) {
+  const boxId = useId()
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={boxId}>What should change?</Label>
+      <Textarea
+        id={boxId}
+        rows={3}
+        maxLength={MAX_COMMENT_CHARS}
+        placeholder="e.g. Also add a totals row at the bottom"
+        value={text}
+        onChange={(event) => onText(event.target.value)}
+      />
+    </div>
+  )
+}
+
 // The spec decision: Approve vN, or Changes… with free text that goes to the session.
 export default function SpecDecision({
   task,
@@ -56,7 +74,6 @@ export default function SpecDecision({
   const [changing, setChanging] = useState(mode === 'change')
   const [text, setText] = useState('')
   const { pending, failed, decide } = useDecision(task.id, close)
-  const boxId = useId()
   const version = specVersion(task)
 
   return (
@@ -67,52 +84,42 @@ export default function SpecDecision({
     >
       <div className="flex flex-col gap-4">
         <SpecBody spec={task.spec} />
-        {changing ? (
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor={boxId}>What should change?</Label>
-            <Textarea
-              id={boxId}
-              rows={3}
-              maxLength={MAX_COMMENT_CHARS}
-              placeholder="e.g. Also add a totals row at the bottom"
-              value={text}
-              onChange={(event) => setText(event.target.value)}
-            />
-          </div>
-        ) : null}
+        {changing ? <ChangeBox text={text} onText={setText} /> : null}
         <SaveError failed={failed} />
-        {changing ? (
-          <div className="flex gap-2.5">
-            <Button
-              className="flex-1"
-              disabled={pending || text.trim() === ''}
-              onClick={() => void decide('request_change', () => requestChange(task, text))}
-            >
-              Send to session
-            </Button>
-            <Button variant="ghost" disabled={pending} onClick={() => setChanging(false)}>
-              Cancel
-            </Button>
-          </div>
-        ) : (
-          <div className="flex gap-2.5">
-            <Button
-              className="flex-1"
-              disabled={pending}
-              onClick={() => void decide('approve_spec', () => approveSpec(task))}
-            >
-              Approve v{version}
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1"
-              disabled={pending}
-              onClick={() => setChanging(true)}
-            >
-              Changes…
-            </Button>
-          </div>
-        )}
+        <div className="flex gap-2.5">
+          {changing ? (
+            <>
+              <Button
+                className="flex-1"
+                disabled={pending || text.trim() === ''}
+                onClick={() => void decide('request_change', () => requestChange(task, text))}
+              >
+                Send to session
+              </Button>
+              <Button variant="ghost" disabled={pending} onClick={() => setChanging(false)}>
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                className="flex-1"
+                disabled={pending}
+                onClick={() => void decide('approve_spec', () => approveSpec(task))}
+              >
+                Approve v{version}
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                disabled={pending}
+                onClick={() => setChanging(true)}
+              >
+                Changes…
+              </Button>
+            </>
+          )}
+        </div>
       </div>
     </SheetContent>
   )

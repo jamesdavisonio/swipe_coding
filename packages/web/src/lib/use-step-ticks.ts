@@ -12,19 +12,18 @@ export function useStepTicks(task: Task) {
   const [chosen, setChosen] = useState<Record<number, boolean>>({})
   const [failed, setFailed] = useState(false)
   const steps = Array.isArray(task.afterDeploy) ? task.afterDeploy : []
-  const saved = (index: number) => task.afterDone?.[index] === true
-  const checked = (index: number) => chosen[index] ?? saved(index)
+  const { afterDone } = task
+  const checked = (index: number) => chosen[index] ?? afterDone?.[index] === true
 
   // A step whose snapshot now agrees with the choice has no choice of its own any more.
   useEffect(() => {
     setChosen((current) => {
       const open = Object.entries(current).filter(
-        ([index, value]) => saved(Number(index)) !== value
+        ([index, value]) => (afterDone?.[Number(index)] === true) !== value
       )
       return open.length === Object.keys(current).length ? current : Object.fromEntries(open)
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [task.afterDone])
+  }, [afterDone])
 
   async function tick(index: number) {
     const next = !checked(index)
