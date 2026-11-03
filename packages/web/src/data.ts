@@ -13,15 +13,18 @@ import {
   updateDoc,
   where,
   writeBatch,
+  arrayUnion,
   type QueryConstraint,
 } from 'firebase/firestore'
 import {
   COLLECTIONS,
+  appendLog,
   forJamesTaskId,
   initialTaskFields,
   type AgentDoc,
   type Comment,
   type CommentKind,
+  type LogEntry,
   type Project,
   type Task,
   type TaskType,
@@ -29,8 +32,10 @@ import {
 } from '@kanban/shared'
 import { db } from './firebase.ts'
 import { log } from './lib/log.ts'
+import { MAX_COMMENT_CHARS } from './lib/limits.ts'
 import { jamesComment, replyKind } from './lib/messages.ts'
 import { newRequestId } from './lib/request-id.ts'
+import { specVersion } from './lib/threads.ts'
 
 export interface Live<T> {
   data: T
@@ -178,6 +183,7 @@ export const useTask = (id: string | undefined) => useDocument<Task>(COLLECTIONS
 // --- writes ------------------------------------------------------------------
 
 const now = () => Date.now()
+const LOG_ARCHIVE = 'log_archive'
 
 export async function renameProject(projectId: string, name: string) {
   await updateDoc(doc(db, COLLECTIONS.projects, projectId), { name, updatedAt: now() })
@@ -202,37 +208,43 @@ export async function createTask(
   return ref.id
 }
 
-// A stage transition James owns: read the task inside a transaction and write only when
-// `plan` accepts its current state, so a double tap (or a stale screen) is a no-op. The
-// optional comment is created in the same transaction. Returns whether anything was written.
+// A decision James makes: read the task inside a transaction and write only when `plan` accepts
+// its current state, so a double tap (or a stale screen) is a no-op. The plan names what changes
+// on the task, the one history line, and James's message; all of it lands in this transaction.
+// The history goes through appendLog; whatever it pushes past LOG_CAP is moved to
+// tasks/{id}/log_archive in the same write, one document per entry.
 interface Transition {
   patch: Partial<Task>
-  comment?: { kind: CommentKind; body: string }
+  history: string
+  comment: { kind: CommentKind; body: string }
 }
 async function transitionTask(
   taskId: string,
   plan: (current: Task) => Transition | null
-): Promise<boolean> {
+): Promise<void> {
   const taskRef = doc(db, COLLECTIONS.tasks, taskId)
   const commentRef = doc(collection(db, COLLECTIONS.comments))
-  return runTransaction(db, async (tx) => {
+  await runTransaction(db, async (tx) => {
     const snap = await tx.get(taskRef)
-    if (!snap.exists()) return false
+    if (!snap.exists()) return
     const current = { ...(snap.data() as Task), id: snap.id }
     const next = plan(current)
-    if (!next) return false
+    if (!next) return
     const t = now()
-    const { comment } = next
-    tx.update(taskRef, {
-      ...next.patch,
-      updatedAt: t,
-      ...(comment ? { lastCommentAt: t } : {}),
-    })
-    if (comment)
-      tx.set(commentRef, jamesComment(current, comment.kind, comment.body, t, commentRef.id))
-    return true
+    const entry: LogEntry = { at: t, who: 'james', text: next.history }
+    const { log: kept, archived } = appendLog(Array.isArray(current.log) ? current.log : [], entry)
+    const archive = collection(db, COLLECTIONS.tasks, taskId, LOG_ARCHIVE)
+    for (const old of archived) tx.set(doc(archive), { at: old.at, who: old.who, text: old.text })
+    tx.update(taskRef, { ...next.patch, log: kept, updatedAt: t, lastCommentAt: t })
+    tx.set(
+      commentRef,
+      jamesComment(current, next.comment.kind, next.comment.body, t, commentRef.id)
+    )
   })
 }
+
+// Free text from James: trimmed and capped before it is written anywhere.
+const cleanText = (text: string): string => text.trim().slice(0, MAX_COMMENT_CHARS)
 
 // A fresh comment id, generated on the device before anything is written, so the screen can show
 // the message at once and a retried write lands on the same document instead of a duplicate.
@@ -264,20 +276,45 @@ export async function approveSpec(task: Task) {
     (cur.stage === 'spec' || cur.stage === 'approved') && cur.needs?.kind === 'spec'
       ? {
           patch: { stage: 'build', needs: null },
-          comment: { kind: 'approve', body: 'Approved: spec' },
+          history: `Approved spec v${specVersion(cur)}`,
+          comment: { kind: 'approve', body: 'Approved.' },
         }
       : null
   )
 }
 
-// A quick-reply answer: James's comment of kind `answer` carrying the option's label, and the
-// need cleared. Only while the task is still waiting on a question, so a double tap is a no-op.
-export async function answerQuestion(task: Task, option: { key: string; label: string }) {
+// "Small change…": the need is cleared and the stage stays, so the session revises the spec.
+// Empty text writes nothing.
+export async function requestChange(task: Task, text: string) {
+  const change = cleanText(text)
+  if (change === '') return
   await transitionTask(task.id, (cur) =>
-    cur.needs?.kind === 'question'
-      ? { patch: { needs: null }, comment: { kind: 'answer', body: option.label } }
+    cur.needs?.kind === 'spec'
+      ? {
+          patch: { needs: null },
+          history: `Asked for a change to spec v${specVersion(cur)}: ${change}`,
+          comment: { kind: 'change_request', body: `Change: ${change}` },
+        }
       : null
   )
+}
+
+// An answer: an option (its key must still be on offer) or James's own words (label only). His
+// message carries the label and the need is cleared; only while the task still waits on a
+// question, so a double tap or a stale option writes nothing.
+export async function answerQuestion(task: Task, answer: { key?: string; label: string }) {
+  const label = cleanText(answer.label)
+  if (label === '') return
+  await transitionTask(task.id, (cur) => {
+    const need = cur.needs
+    if (need?.kind !== 'question') return null
+    if (answer.key !== undefined && !need.options?.some((o) => o.key === answer.key)) return null
+    return {
+      patch: { needs: null },
+      history: need.question ? `Answered ${need.question}: ${label}` : `Answered: ${label}`,
+      comment: { kind: 'answer', body: label },
+    }
+  })
 }
 
 // "Merged it": only from stage `pr`, so a second tap (or a stale row) writes nothing.
@@ -286,10 +323,60 @@ export async function markMerged(task: Task) {
     cur.stage === 'pr'
       ? {
           patch: { stage: 'merged', needs: null },
+          history: cur.pr ? `Merged PR #${cur.pr.number}` : 'Merged the PR',
           comment: { kind: 'merged', body: 'Merged it.' },
         }
       : null
   )
+}
+
+// Ticks (or unticks) one after-deploy step. A batch built from the task as the screen has it, so
+// a tick made offline is queued and shows at once. History goes in with arrayUnion (the next
+// transactional writer enforces LOG_CAP). The tick that leaves every step done also closes the
+// task: stage done, doneAt, need and working cleared, the "Done" history line and James's
+// closing message, all in the same batch.
+export async function tickStep(task: Task, index: number) {
+  const steps = Array.isArray(task.afterDeploy) ? task.afterDeploy : []
+  if (
+    task.stage !== 'after_deploy' ||
+    !Number.isInteger(index) ||
+    index < 0 ||
+    index >= steps.length
+  )
+    return
+  const afterDone = steps.map((_, i) =>
+    i === index ? !task.afterDone?.[i] : !!task.afterDone?.[i]
+  )
+  const t = now()
+  const ticked = afterDone[index]
+  const step: LogEntry = {
+    at: t,
+    who: 'james',
+    text: `${ticked ? 'Step done' : 'Step unticked'}: ${steps[index]}`,
+  }
+  const batch = writeBatch(db)
+  const taskRef = doc(db, COLLECTIONS.tasks, task.id)
+  if (afterDone.every(Boolean)) {
+    const commentRef = doc(collection(db, COLLECTIONS.comments))
+    const closed: LogEntry = { at: t, who: 'system', text: 'Done' }
+    batch.update(taskRef, {
+      afterDone,
+      log: arrayUnion(step, closed),
+      stage: 'done',
+      doneAt: t,
+      needs: null,
+      working: false,
+      updatedAt: t,
+      lastCommentAt: t,
+    })
+    batch.set(
+      commentRef,
+      jamesComment(task, 'comment', 'After-deploy steps done.', t, commentRef.id)
+    )
+  } else {
+    batch.update(taskRef, { afterDone, log: arrayUnion(step), updatedAt: t })
+  }
+  await batch.commit()
 }
 
 // Opening a thread clears its unread flag. updatedAt stays put so the row does not jump.
