@@ -3,7 +3,7 @@
 // Always:   initialize advertises claude/channel + instructions; tools/list is complete.
 // Emulator: (FIRESTORE_EMULATOR_HOST set) create a task, write a james comment with the
 //           Admin SDK, expect a notifications/claude/channel within 5 s and deliveredAt
-//           set; then kanban_ask → task waiting_on_james → answer → in_progress.
+//           set; then kanban_ask → task needs a question → answer → needs cleared.
 import { spawn } from 'node:child_process'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -31,8 +31,9 @@ interface RpcMessage {
 interface TaskBrief {
   id: string
   type: string
-  status: string
-  subtasks?: string
+  stage: string
+  needs: { kind: string; question?: string } | null
+  mine?: boolean
 }
 interface Whoami {
   cwd: string
@@ -188,7 +189,7 @@ try {
       description: 'created by test',
     })
     assert(
-      task.id && task.status === 'in_progress' && /spec:pending/.test(task.subtasks ?? ''),
+      task.id && task.stage === 'spec' && task.needs === null && task.mine === true,
       `create_task → ${task.id}`
     )
 
@@ -228,11 +229,17 @@ try {
     assert((await cRef.get()).get('deliveredAt') != null, 'deliveredAt set after delivery')
 
     await call('kanban_subtask', { task_id: task.id, key: 'spec', status: 'awaiting_approval' })
-    await call('kanban_ask', { task_id: task.id, question: 'Approve the spec?' })
     let snap = await db.collection('tasks').doc(task.id).get()
     assert(
-      snap.get('status') === 'waiting_on_james' && snap.get('openQuestion') === 'Approve the spec?',
-      'ask → waiting_on_james + openQuestion'
+      (snap.get('needs') as TaskBrief['needs'])?.kind === 'spec',
+      'subtask spec awaiting_approval → needs spec'
+    )
+    await call('kanban_ask', { task_id: task.id, question: 'Approve the spec?' })
+    snap = await db.collection('tasks').doc(task.id).get()
+    assert(
+      (snap.get('needs') as TaskBrief['needs'])?.kind === 'question' &&
+        (snap.get('needs') as TaskBrief['needs'])?.question === 'Approve the spec?',
+      'ask → needs question'
     )
 
     const aRef = db.collection('comments').doc()
@@ -252,13 +259,28 @@ try {
     )
     for (let i = 0; i < 40; i++) {
       snap = await db.collection('tasks').doc(task.id).get()
-      if (snap.get('status') === 'in_progress') break
+      if (snap.get('needs') === null) break
       await new Promise((r) => setTimeout(r, 100))
     }
+    assert(snap.get('needs') === null, 'answer → needs cleared')
+
+    await call('kanban_subtask', { task_id: task.id, key: 'spec', status: 'done' })
+    snap = await db.collection('tasks').doc(task.id).get()
     assert(
-      snap.get('status') === 'in_progress' && snap.get('openQuestion') === null,
-      'answer → in_progress, question cleared'
+      snap.get('stage') === 'approved',
+      `subtask spec done → stage ${String(snap.get('stage'))}`
     )
+    await call('kanban_subtask', { task_id: task.id, key: 'approved', status: 'done' })
+    snap = await db.collection('tasks').doc(task.id).get()
+    assert(
+      snap.get('stage') === 'build',
+      `subtask approved done → stage ${String(snap.get('stage'))}`
+    )
+
+    await call('kanban_ask', { task_id: task.id, question: 'Which option?' })
+    await call('kanban_update_task', { task_id: task.id, status: 'in_progress' })
+    snap = await db.collection('tasks').doc(task.id).get()
+    assert(snap.get('needs') === null, 'update_task in_progress after ask → needs null')
 
     const todo = await call<{ id: string }>('kanban_todo_for_james', {
       body: 'Merge the PR',
@@ -273,14 +295,15 @@ try {
       summary: 'All good.',
       pr_url: 'https://example.com/pr/1',
     })
-    assert(
-      done.status === 'done' &&
-        /pr_open:done/.test(done.subtasks ?? '') &&
-        /done:done/.test(done.subtasks ?? ''),
-      'update_task done closes template steps'
-    )
+    assert(done.stage === 'done', 'update_task done moves stage to done')
     snap = await db.collection('tasks').doc(task.id).get()
-    assert(snap.get('agentId') === null, 'done task is unbound')
+    assert(
+      snap.get('stage') === 'done' &&
+        snap.get('agentId') === null &&
+        typeof snap.get('doneAt') === 'number' &&
+        (snap.get('pr') as { url?: string } | null)?.url === 'https://example.com/pr/1',
+      'stored task is done, unbound, doneAt stamped, pr recorded'
+    )
 
     // Leave the real board clean: remove the test task, its comments and the todo.
     const batch = db.batch()
