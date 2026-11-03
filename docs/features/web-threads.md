@@ -208,9 +208,45 @@ null`, `unread: boolean` (session set, James clears), `working: boolean`,
 - Transitions James owns, each a Firestore transaction guarded on the current stage so a
   double tap is a no-op: approve (`approved`/`spec` → `build`), merged (`pr` → `merged`),
   all after-deploy steps ticked (`after_deploy` → `done`), reopen (`done` → previous).
-- Indexes: tasks(projectId, stage, updatedAt desc), tasks(doneAt), comments unchanged.
+- Indexes: tasks(projectId, stage, updatedAt desc), tasks(projectId, doneAt desc), comments
+  unchanged.
 
-**Unresolved:** Open questions 1–3 below; B1 does not start until they are answered.
+**B1 contract details fixed at test time** (planner decisions, 2026-11-02; exact signatures
+in `.sdd-evidence/web-threads-b1/packet-test-author.md` and ADR 0003):
+
+- `appendLog(log, entry)` counts after appending: 199 + 1 archives nothing, 200 + 1 archives
+  the single oldest entry, an already-oversized log archives all overflow oldest-first; the
+  input array is never mutated.
+- `bugfix` with after-deploy steps is `fix → pr → merged → main_ci → after_deploy → done`;
+  `chore` with after-deploy steps is `do → after_deploy → done` (New task allows steps on
+  any type, criterion 23).
+- `STAGE_LABEL` (spec Spec · approved Approved · build Build · fix Fix · do Do · pr PR ·
+  merged Merged · main_ci Main CI · after_deploy After deploy · done Done) is part of the
+  shared contract: the stepper (B3) and New task preview (B5) render it.
+- `deliveryState` treats a missing stamp field exactly like `null` (older comment documents
+  carry no `workingAt`/`handledAt`).
+- Indexes: `tasks(projectId ASC, stage ASC, updatedAt DESC)` and `tasks(projectId ASC,
+doneAt DESC)` (a single-field `doneAt` index is automatic; the Done tab queries per
+  project); both `comments` composite indexes stay exactly as they are (delivery depends
+  on `comments(agentId, deliveredAt, createdAt)`); the two `status` indexes go.
+- Agent compat in B1: `kanban_subtask { key: 'spec', status: 'awaiting_approval' }` arms
+  `needs.kind === 'spec'`; `status: 'done'` on a key advances `stage` past it;
+  `kanban_update_task { status: 'done' }` sets `stage: 'done'`, `doneAt`, unbinds the
+  agent; `status: 'in_progress'` clears `needs`. Replaced wholesale by the four-moment tools
+  in DESIGN.md Phase 2 package 2.
+- Criterion 2's "opened by id" clause is B3's: its thread-view tests must open `/t/:id`
+  for a done task older than 7 days and render it.
+- The live protocol test (`packages/agent/test/protocol.ts`) keeps its pre-existing
+  100 ms poll loops against real Firestore; waiver recorded in `.sdd-evidence/web-threads-b1/`
+  (it predates this spec and is not a vitest file).
+- `stageIndex` is the position in `stagesFor(type, afterDeploy.length > 0)`, `-1` when the
+  stage is not in that list (e.g. a bugfix at `spec`).
+- `initialTaskFields` returns no retired keys (`status`, `subtasks`, `openQuestion`,
+  `prUrl`, `branch`) and `lastCommentAt: null`; `isTaskVisible` defaults `now` to the
+  current time; the agent's task brief carries `mine: true` for the calling session; a
+  cleared need is the literal `null`, never a missing field.
+
+**Unresolved:** none for B1 (open questions 1–4 answered at confirmation).
 
 ## Files & modules affected
 
