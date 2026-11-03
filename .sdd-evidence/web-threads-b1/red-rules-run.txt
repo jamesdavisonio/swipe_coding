@@ -1,0 +1,172 @@
+$ PATH="/c/Users/Intel/Documents/tools/jdk-21/bin:$PATH" npm run test:rules   (exit 1)
+> test:rules
+> firebase emulators:exec --only firestore --project demo-kanban "vitest run --config vitest.rules.config.ts"
+i  emulators: Starting emulators: firestore
+i  emulators: Detected demo project ID "demo-kanban", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Firestore Emulator logging to firestore-debug.log
++  firestore: Firestore Emulator UI websocket is running on 9150.
+i  Running script: vitest run --config vitest.rules.config.ts
+ RUN  v3.2.7 C:/Users/Intel/Documents/code/kanban
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot edit the agent's comment
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot change a sent comment's author
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > archived task log > James writes and reads an archive entry under its task
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > archived task log > stranger can neither read nor write it
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > archived task log > unverified James can neither read nor write it
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > archived task log > anonymous can neither read nor write it
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > agents stay read-only from the browser > James reads an agent but cannot create, update or delete one
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > agents stay read-only from the browser > James reads an agent but cannot create, update or delete one
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > agents stay read-only from the browser > James reads an agent but cannot create, update or delete one
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > default deny > James is refused on a collection the rules do not name
+ ❯ tests/rules/web-threads-b1-4.rules.test.ts (34 tests | 11 failed) 3972ms
+   ✓ owner writes the new task fields, todos and projects > j@nullnoise.ai creates a task with the new fields and reads it back  392ms
+   ✓ owner writes the new task fields, todos and projects > james@nullnoise.ai creates a task with the new fields and reads it back 74ms
+   ✓ owner writes the new task fields, todos and projects > updates stage, needs, afterDone, log, doneAt and reopenedAt on an existing task 94ms
+   ✓ owner writes the new task fields, todos and projects > creates, updates and deletes a todo 50ms
+   ✓ owner writes the new task fields, todos and projects > creates a project 26ms
+   ✓ owner writes the new task fields, todos and projects > reads back seeded comments (both authors), a todo and a project 113ms
+   ✓ comment kinds > James sends a "comment" comment 79ms
+   ✓ comment kinds > James sends a "answer" comment 32ms
+   ✓ comment kinds > James sends a "approve" comment 38ms
+   ✓ comment kinds > James sends a "change_request" comment 24ms
+   ✓ comment kinds > James sends a "merged" comment 24ms
+   ✓ comment kinds > James sends a "reopen" comment 28ms
+   × comment kinds > James cannot send a "spec" comment (not a James kind) 41ms
+     → Expected request to fail, but it succeeded.
+   × comment kinds > James cannot send a "question" comment (not a James kind) 26ms
+     → Expected request to fail, but it succeeded.
+   × comment kinds > James cannot send a "pr" comment (not a James kind) 30ms
+     → Expected request to fail, but it succeeded.
+   × comment kinds > James cannot send a "after_deploy" comment (not a James kind) 30ms
+     → Expected request to fail, but it succeeded.
+   × comment kinds > James cannot send a "done" comment (not a James kind) 27ms
+     → Expected request to fail, but it succeeded.
+   × comment kinds > James cannot send a "info" comment (not a James kind) 36ms
+     → Expected request to fail, but it succeeded.
+   × comment kinds > James cannot send a "system" comment (not a James kind) 27ms
+     → Expected request to fail, but it succeeded.
+   × comment kinds > James cannot send a "bogus" comment (not a James kind) 27ms
+     → Expected request to fail, but it succeeded.
+   ✓ comment kinds > a comment authored as the agent is refused whatever the kind  313ms
+   ✓ comment kinds > James cannot edit the agent's comment 47ms
+   × comment kinds > James cannot change a sent comment's kind 47ms
+     → Expected request to fail, but it succeeded.
+   × comment kinds > James cannot change a sent comment's kind to another James kind 33ms
+     → Expected request to fail, but it succeeded.
+   ✓ comment kinds > James cannot change a sent comment's author 42ms
+   × archived task log > James writes and reads an archive entry under its task 20ms
+     → 7 PERMISSION_DENIED: 
+   ✓ archived task log > stranger can neither read nor write it 59ms
+   ✓ archived task log > unverified James can neither read nor write it 63ms
+   ✓ archived task log > anonymous can neither read nor write it 86ms
+   ✓ any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents  382ms
+   ✓ any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents  354ms
+   ✓ any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents  526ms
+   ✓ agents stay read-only from the browser > James reads an agent but cannot create, update or delete one 97ms
+   ✓ default deny > James is refused on a collection the rules do not name 44ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "spec" comment (not a James kind)
+ FAIL  tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "question" comment (not a James kind)
+ FAIL  tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "pr" comment (not a James kind)
+ FAIL  tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "after_deploy" comment (not a James kind)
+ FAIL  tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "done" comment (not a James kind)
+ FAIL  tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "info" comment (not a James kind)
+ FAIL  tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "system" comment (not a James kind)
+ FAIL  tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "bogus" comment (not a James kind)
+Error: Expected request to fail, but it succeeded.
+ ❯ node_modules/@firebase/rules-unit-testing/src/util.ts:137:9
+ ❯ tests/rules/web-threads-b1-4.rules.test.ts:174:7
+    172|   for (const kind of [...SESSION_KINDS, 'bogus'])
+    173|     it(`James cannot send a "${kind}" comment (not a James kind)`, asy…
+    174|       await assertFails(setDoc(doc(james(), 'comments/c1'), comment('j…
+       |       ^
+    175|     })
+    176| 
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+ FAIL  tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot change a sent comment's kind
+Error: Expected request to fail, but it succeeded.
+ ❯ node_modules/@firebase/rules-unit-testing/src/util.ts:137:9
+ ❯ tests/rules/web-threads-b1-4.rules.test.ts:189:5
+    187|   it("James cannot change a sent comment's kind", async () => {
+    188|     await seed({ 'comments/j1': comment('james', 'comment') })
+    189|     await assertFails(updateDoc(doc(james(), 'comments/j1'), { kind: '…
+       |     ^
+    190|   })
+    191| 
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+ FAIL  tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot change a sent comment's kind to another James kind
+Error: Expected request to fail, but it succeeded.
+ ❯ node_modules/@firebase/rules-unit-testing/src/util.ts:137:9
+ ❯ tests/rules/web-threads-b1-4.rules.test.ts:194:5
+    192|   it("James cannot change a sent comment's kind to another James kind"…
+    193|     await seed({ 'comments/j1': comment('james', 'comment') })
+    194|     await assertFails(updateDoc(doc(james(), 'comments/j1'), { kind: '…
+       |     ^
+    195|   })
+    196| 
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+ FAIL  tests/rules/web-threads-b1-4.rules.test.ts > archived task log > James writes and reads an archive entry under its task
+FirebaseError: 7 PERMISSION_DENIED: 
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+ Test Files  1 failed (1)
+      Tests  11 failed | 23 passed (34)
+   Start at  07:10:20
+   Duration  4.48s (transform 31ms, setup 0ms, collect 226ms, tests 3.97s, environment 0ms, prepare 92ms)
+!  Script exited unsuccessfully (code 1)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+Error: Script "vitest run --config vitest.rules.config.ts" exited with code 1
