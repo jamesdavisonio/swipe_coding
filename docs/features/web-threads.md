@@ -383,6 +383,15 @@ body })`, `markRead(task)`, `approveSpec`, `answerQuestion` and `markMerged`. Th
   and a failed send logs `api_call_failed` with the Firestore code, through the existing
   `track` helper (one `request_id` per send); quick replies log as on Threads.
 
+- Fidelity round 1 decisions (B3): every send takes a fresh id from `newCommentId()` (when
+  the id is generated is free, but two sends never share one), and the optimistic message is
+  matched to the snapshot by id, never by text, so the same text sent twice shows twice. As in
+  the prototype, a session message's label sits above its body and James's relative time and
+  tick label sit below his body. A thread with no messages shows the quiet line
+  `No messages yet.` above the composer. Only the task and comments reads gate the screen: a
+  failed projects or agents read is logged by `data.ts` and degrades the header (no project
+  name, no `session live`) without an error state or Retry.
+
 **Unresolved:** none for B1, B2 or B3 (open questions 1–4 answered at confirmation).
 
 ## Files & modules affected
