@@ -280,7 +280,8 @@ todo createdAt, needs: true, unread: false }`. It holds every visible task
   B2's minimal writes: answer creates James's comment of kind `answer` with the option label
   and clears the need; merged is a transaction guarded on stage `pr` that moves to `merged`,
   creates kind `merged` "Merged it." and clears the need; markRead sets `unread: false`.
-- Rows: a task row's open control is a button whose name contains the title; tapping it
+- Rows: a task row's open control is a button whose accessible name starts with the title
+  (so no row button's name starts with a project name, which the chip lookups rely on); tapping it
   navigates to `/t/:id` and calls `markRead(task)` only when `task.unread`. Its meta line is
   `<project name> · <stageText>` with a relative time. The For James row is a button named
   `For James · <project name>` showing `N thing(s) to do by hand` ("1 thing", "2 things") and
