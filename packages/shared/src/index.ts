@@ -11,6 +11,8 @@ export function isOwnerEmail(email: string | null | undefined): boolean {
   return !!email && OWNER_EMAILS.includes(email.toLowerCase())
 }
 
+import { stagesFor } from './templates.ts'
+
 export const COLLECTIONS = {
   projects: 'projects',
   agents: 'agents',
@@ -24,28 +26,68 @@ export type Author = 'james' | 'agent'
 export type TaskType = 'feature' | 'bugfix' | 'chore' | 'for_james'
 export const TASK_TYPES: readonly TaskType[] = ['feature', 'bugfix', 'chore', 'for_james']
 
-export type TaskStatus =
-  'queued' | 'in_progress' | 'waiting_on_james' | 'blocked_on_permission' | 'done' | 'orphaned'
-export const TASK_STATUSES: readonly TaskStatus[] = [
-  'queued',
-  'in_progress',
-  'waiting_on_james',
-  'blocked_on_permission',
-  'done',
-  'orphaned',
-]
+// A task moves along a fixed chain of stages per type (see stagesFor in templates.ts).
+export type Stage =
+  | 'spec'
+  | 'approved'
+  | 'build'
+  | 'fix'
+  | 'do'
+  | 'pr'
+  | 'merged'
+  | 'main_ci'
+  | 'after_deploy'
+  | 'done'
 
-export type SubtaskStatus = 'pending' | 'in_progress' | 'awaiting_approval' | 'done' | 'skipped'
-
-export type CommentKind = 'comment' | 'question' | 'answer' | 'system'
-
-export interface Subtask {
-  key: string
-  label: string
-  status: SubtaskStatus
-  note?: string
+// What James has to decide right now; the session sets it, his decision clears it.
+export type NeedKind = 'spec' | 'question' | 'pr' | 'after_deploy'
+export interface TaskNeed {
+  kind: NeedKind
+  question?: string
+  options?: { key: string; label: string }[]
 }
 
+export interface TaskSpec {
+  goal: string
+  points: string[]
+  out: string
+  touches: string
+  version: number
+}
+
+export interface TaskPr {
+  number: number
+  url: string
+}
+
+export type LogWho = 'james' | 'session' | 'system'
+export interface LogEntry {
+  at: number
+  who: LogWho
+  text: string
+}
+
+// Comments split by author: James writes the first six kinds, the session the other seven.
+export const JAMES_COMMENT_KINDS = [
+  'comment',
+  'answer',
+  'approve',
+  'change_request',
+  'merged',
+  'reopen',
+] as const
+export type JamesCommentKind = (typeof JAMES_COMMENT_KINDS)[number]
+export const SESSION_COMMENT_KINDS = [
+  'spec',
+  'question',
+  'pr',
+  'after_deploy',
+  'done',
+  'info',
+  'system',
+] as const
+export type SessionCommentKind = (typeof SESSION_COMMENT_KINDS)[number]
+export type CommentKind = JamesCommentKind | SessionCommentKind
 export interface Project {
   id: string
   hostname: string
@@ -75,16 +117,22 @@ export interface Task {
   type: TaskType
   title: string
   description: string
-  status: TaskStatus
+  stage: Stage
+  needs: TaskNeed | null // null (never absent) once James has decided
+  spec: TaskSpec | null
+  afterDeploy: string[] // steps James does by hand once merged and green
+  afterDone: boolean[] // his ticks, parallel to afterDeploy
+  pr: TaskPr | null
   summary: string // the session's running summary / final report
-  prUrl: string | null
-  branch: string | null
   createdBy: Author
   createdAt: number
   updatedAt: number
-  subtasks: Subtask[]
-  openQuestion: string | null // set by kanban_ask, cleared when James answers
+  doneAt: number | null
+  reopenedAt: number | null
+  unread: boolean // set by the session, cleared when James opens the thread
+  working: boolean // the session is on it right now
   lastCommentAt: number | null
+  log: LogEntry[] // decision history, append-only, capped at LOG_CAP (see appendLog)
 }
 
 export interface Comment {
@@ -97,6 +145,8 @@ export interface Comment {
   body: string
   createdAt: number
   deliveredAt: number | null // null until the bound agent has pushed it into its session
+  workingAt: number | null // agent-written: the session started on it (absent on older documents)
+  handledAt: number | null // agent-written: the session answered it (absent on older documents)
 }
 
 export interface Todo {
@@ -135,6 +185,100 @@ export function projectNameFor(cwd: string): string {
 
 export function isAgentOnline(agent: Pick<AgentDoc, 'lastSeen'>, now = Date.now()): boolean {
   return now - agent.lastSeen < AGENT_STALE_MS
+}
+
+// ---- stage model helpers (pure) ---------------------------------------------------
+
+// Done tasks leave the lists this long after `doneAt`; nothing is deleted.
+export const DONE_VISIBLE_MS = 7 * 24 * 60 * 60 * 1000
+// The task's decision log keeps this many entries; the oldest move to tasks/{id}/log_archive.
+export const LOG_CAP = 200
+// A for_james task has no stage chain; it rests at this stage.
+const FOR_JAMES_STAGE: Stage = 'do'
+
+type StageShape = Pick<Task, 'type' | 'afterDeploy' | 'stage'>
+
+export function isDone(task: Pick<Task, 'stage'>): boolean {
+  return task.stage === 'done'
+}
+
+export function isTaskVisible(
+  task: Pick<Task, 'stage' | 'doneAt'>,
+  opts: { now?: number; showOlder?: boolean } = {}
+): boolean {
+  const { now = Date.now(), showOlder = false } = opts
+  if (!isDone(task) || showOlder || task.doneAt === null) return true
+  return now - task.doneAt <= DONE_VISIBLE_MS
+}
+
+// Position in the task's own stage list; -1 when the stage is not in it.
+export function stageIndex(task: StageShape): number {
+  return stagesFor(task.type, task.afterDeploy.length > 0).indexOf(task.stage)
+}
+
+// Queued = still at the first stage and not yet bound to a session.
+export function isQueued(task: StageShape & Pick<Task, 'agentId'>): boolean {
+  const first = stagesFor(task.type, task.afterDeploy.length > 0)[0]
+  return task.agentId === null && task.stage === first
+}
+
+// Appends one entry and returns the new log (the newest LOG_CAP entries) plus the overflow,
+// oldest first, for the caller to move into tasks/{id}/log_archive. Never mutates its input.
+export function appendLog(
+  log: readonly LogEntry[],
+  entry: LogEntry
+): { log: LogEntry[]; archived: LogEntry[] } {
+  const all = [...log, entry]
+  const overflow = Math.max(0, all.length - LOG_CAP)
+  return { log: all.slice(overflow), archived: all.slice(0, overflow) }
+}
+
+export type DeliveryState = 'sent' | 'delivered' | 'working' | 'handled'
+
+// Tick state of one of James's comments from the agent's stamps. The latest stamp wins even
+// when an earlier one is missing, so it never goes backwards; absent fields read like null.
+export function deliveryState(
+  c: Pick<Comment, 'deliveredAt' | 'workingAt' | 'handledAt'>
+): DeliveryState {
+  if (c.handledAt != null) return 'handled'
+  if (c.workingAt != null) return 'working'
+  if (c.deliveredAt != null) return 'delivered'
+  return 'sent'
+}
+
+// Every field of a freshly created task, in the one shape both web and agent write.
+export function initialTaskFields(input: {
+  projectId: string
+  type: TaskType
+  title: string
+  description: string
+  createdBy: Author
+  afterDeploy: string[]
+  now: number
+}): Omit<Task, 'id'> {
+  return {
+    projectId: input.projectId,
+    agentId: null,
+    type: input.type,
+    title: input.title,
+    description: input.description,
+    stage: stagesFor(input.type, input.afterDeploy.length > 0)[0] ?? FOR_JAMES_STAGE,
+    needs: null,
+    spec: null,
+    afterDeploy: input.afterDeploy,
+    afterDone: input.afterDeploy.map(() => false),
+    pr: null,
+    summary: '',
+    createdBy: input.createdBy,
+    createdAt: input.now,
+    updatedAt: input.now,
+    doneAt: null,
+    reopenedAt: null,
+    unread: false,
+    working: false,
+    lastCommentAt: null,
+    log: [],
+  }
 }
 
 export * from './templates.ts'
