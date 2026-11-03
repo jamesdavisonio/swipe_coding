@@ -12,13 +12,19 @@ const RESOLVED_ID = `\0${MANIFEST_ID}`
 
 function appManifest(): Plugin {
   const file = fileURLToPath(new URL('../../app.manifest.yaml', import.meta.url))
+  let env = 'prod'
   return {
     name: 'app-manifest',
+    // The logger's environment follows the Vite mode (docs/error-schema.md): prod for a
+    // production build, dev for the dev server and any other mode.
+    configResolved(config) {
+      env = config.mode === 'production' ? 'prod' : 'dev'
+    },
     resolveId: (id) => (id === MANIFEST_ID ? RESOLVED_ID : null),
     load(id) {
       if (id !== RESOLVED_ID) return null
       this.addWatchFile(file)
-      return `export default ${JSON.stringify(parse(readFileSync(file, 'utf8')))}`
+      return `export default ${JSON.stringify({ ...parse(readFileSync(file, 'utf8')), env })}`
     },
   }
 }
