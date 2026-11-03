@@ -12,15 +12,13 @@ import {
   setDoc,
   updateDoc,
   where,
+  writeBatch,
   type QueryConstraint,
 } from 'firebase/firestore'
 import {
   COLLECTIONS,
   forJamesTaskId,
   initialTaskFields,
-  isDone,
-  isQueued,
-  taskStages,
   type AgentDoc,
   type Comment,
   type CommentKind,
@@ -30,7 +28,7 @@ import {
   type Todo,
 } from '@kanban/shared'
 import { db } from './firebase.ts'
-import type { LegacyStatus } from './lib/legacy-status.ts'
+import { MAX_COMMENT_CHARS } from './lib/limits.ts'
 import { log } from './lib/log.ts'
 import { newRequestId } from './lib/request-id.ts'
 
@@ -176,8 +174,6 @@ export const useTaskComments = (taskId: string | undefined) =>
 
 export const useProject = (id: string | undefined) => useDocument<Project>(COLLECTIONS.projects, id)
 export const useTask = (id: string | undefined) => useDocument<Task>(COLLECTIONS.tasks, id)
-export const useAgent = (id: string | null | undefined) =>
-  useDocument<AgentDoc>(COLLECTIONS.agents, id)
 
 // --- writes ------------------------------------------------------------------
 
@@ -205,9 +201,6 @@ export async function createTask(
   await touchProject(projectId)
   return ref.id
 }
-
-// The longest message body written from the UI (io-validation: capped before write).
-const MAX_COMMENT_CHARS = 4000
 
 // James's comment in the shape every writer uses; delivery stamps are the agent's to set.
 function jamesComment(task: Task, kind: CommentKind, body: string, t: number, id: string): Comment {
@@ -258,37 +251,28 @@ async function transitionTask(
   })
 }
 
-// The Phase 1 menu actions (mark done, re-queue, reopen) expressed on stage and doneAt, each
-// guarded on the stage it expects: done only when not done, reopen only from done, re-queue
-// only when the type has a stage chain and the task is not already queued.
-export async function setTaskStatus(task: Task, status: LegacyStatus) {
-  await transitionTask(task.id, (cur) => {
-    const chain = taskStages(cur)
-    if (status === 'done')
-      return isDone(cur) ? null : { patch: { stage: 'done', doneAt: now(), needs: null } }
-    if (status === 'queued')
-      return chain.length === 0 || isQueued(cur)
-        ? null
-        : {
-            patch: { stage: chain[0], agentId: null, needs: null, doneAt: null, working: false },
-          }
-    if (status === 'in_progress')
-      return isDone(cur) && chain.length > 1
-        ? { patch: { stage: chain[chain.length - 2], doneAt: null, reopenedAt: now() } }
-        : null
-    return null
-  })
-}
+// A fresh comment id, generated on the device before anything is written, so the screen can show
+// the message at once and a retried write lands on the same document instead of a duplicate.
+export const newCommentId = (): string => doc(collection(db, COLLECTIONS.comments)).id
 
-// A comment from James. If the task was waiting on him, it is now unblocked (need cleared).
-export async function addComment(task: Task, body: string) {
-  const ref = doc(collection(db, COLLECTIONS.comments))
+// James's reply from the composer. The comment is written under `id`, trimmed and capped. When
+// the task is waiting on a question the comment is the answer (kind `answer`) and the need is
+// cleared in the same write; otherwise it is a plain `comment` and the need stays. A batch, not
+// a transaction: a transaction cannot run offline, a batch is queued and committed on return.
+export async function sendReply(task: Task, reply: { id: string; body: string }) {
+  const kind: CommentKind = task.needs?.kind === 'question' ? 'answer' : 'comment'
   const t = now()
-  const kind = task.needs?.kind === 'question' ? 'answer' : 'comment'
-  await setDoc(ref, jamesComment(task, kind, body, t, ref.id))
-  const patch: Partial<Task> = { lastCommentAt: t, updatedAt: t }
-  if (task.needs) patch.needs = null
-  await updateDoc(doc(db, COLLECTIONS.tasks, task.id), patch)
+  const batch = writeBatch(db)
+  batch.set(
+    doc(db, COLLECTIONS.comments, reply.id),
+    jamesComment(task, kind, reply.body, t, reply.id)
+  )
+  batch.update(doc(db, COLLECTIONS.tasks, task.id), {
+    lastCommentAt: t,
+    updatedAt: t,
+    ...(kind === 'answer' ? { needs: null } : {}),
+  })
+  await batch.commit()
 }
 
 // Approve only while the spec is what the task waits on (stage spec or approved).

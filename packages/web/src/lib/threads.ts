@@ -157,6 +157,11 @@ export function stageText(task: Task): string {
   return (STAGES.includes(task.stage) && STAGE_TEXT[task.stage]) || UNKNOWN_STAGE_TEXT
 }
 
+// A usable timestamp: a number a Date can represent. A document without one still renders, just
+// without a time (toISOString would throw and take the whole screen down).
+export const isDateable = (at: unknown): at is number =>
+  typeof at === 'number' && Number.isFinite(at) && !Number.isNaN(new Date(at).getTime())
+
 // "now", "12 min", the clock time earlier today, "Yesterday", "3 d".
 export function relativeTime(at: number, now: number): string {
   const age = now - at

@@ -5,6 +5,7 @@ export {
   Check,
   CheckCheck,
   ChevronRight,
+  Clock,
   ExternalLink,
   Folder,
   Inbox,

@@ -1,4 +1,5 @@
 import type { QuickReply } from '../lib/threads.ts'
+import { cn } from '../lib/cn.ts'
 import { Button } from './ui/button.tsx'
 import { ExternalLink } from '../lib/icons.ts'
 
@@ -7,13 +8,16 @@ import { ExternalLink } from '../lib/icons.ts'
 export default function QuickReplies({
   replies,
   onReply,
+  className,
 }: {
   replies: QuickReply[]
   onReply: (reply: QuickReply) => void
+  // Extra classes for the row; the default indent lines the chips up with a thread row's text.
+  className?: string
 }) {
   if (replies.length === 0) return null
   return (
-    <div className="flex flex-wrap gap-2 pt-1.5 pl-15">
+    <div className={cn('flex flex-wrap gap-2 pt-1.5 pl-15', className)}>
       {replies.map((reply, index) => {
         const variant = index === 0 ? 'primary' : 'outline'
         const pill = 'rounded-full px-4 text-sm'
