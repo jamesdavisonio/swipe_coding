@@ -224,15 +224,19 @@ export function isTaskVisible(
   return now - task.doneAt <= DONE_VISIBLE_MS
 }
 
+// The task's own stage list (after_deploy is in it only when the task has steps).
+export function taskStages(task: Pick<Task, 'type' | 'afterDeploy'>): Stage[] {
+  return stagesFor(task.type, task.afterDeploy.length > 0)
+}
+
 // Position in the task's own stage list; -1 when the stage is not in it.
 export function stageIndex(task: StageShape): number {
-  return stagesFor(task.type, task.afterDeploy.length > 0).indexOf(task.stage)
+  return taskStages(task).indexOf(task.stage)
 }
 
 // Queued = still at the first stage and not yet bound to a session.
 export function isQueued(task: StageShape & Pick<Task, 'agentId'>): boolean {
-  const first = stagesFor(task.type, task.afterDeploy.length > 0)[0]
-  return task.agentId === null && task.stage === first
+  return task.agentId === null && task.stage === taskStages(task)[0]
 }
 
 // Appends one entry and returns the new log (the newest LOG_CAP entries) plus the overflow,

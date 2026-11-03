@@ -17,7 +17,7 @@ import {
   COLLECTIONS,
   forJamesTaskId,
   initialTaskFields,
-  stagesFor,
+  taskStages,
   type AgentDoc,
   type Comment,
   type Project,
@@ -162,7 +162,7 @@ export async function createTask(
 // The Phase 1 menu actions (mark done, re-queue, reopen) expressed on stage and doneAt.
 export async function setTaskStatus(task: Task, status: LegacyStatus) {
   const t = now()
-  const chain = stagesFor(task.type, task.afterDeploy.length > 0)
+  const chain = taskStages(task)
   const patch: Partial<Task> = { updatedAt: t }
   if (status === 'done') Object.assign(patch, { stage: 'done', doneAt: t, needs: null })
   if (status === 'queued')

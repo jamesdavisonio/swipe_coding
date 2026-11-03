@@ -1,7 +1,7 @@
 // Phase 1 pages still show what the retired `status` and `subtasks` fields expressed. This
 // derives the same words from the stage model so they keep rendering until the Threads
 // screens (B2-B6) replace them; nothing here is new behaviour.
-import { STAGE_LABEL, isDone, isQueued, stagesFor, type Task } from '@kanban/shared'
+import { STAGE_LABEL, isDone, isQueued, taskStages, type Task } from '@kanban/shared'
 
 export type LegacyStatus = 'queued' | 'in_progress' | 'waiting_on_james' | 'done'
 
@@ -20,7 +20,7 @@ export interface LegacyStep {
 // The task's stage chain as the step list: stages before the current one are done, the
 // current one is in progress (or awaiting approval while the spec need is open).
 export function legacySteps(task: Task): LegacyStep[] {
-  const chain = stagesFor(task.type, task.afterDeploy.length > 0)
+  const chain = taskStages(task)
   const current = isDone(task) ? chain.length : chain.indexOf(task.stage)
   return chain.map((stage, i) => ({
     key: stage,

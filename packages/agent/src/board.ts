@@ -18,7 +18,7 @@ import {
   isQueued,
   projectIdFor,
   projectNameFor,
-  stagesFor,
+  taskStages,
   type AgentDoc,
   type Comment,
   type NeedKind,
@@ -504,16 +504,12 @@ function listRank(t: Task): number {
   return isQueued(t) ? 2 : 1
 }
 
-function chainOf(task: Pick<Task, 'type' | 'afterDeploy'>): Stage[] {
-  return stagesFor(task.type, task.afterDeploy.length > 0)
-}
-
 // A step key from the tool is a stage of this task's chain, or a retired Phase 1 step key.
 function resolveStage(task: Task, key: string): Stage {
   const wanted = LEGACY_STEP_KEYS[key] ?? key
-  const stage = chainOf(task).find((s) => s === wanted)
+  const stage = taskStages(task).find((s) => s === wanted)
   if (!stage) {
-    const has = chainOf(task).join(', ') || 'none'
+    const has = taskStages(task).join(', ') || 'none'
     throw new BoardError(`task ${task.id} has no step "${key}" (has: ${has})`)
   }
   return stage
@@ -530,7 +526,7 @@ function prPatch(task: Task, url: string): Record<string, unknown> {
   if (!url) return { pr: null }
   const number = /(\d+)\/?(?:[?#].*)?$/.exec(url)?.[1]
   if (!number) throw new BoardError('pr_url must end in the pull request number')
-  const chain = chainOf(task)
+  const chain = taskStages(task)
   const earlier = chain.indexOf(task.stage) < chain.indexOf('pr')
   const stage = chain.includes('pr') && earlier ? { stage: 'pr' } : {}
   return { pr: { number: Number(number), url }, ...stage }
@@ -539,7 +535,7 @@ function prPatch(task: Task, url: string): Record<string, unknown> {
 // Moves the task past `stage`: to the next stage of its chain (done after the last), clearing
 // the need that stage was waiting on. A task already beyond it is left alone.
 function advancePast(task: Task, stage: Stage, t: number): Record<string, unknown> {
-  const chain = chainOf(task)
+  const chain = taskStages(task)
   const next = chain.at(chain.indexOf(stage) + 1)
   if (next === undefined || next === 'done') return donePatch(t)
   if (chain.indexOf(task.stage) > chain.indexOf(stage)) return {}
@@ -562,7 +558,7 @@ function subtaskPatch(
     case 'skipped':
       return advancePast(task, stage, t)
     case 'in_progress': {
-      const chain = chainOf(task)
+      const chain = taskStages(task)
       const ahead = stage !== 'done' && chain.indexOf(stage) > chain.indexOf(task.stage)
       return ahead ? { stage } : {}
     }
