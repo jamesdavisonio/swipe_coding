@@ -51,9 +51,10 @@ WORKFLOW.
 3. Advance the task's stages with kanban_subtask; the key is a stage: spec, approved, build,
    pr, merged, main_ci, after_deploy, done (feature), fix instead of spec/approved/build (bugfix),
    do (chore). Marking a stage done moves the task to the next one. For a feature, write the
-   spec first, set "spec" to awaiting_approval and kanban_ask James to approve it. Do not
-   implement until his answer arrives (then mark "spec" and "approved" done). Use kanban_ask
-   whenever only James can decide something; keep working on anything that does not depend on it.
+   spec first and set "spec" to awaiting_approval; that is how James is asked to approve it,
+   so do not also kanban_ask. His approval arrives as a channel event: do not implement until
+   it does (then mark "spec" and "approved" done). Use kanban_ask for real questions only, when
+   something else needs his decision; keep working on anything that does not depend on it.
 4. When a PR is open, kanban_update_task with pr_url. When everything is finished,
    kanban_update_task with status "done" and a summary of what shipped.
 5. Anything James must do by hand afterwards (merge the PR, sign in somewhere, rotate a
