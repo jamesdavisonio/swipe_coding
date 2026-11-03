@@ -1,20 +1,18 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Task } from '@kanban/shared'
+import { rememberFocus } from '../lib/a11y.ts'
 import { activeNeed } from '../lib/threads.ts'
-import { Sheet, SheetContent } from './ui/sheet.tsx'
+import AfterDeployDecision from './AfterDeployDecision.tsx'
+import PrDecision from './PrDecision.tsx'
+import QuestionDecision from './QuestionDecision.tsx'
+import SpecDecision from './SpecDecision.tsx'
+import { Sheet } from './ui/sheet.tsx'
 
-// What the sheet says under the title, from the need it was opened for.
-function summaryLine(task: Task): string {
-  const need = activeNeed(task)
-  if (need?.kind === 'question' && need.question) return need.question
-  if (need?.kind === 'spec' && task.spec?.goal) return task.spec.goal
-  if (typeof task.summary === 'string' && task.summary) return task.summary
-  return 'Nothing more to read on this one yet.'
-}
-
-// The decision card that slides up from "Read more" and "Open the N steps". B2 only needs it
-// to open and close accessibly; the decisions themselves (approve, change request, answer,
-// merged, ticks) arrive with B4. Radix handles focus trap, Escape and focus return; the close
-// button comes with the sheet primitive.
+// The decision card that slides up from "Read more", "Small change…" and "Open the N steps": the
+// spec, the question, the PR or the after-deploy steps, whichever the task needs. It is made for
+// the need the task had when it opened and closes itself (onClose) once the task has moved on,
+// however that happened (this sheet, another device, the session). Radix gives it the focus trap,
+// Escape and the return of focus to the control that opened it.
 export default function DecisionSheet({
   task,
   mode,
@@ -24,9 +22,43 @@ export default function DecisionSheet({
   mode: 'read' | 'change'
   onClose: () => void
 }) {
+  const need = activeNeed(task)
+  const [openedFor] = useState(need?.kind)
+  const [restoreFocus] = useState(rememberFocus)
+  const closed = useRef(false)
+  const close = useCallback(() => {
+    if (closed.current) return
+    closed.current = true
+    onClose()
+  }, [onClose])
+
+  // Radix only knows how to hand focus back to a Dialog.Trigger; this sheet is opened by chips
+  // and buttons elsewhere, so the control that had focus when it opened gets it back.
+  const returnFocus = (event: Event) => {
+    event.preventDefault()
+    restoreFocus()
+  }
+
+  const moved = !need || need.kind !== openedFor
+  useEffect(() => {
+    if (moved) close()
+  }, [moved, close])
+  if (!need || moved) return null
+
   return (
-    <Sheet open onOpenChange={(open) => !open && onClose()}>
-      <SheetContent title={task.title} description={summaryLine(task)} data-mode={mode} />
+    <Sheet open onOpenChange={(open) => !open && close()}>
+      {need.kind === 'spec' ? (
+        <SpecDecision task={task} mode={mode} close={close} returnFocus={returnFocus} />
+      ) : null}
+      {need.kind === 'question' ? (
+        <QuestionDecision task={task} need={need} close={close} returnFocus={returnFocus} />
+      ) : null}
+      {need.kind === 'pr' ? (
+        <PrDecision task={task} close={close} returnFocus={returnFocus} />
+      ) : null}
+      {need.kind === 'after_deploy' ? (
+        <AfterDeployDecision task={task} returnFocus={returnFocus} />
+      ) : null}
     </Sheet>
   )
 }
