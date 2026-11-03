@@ -239,6 +239,15 @@ export function isQueued(task: StageShape & Pick<Task, 'agentId'>): boolean {
   return task.agentId === null && task.stage === taskStages(task)[0]
 }
 
+// The one classification both the agent's list order and the web's status words use.
+export type TaskPhase = 'waiting_on_james' | 'done' | 'queued' | 'in_progress'
+
+export function taskPhase(task: StageShape & Pick<Task, 'agentId' | 'needs'>): TaskPhase {
+  if (task.needs) return 'waiting_on_james'
+  if (isDone(task)) return 'done'
+  return isQueued(task) ? 'queued' : 'in_progress'
+}
+
 // Appends one entry and returns the new log (the newest LOG_CAP entries) plus the overflow,
 // oldest first, for the caller to move into tasks/{id}/log_archive. Never mutates its input.
 export function appendLog(

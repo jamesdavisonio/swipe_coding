@@ -18,6 +18,7 @@ import {
   isQueued,
   projectIdFor,
   projectNameFor,
+  taskPhase,
   taskStages,
   type AgentDoc,
   type Comment,
@@ -27,6 +28,7 @@ import {
   type Stage,
   type Task,
   type TaskNeed,
+  type TaskPhase,
   type TaskType,
   type Todo,
 } from '@kanban/shared'
@@ -497,11 +499,14 @@ export async function findLiveAgent(
 
 // Order in kanban_list_tasks: the pinned For James task, then what needs James, then work in
 // flight, then queued, then done.
+const PHASE_RANK: Record<TaskPhase, number> = {
+  waiting_on_james: 0,
+  in_progress: 1,
+  queued: 2,
+  done: 3,
+}
 function listRank(t: Task): number {
-  if (t.type === 'for_james') return -1
-  if (t.needs) return 0
-  if (isDone(t)) return 3
-  return isQueued(t) ? 2 : 1
+  return t.type === 'for_james' ? -1 : PHASE_RANK[taskPhase(t)]
 }
 
 // A step key from the tool is a stage of this task's chain, or a retired Phase 1 step key.
