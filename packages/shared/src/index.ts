@@ -39,6 +39,19 @@ export type Stage =
   | 'after_deploy'
   | 'done'
 
+export const STAGES: readonly Stage[] = [
+  'spec',
+  'approved',
+  'build',
+  'fix',
+  'do',
+  'pr',
+  'merged',
+  'main_ci',
+  'after_deploy',
+  'done',
+]
+
 // What James has to decide right now; the session sets it, his decision clears it.
 export type NeedKind = 'spec' | 'question' | 'pr' | 'after_deploy'
 export interface TaskNeed {
