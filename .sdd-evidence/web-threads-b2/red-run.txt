@@ -1,0 +1,192 @@
+
+ RUN  v3.2.7 C:/Users/Intel/Documents/code/kanban
+
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/web-threads-b2-10.test.tsx [ tests/web-threads-b2-10.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/Threads.tsx" from "tests/web-threads-b2-10.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b2-10.test.tsx:6:0
+  14 |  const __vi_import_0__ = await import("react/jsx-dev-runtime");
+  15 |  const __vi_import_1__ = await import("../packages/shared/src/index.ts");
+  16 |  const __vi_import_2__ = await import("../packages/web/src/pages/Threads.tsx");
+     |                                       ^
+  17 |  const __vi_import_3__ = await import("../packages/web/src/lib/threads.ts");
+  18 |  const __vi_import_4__ = await import("./fixtures/web-threads-b2.tsx");
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  tests/web-threads-b2-11.test.tsx [ tests/web-threads-b2-11.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/Threads.tsx" from "tests/web-threads-b2-11.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b2-11.test.tsx:7:0
+  15 |  const __vi_import_1__ = await import("@testing-library/react");
+  16 |  const __vi_import_2__ = await import("@testing-library/user-event");
+  17 |  const __vi_import_3__ = await import("../packages/web/src/pages/Threads.tsx");
+     |                                       ^
+  18 |  const __vi_import_4__ = await import("./fixtures/web-threads-b2.tsx");
+  19 |  
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  tests/web-threads-b2-12.test.tsx [ tests/web-threads-b2-12.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/components/BottomNav.tsx" from "tests/web-threads-b2-12.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b2-12.test.tsx:7:0
+  15 |  const __vi_import_1__ = await import("@testing-library/react");
+  16 |  const __vi_import_2__ = await import("react-router-dom");
+  17 |  const __vi_import_3__ = await import("../packages/web/src/components/BottomNav.tsx");
+     |                                       ^
+  18 |  const __vi_import_4__ = await import("../packages/web/src/pages/Threads.tsx");
+  19 |  const __vi_import_5__ = await import("./fixtures/web-threads-b2.tsx");
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  tests/web-threads-b2-29.test.tsx [ tests/web-threads-b2-29.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/Threads.tsx" from "tests/web-threads-b2-29.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b2-29.test.tsx:7:0
+  15 |  const __vi_import_1__ = await import("@testing-library/react");
+  16 |  const __vi_import_2__ = await import("@testing-library/user-event");
+  17 |  const __vi_import_3__ = await import("../packages/web/src/pages/Threads.tsx");
+     |                                       ^
+  18 |  const __vi_import_4__ = await import("./fixtures/web-threads-b2.tsx");
+  19 |  
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  tests/web-threads-b2-30.test.tsx [ tests/web-threads-b2-30.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/Threads.tsx" from "tests/web-threads-b2-30.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b2-30.test.tsx:8:0
+  15 |  const __vi_import_1__ = await import("@testing-library/react");
+  16 |  const __vi_import_2__ = await import("@testing-library/user-event");
+  17 |  const __vi_import_3__ = await import("../packages/web/src/pages/Threads.tsx");
+     |                                       ^
+  18 |  const __vi_import_4__ = await import("./fixtures/web-threads-b2.tsx");
+  19 |  
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  tests/web-threads-b2-6.test.tsx [ tests/web-threads-b2-6.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/Threads.tsx" from "tests/web-threads-b2-6.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b2-6.test.tsx:7:0
+  14 |  const __vi_import_0__ = await import("react/jsx-dev-runtime");
+  15 |  const __vi_import_1__ = await import("@testing-library/react");
+  16 |  const __vi_import_2__ = await import("../packages/web/src/pages/Threads.tsx");
+     |                                       ^
+  17 |  const __vi_import_3__ = await import("../packages/web/src/lib/threads.ts");
+  18 |  const __vi_import_4__ = await import("./fixtures/web-threads-b2.tsx");
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  tests/web-threads-b2-7.test.tsx [ tests/web-threads-b2-7.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/Threads.tsx" from "tests/web-threads-b2-7.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b2-7.test.tsx:7:0
+  15 |  const __vi_import_1__ = await import("@testing-library/react");
+  16 |  const __vi_import_2__ = await import("@testing-library/user-event");
+  17 |  const __vi_import_3__ = await import("../packages/web/src/pages/Threads.tsx");
+     |                                       ^
+  18 |  const __vi_import_4__ = await import("./fixtures/web-threads-b2.tsx");
+  19 |  
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  tests/web-threads-b2-8.test.tsx [ tests/web-threads-b2-8.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/Threads.tsx" from "tests/web-threads-b2-8.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b2-8.test.tsx:7:0
+  15 |  const __vi_import_1__ = await import("@testing-library/react");
+  16 |  const __vi_import_2__ = await import("@testing-library/user-event");
+  17 |  const __vi_import_3__ = await import("../packages/web/src/pages/Threads.tsx");
+     |                                       ^
+  18 |  const __vi_import_4__ = await import("../packages/web/src/lib/threads.ts");
+  19 |  const __vi_import_5__ = await import("./fixtures/web-threads-b2.tsx");
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ FAIL  tests/web-threads-b2-9.test.tsx [ tests/web-threads-b2-9.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/Threads.tsx" from "tests/web-threads-b2-9.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b2-9.test.tsx:7:0
+  14 |  const __vi_import_0__ = await import("react/jsx-dev-runtime");
+  15 |  const __vi_import_1__ = await import("@testing-library/react");
+  16 |  const __vi_import_2__ = await import("../packages/web/src/pages/Threads.tsx");
+     |                                       ^
+  17 |  const __vi_import_3__ = await import("./fixtures/web-threads-b2.tsx");
+  18 |  
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯
+
+
+ Test Files  9 failed (9)
+      Tests  no tests
+   Start at  08:35:16
+   Duration  1.72s (transform 21ms, setup 0ms, collect 0ms, tests 0ms, environment 9.69s, prepare 1.72s)
+
