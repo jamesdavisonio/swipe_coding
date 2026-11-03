@@ -29,7 +29,8 @@
       "collectionGroup": "tasks",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "projectId", "order": "ASCENDING" },
+        { "fieldPath": "stage", "order": "ASCENDING" },
         { "fieldPath": "updatedAt", "order": "DESCENDING" }
       ]
     },
@@ -38,8 +39,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "projectId", "order": "ASCENDING" },
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+        { "fieldPath": "doneAt", "order": "DESCENDING" }
       ]
     },
     {
