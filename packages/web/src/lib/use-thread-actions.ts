@@ -12,7 +12,8 @@ export const FEATURE = 'web-threads'
 export type SheetMode = 'read' | 'change'
 
 // Records a tap, then runs the write; a failed write is logged with the same request id so
-// the tap can be followed to its failure. The row stays as it was (the snapshot is the truth).
+// the tap can be followed to its failure: a Firestore error is api_call_failed with its code,
+// anything else is feature_error. The row stays as it was (the snapshot is the truth).
 export async function track(action: string, target: string, write?: () => Promise<unknown>) {
   const requestId = newRequestId()
   log.event('user_action', { feature: FEATURE, action, target, request_id: requestId })
@@ -20,13 +21,23 @@ export async function track(action: string, target: string, write?: () => Promis
   try {
     await write()
   } catch (err) {
-    log.error('feature_error', `${action} failed`, {
-      feature: FEATURE,
-      action,
-      request_id: requestId,
-      status: err instanceof Error ? err.name : 'unknown',
-    })
+    const context = { feature: FEATURE, action, request_id: requestId }
+    const code = firestoreCode(err)
+    if (code !== null)
+      log.error('api_call_failed', `Firestore write failed: ${action}`, {
+        ...context,
+        target: 'firestore',
+        status: code,
+      })
+    else log.error('feature_error', `${action} failed`, context)
   }
+}
+
+// The Firestore error code ('permission-denied', 'unavailable', ...) when `err` is a
+// FirebaseError, else null.
+function firestoreCode(err: unknown): string | null {
+  if (!(err instanceof Error) || err.name !== 'FirebaseError') return null
+  return 'code' in err && typeof err.code === 'string' ? err.code : 'unknown'
 }
 
 export function useThreadActions(openSheet: (task: Task, mode: SheetMode) => void) {
