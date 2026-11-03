@@ -25,7 +25,7 @@ export default function AfterDeployDecision({
       <div className="flex flex-col gap-3">
         <ul className="flex flex-col rounded-lg border border-border">
           {steps.map((step, index) => (
-            <li key={step} className="border-b border-border last:border-b-0">
+            <li key={`${index}:${step}`} className="border-b border-border last:border-b-0">
               <label className="flex min-h-11 cursor-pointer items-center gap-3 px-3 py-2">
                 <input
                   type="checkbox"

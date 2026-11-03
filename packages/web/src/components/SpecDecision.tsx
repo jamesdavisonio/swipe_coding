@@ -22,8 +22,8 @@ function SpecBody({ spec }: { spec: TaskSpec | null }) {
       </p>
       {points.length > 0 ? (
         <ul className="flex list-disc flex-col gap-1 pl-5">
-          {points.map((point) => (
-            <li key={point}>{point}</li>
+          {points.map((point, index) => (
+            <li key={`${index}:${point}`}>{point}</li>
           ))}
         </ul>
       ) : null}
