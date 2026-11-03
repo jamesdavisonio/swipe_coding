@@ -45,7 +45,8 @@ Layout: phone-first, content column `max-w-(--content-max)` (560px), safe-area p
 
 ## Not here (yet)
 
-Feature components live beside the primitives in `src/components/` (B2 added `ThreadRow`,
-`ProjectChips`, `QuickReplies`, `ThreadList`, `ThreadsHeader`, `BottomNav`, `DecisionSheet`);
-the stepper and delivery ticks come with the thread view (B3). No component catalog: the prototype is the reference.
+Feature components live beside the primitives in `src/components/`: B2 added `ThreadRow`,
+`ProjectChips`, `QuickReplies`, `ThreadList`, `ThreadsHeader`, `BottomNav`, `DecisionSheet`;
+B3 added `StageStepper`, `Ticks`, `Messages`, `MessageList`, `Composer`, `ThreadHeader`,
+`ThreadFooter`, `ThreadState`, `ThreadView`, `HistorySheet`. No component catalog: the prototype is the reference.
 No i18n: single owner, English.

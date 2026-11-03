@@ -147,13 +147,15 @@ state honest when the model forgets to call tools:
 
 React + Vite + Tailwind PWA, installable on the phone.
 
-- `/` projects, each with counts (in progress / waiting on me / open / done) and the
-  "For James" badge.
-- `/p/:project` board: columns **Waiting on me · In progress · Queued · Done**; the
-  "For James" task pinned at top.
-- `/t/:task` task view: type + subtask stepper, summary, PR link (opens GitHub), agent
-  presence (online / idle / offline, `claude --resume …`), comment thread with a
-  composer. Quick actions on an open question: _Approve_, _Reply_.
+- `/` **Threads** (B2): one row per task across projects plus a pinned For James row per
+  project; project chips with needs-you counts (`?project=` keeps the filter); quick replies
+  by need; bottom nav. Spec: `docs/features/web-threads.md`.
+- `/t/:task` **thread** (B3): stage stepper, the conversation with kind labels and delivery
+  ticks, typing indicator, composer (Ctrl/⌘+Enter; a reply queued offline keeps one tick),
+  quick replies, Decision history button. Phase 1's mark done / re-queue menu and the
+  `claude --resume` copy button were retired with the old task page; Reopen returns in B6.
+- `/projects` the Phase 1 project list and `/p/:project` the Phase 1 board, until the
+  Projects screen (B5) replaces them.
 - Web Push for `kanban_ask`, `Stop` with open question, PR opened, permission prompt.
 
 ### Data model (Firestore)
