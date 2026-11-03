@@ -172,6 +172,15 @@ export function relativeTime(at: number, now: number): string {
   return days === 1 ? 'Yesterday' : `${days} d`
 }
 
+// "Today 14:05", "Yesterday 09:30", "24 Oct 18:00".
+export function dayAndTime(at: number, now: number): string {
+  const day = new Date(at)
+  const time = day.toTimeString().slice(0, CLOCK_TEXT_CHARS)
+  if (day.toDateString() === new Date(now).toDateString()) return `Today ${time}`
+  if (day.toDateString() === new Date(now - DAY_MS).toDateString()) return `Yesterday ${time}`
+  return `${day.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} ${time}`
+}
+
 // "1 thing to do by hand", "3 things to do by hand".
 export const forJamesSummary = (count: number): string =>
   `${count} ${count === 1 ? 'thing' : 'things'} to do by hand`

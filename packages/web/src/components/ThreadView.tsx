@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react'
-import { isDone, type Comment, type Task } from '@kanban/shared'
+import type { Comment, Task } from '@kanban/shared'
 import { readMoreId } from '../lib/messages.ts'
-import { activeNeed, quickReplies } from '../lib/threads.ts'
+import { activeNeed } from '../lib/threads.ts'
 import { useReply } from '../lib/use-reply.ts'
 import { useThreadActions, type SheetMode } from '../lib/use-thread-actions.ts'
 import { useUnreadCleared } from '../lib/use-unread-cleared.ts'
-import Composer from './Composer.tsx'
 import DecisionSheet from './DecisionSheet.tsx'
 import HistorySheet from './HistorySheet.tsx'
 import MessageList from './MessageList.tsx'
-import QuickReplies from './QuickReplies.tsx'
-import ThreadFooter, { DoneNote } from './ThreadFooter.tsx'
+import ThreadFooter from './ThreadFooter.tsx'
 import ThreadHeader from './ThreadHeader.tsx'
 
 // Keeps the newest message in view as the conversation grows (the page scrolls; the header and
@@ -61,24 +59,12 @@ export default function ThreadView({
           onReadMore={() => setSheet('read')}
         />
       </main>
-      <ThreadFooter>
-        <QuickReplies
-          replies={quickReplies(task)}
-          onReply={(quick) => actions.reply(task, quick)}
-          className="pt-0 pl-0"
-        />
-        {isDone(task) ? (
-          <DoneNote task={task} now={now} />
-        ) : (
-          <Composer
-            text={reply.text}
-            onText={reply.setText}
-            canSend={reply.canSend}
-            onSend={reply.send}
-            failed={reply.failed}
-          />
-        )}
-      </ThreadFooter>
+      <ThreadFooter
+        task={task}
+        now={now}
+        reply={reply}
+        onQuickReply={(quick) => actions.reply(task, quick)}
+      />
       {sheet ? <DecisionSheet task={task} mode={sheet} onClose={() => setSheet(null)} /> : null}
       {historyOpen ? <HistorySheet task={task} onClose={() => setHistoryOpen(false)} /> : null}
     </div>
