@@ -1,0 +1,66 @@
+=== npm run build:web
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.15s
+exit 0
+=== npm run typecheck
+> tsc -p tsconfig.json
+
+
+> @kanban/web@0.0.1 typecheck
+> tsc -p tsconfig.json
+
+exit 0
+=== npm run lint
+
+C:\Users\Intel\Documents\code\kanban\packages\web\src\pages\Home.tsx
+  115:13  warning  The autoFocus prop should not be used, as it can reduce usability and accessibility for users  jsx-a11y/no-autofocus
+
+✖ 2 problems (0 errors, 2 warnings)
+
+exit 0
+=== npm test
+
+ Test Files  15 passed (15)
+      Tests  120 passed (120)
+   Start at  08:59:36
+   Duration  4.66s (transform 577ms, setup 0ms, collect 7.22s, tests 6.00s, environment 12.54s, prepare 3.62s)
+
+exit 0
+=== npm run test:rules
++  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+exit 0
+=== npx firebase emulators:exec --only firestore --project demo-kanban "npm run test:agent"
++  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+exit 0
+=== npm run audit
+
+> audit
+> node scripts/check-audit.mjs
+
+· accepted high GHSA-m9gg-hp2v-232j (@grpc/grpc-js) until 2027-02-01 — Pinned ~1.9.0 by @firebase/firestore's Node build inside the firebase web SDK; the browser bundle never loads gRPC and nothing in this repo runs the web SDK on Node. npm overrides do not reach workspace dependency trees, so it cannot be forced. Re-check on every firebase bump.
+✓ audit gate passed: 1 high+ advisory (all allowlisted), 12 findings in total at any severity.
+exit 0
+=== node scripts/check-firestore-rules.mjs
+✓ firestore.rules passed lint.
+exit 0
+=== node scripts/check-contrast.mjs
+✓ contrast passes WCAG AA for 38 pairs (:root + .dark).
+exit 0
+=== npx prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+exit 0

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Project, Task } from '@kanban/shared'
+import BottomNav from '../components/BottomNav.tsx'
 import { renameProject, useOpenTodos, useProjects, useRecentTasks } from '../data.ts'
 import { legacyStatus } from '../lib/legacy-status.ts'
 import { Empty, Page, Section, TaskCard, TopBar } from '../ui.tsx'
@@ -82,6 +83,7 @@ export default function Home() {
           </Section>
         </div>
       </Page>
+      <BottomNav />
     </>
   )
 }

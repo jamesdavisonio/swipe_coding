@@ -41,7 +41,7 @@ export default function Board() {
     <>
       <TopBar
         title={project.data?.name ?? '…'}
-        back="/"
+        back="/projects"
         right={
           <button className="btn-primary px-3 py-1.5" onClick={() => setOpen(true)}>
             + Task

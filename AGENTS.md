@@ -23,7 +23,7 @@ npm run web                # Vite dev server; packages/web/.env holds the Fireba
 ## How to run tests
 
 ```
-npm test                   # vitest unit suite, tests/ (excludes tests/rules)
+npm test                   # vitest: unit + web component tests (tests/*.test.tsx, jsdom), not tests/rules
 npm run test:rules         # Firestore rules in the emulator (needs Java 21 on PATH)
 npm run test:agent         # agent stdio protocol test; offline by default. Board path:
                            #   firebase emulators:exec --only firestore --project demo-kanban "npm run test:agent"
