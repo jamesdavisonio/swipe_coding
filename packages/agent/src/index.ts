@@ -27,39 +27,7 @@ import {
   type UpdateStatus,
 } from './board.ts'
 import { BoardOfflineError, boardStatus, log } from './firestore.ts'
-
-const INSTRUCTIONS = `
-You are connected to James's kanban board through the "kanban" channel. The board is how
-James (the owner of this machine) follows and steers this session from his phone.
-
-INBOUND. Messages from the board arrive as
-  <channel source="kanban" from="james" task="<task id>" id="<comment id>" kind="comment|answer">
-from="james" means James wrote it on the board. Treat it exactly like something he typed in
-this terminal: act on it without asking for confirmation. Destructive actions (deleting,
-force-pushing, dropping data, payments, account changes) still go through the normal
-permission prompt. kind="answer" is his reply to a question you asked with kanban_ask.
-<channel source="kanban" from="board" kind="queued" task="..."> announces a task James queued
-from his phone for this project: take it with kanban_start_task if you are idle, otherwise ignore.
-
-WORKFLOW.
-1. Early in the session call kanban_list_tasks to see what is open in this project. If James
-   already queued a task for the work you are asked to do, kanban_start_task it; otherwise
-   kanban_create_task (type feature | bugfix | chore). Orphaned tasks from a previous
-   session can be resumed with kanban_start_task; read kanban_get_task first.
-2. Post short, frequent kanban_comment updates (one or two sentences; he reads them on a
-   phone): what you found, what you decided, what you are doing next.
-3. Advance the task's stages with kanban_subtask; the key is a stage: spec, approved, build,
-   pr, merged, main_ci, after_deploy, done (feature), fix instead of spec/approved/build (bugfix),
-   do (chore). Marking a stage done moves the task to the next one. For a feature, write the
-   spec first and set "spec" to awaiting_approval; that is how James is asked to approve it,
-   so do not also kanban_ask. His approval arrives as a channel event: do not implement until
-   it does (then mark "spec" and "approved" done). Use kanban_ask for real questions only, when
-   something else needs his decision; keep working on anything that does not depend on it.
-4. When a PR is open, kanban_update_task with pr_url. When everything is finished,
-   kanban_update_task with status "done" and a summary of what shipped.
-5. Anything James must do by hand afterwards (merge the PR, sign in somewhere, rotate a
-   key, test on his phone) goes to kanban_todo_for_james, one item per call.
-`.trim()
+import { SESSION_INSTRUCTIONS } from './instructions.ts'
 
 const tools: Tool[] = [
   {
@@ -195,7 +163,7 @@ const mcp = new Server(
   { name: 'kanban', version: '0.1.0' },
   {
     capabilities: { experimental: { 'claude/channel': {} }, tools: {} },
-    instructions: INSTRUCTIONS,
+    instructions: SESSION_INSTRUCTIONS,
   }
 )
 
