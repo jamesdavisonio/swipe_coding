@@ -76,6 +76,17 @@ function SpecBrief({ brief, spec }: { brief: Brief; spec: TaskSpec | null }) {
   )
 }
 
+// What the sheet shows of the spec: the session's spec brief with the full spec behind a toggle,
+// or the spec itself when the thread holds no spec brief.
+function SpecContent({ task }: { task: Task }) {
+  const specBrief = useLatestBrief(task.id, 'spec')
+  return specBrief ? (
+    <SpecBrief brief={specBrief.brief} spec={task.spec} />
+  ) : (
+    <SpecBody spec={task.spec} />
+  )
+}
+
 // The free text of a change request.
 function ChangeBox({ text, onText }: { text: string; onText: (text: string) => void }) {
   const boxId = useId()
@@ -110,7 +121,6 @@ export default function SpecDecision({
   const [text, setText] = useState('')
   const { pending, failed, decide } = useDecision(task.id, close)
   const version = specVersion(task)
-  const specBrief = useLatestBrief(task.id, 'spec')
 
   return (
     <SheetContent
@@ -119,11 +129,7 @@ export default function SpecDecision({
       aria-describedby={undefined}
     >
       <div className="flex flex-col gap-4">
-        {specBrief ? (
-          <SpecBrief brief={specBrief.brief} spec={task.spec} />
-        ) : (
-          <SpecBody spec={task.spec} />
-        )}
+        <SpecContent task={task} />
         {changing ? <ChangeBox text={text} onText={setText} /> : null}
         <SaveError failed={failed} />
         <div className="flex gap-2.5">

@@ -5,7 +5,7 @@ import { MAX_COMMENT_CHARS } from '../lib/limits.ts'
 import { withoutReplyLine } from '../lib/brief.ts'
 import { questionBrief, questionOptions, questionTitle } from '../lib/threads.ts'
 import { useDecision } from '../lib/use-decision.ts'
-import BriefCard from './BriefCard.tsx'
+import BriefBlock from './BriefBlock.tsx'
 import SaveError from './SaveError.tsx'
 import { Button } from './ui/button.tsx'
 import { Textarea } from './ui/input.tsx'
@@ -39,13 +39,7 @@ export default function QuestionDecision({
       aria-describedby={undefined}
     >
       <div className="flex flex-col gap-4">
-        {brief ? (
-          <div className="flex flex-col gap-2.5 text-base leading-snug">
-            {brief.before ? <p>{brief.before}</p> : null}
-            <BriefCard brief={brief} />
-            {after ? <p>{after}</p> : null}
-          </div>
-        ) : null}
+        {brief ? <BriefBlock brief={brief} after={after} /> : null}
         <div className="flex flex-col gap-2">
           {phrase ? (
             <Button
