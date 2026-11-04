@@ -528,6 +528,14 @@ attached the spec yet.`). Buttons `Approve v<N>` and `Changes…`; in mode `chan
   the untick (target the todo id); `milestone_reached` `task_queued` (target the task id)
   after `createTask` resolves; failed writes log `api_call_failed` with the Firestore code.
 
+- Fidelity round 1 decisions (B5): unticking a todo logs `user_action` with action
+  `todo_undone` (target the todo id), added to the Instrumentation table. `queue_task` is
+  logged once `createTask` resolves, so its target is the new task id, and the
+  `task_queued` milestone carries the same `request_id`; a pending or refused save logs no
+  `queue_task` and no milestone (a refused save logs `api_call_failed`). Windows are the shared
+  constants, not literal durations: online is `lastSeen` within `AGENT_STALE_MS`, "this week"
+  is `DONE_VISIBLE_MS` (both may change; tests derive their edges from them).
+
 **Unresolved:** none for B1–B5 (open questions 1–4 answered at confirmation).
 
 ## Files & modules affected
@@ -572,15 +580,15 @@ kanban`).
 All from `logging/taxonomy.json` (v6); `feature: 'web-threads'` on every row; emitted via
 `logger.browser.js` (`source: web_client`, buffered until the client logging project exists).
 
-| event_type          | severity | context keys                                                                                                                                                                                         | audience |
-| ------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| `session_start`     | INFO     | `feature`                                                                                                                                                                                            | internal |
-| `session_end`       | INFO     | `feature`, `duration_s`                                                                                                                                                                              | internal |
-| `user_action`       | INFO     | `feature`, `action` ∈ reply · approve_spec · request_change · answer · merged · tick_step · untick_step · reopen · queue_task · todo_add · todo_done · filter · open_thread, `target` = task/todo id | internal |
-| `milestone_reached` | INFO     | `feature`, `milestone` ∈ task_done · task_reopened · task_queued, `target`                                                                                                                           | internal |
-| `api_call_failed`   | ERROR    | `feature`, `target` = firestore, `action`, `status`                                                                                                                                                  | internal |
-| `validation_failed` | WARNING  | `feature`, `field`, `action`                                                                                                                                                                         | internal |
-| `feature_error`     | ERROR    | `feature`, `action`                                                                                                                                                                                  | internal |
+| event_type          | severity | context keys                                                                                                                                                                                                       | audience |
+| ------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| `session_start`     | INFO     | `feature`                                                                                                                                                                                                          | internal |
+| `session_end`       | INFO     | `feature`, `duration_s`                                                                                                                                                                                            | internal |
+| `user_action`       | INFO     | `feature`, `action` ∈ reply · approve_spec · request_change · answer · merged · tick_step · untick_step · reopen · queue_task · todo_add · todo_done · todo_undone · filter · open_thread, `target` = task/todo id | internal |
+| `milestone_reached` | INFO     | `feature`, `milestone` ∈ task_done · task_reopened · task_queued, `target`                                                                                                                                         | internal |
+| `api_call_failed`   | ERROR    | `feature`, `target` = firestore, `action`, `status`                                                                                                                                                                | internal |
+| `validation_failed` | WARNING  | `feature`, `field`, `action`                                                                                                                                                                                       | internal |
+| `feature_error`     | ERROR    | `feature`, `action`                                                                                                                                                                                                | internal |
 
 No R3 proposal needed; nothing here falls outside the taxonomy.
 
