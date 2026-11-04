@@ -536,7 +536,48 @@ attached the spec yet.`). Buttons `Approve v<N>` and `Changes…`; in mode `chan
   constants, not literal durations: online is `lastSeen` within `AGENT_STALE_MS`, "this week"
   is `DONE_VISIBLE_MS` (both may change; tests derive their edges from them).
 
-**Unresolved:** none for B1–B5 (open questions 1–4 answered at confirmation).
+**B6 contract details fixed at test time** (planner decisions, 2026-11-04):
+
+- History sheet (`packages/web/src/components/HistorySheet.tsx`, same props `{ task, onClose }`,
+  opened from the thread's `Decision history` button and from a done task's `History` button on
+  the project Done tab): a dialog named `Decision history` with the task title as its heading.
+  It lists `task.log` entries oldest first (newest last), each with who (`You` for james,
+  `Session` for session, `Board` for system), its time (`Today HH:MM`, `Yesterday HH:MM`, else
+  `<day> <Mon> HH:MM`) and its text. No entries: `Nothing recorded yet.` Comments never appear
+  in it. When the task's log is at `LOG_CAP` (older entries were archived), a button
+  `Show earlier history` loads `tasks/{id}/log_archive` (new hook `useLogArchive(taskId,
+enabled)` in `data.ts`, `Live`, ordered by `at`) and lists those entries above the rest. A
+  done task's sheet also has a `Reopen task` button that opens the Reopen sheet.
+- Reopen: a `Reopen` button in a done task's thread footer, a `Reopen` button on each card of
+  the project Done tab, and `Reopen task` in the History sheet open
+  `packages/web/src/components/ReopenSheet.tsx` (default export, props `{ task, onClose }`):
+  a dialog named `Reopen task`, the task title as heading, the line `Goes back to the
+after-deploy checklist so you can untick a step. Your note is sent to the session.` when the
+  stage before done is `after_deploy`, else `Goes back to <STAGE_LABEL of the previous stage>.
+Your note is sent to the session as the first thing it reads.`; a textarea labelled
+  `What is wrong, or what should happen now?`; buttons `Reopen and send` (disabled while the
+  trimmed note is empty or the save is pending) and `Cancel` (no write). Saving calls
+  `reopenTask(task, note)` once; when it resolves the sheet closes and, if James is not
+  already on that thread, he is taken to `/t/<id>`. If it rejects: `role="alert"`
+  `Couldn't save. Try again.`, the note kept.
+- `reopenTask(task, note)` in `data.ts` (tested in the emulator): a transaction guarded on stage
+  `done` (anything else writes nothing and resolves); note trimmed, required (blank writes
+  nothing), capped at 4000. It sets `doneAt: null`, `reopenedAt` now, stage the one before
+  `done` in the task's own chain, `needs: { kind: 'after_deploy' }` when that stage is
+  `after_deploy` else `null`, appends history `Reopened: <note>` (`who: 'james'`, through
+  `appendLog` with archive overflow as in B4), and writes James's comment kind `reopen` with
+  body `Reopened: <note>`. `afterDone` is left as it is (James unticks the step himself).
+- The system line `Reopened by you`: not stored (the B1 rules keep system lines agent-only, as
+  in B5). The thread view shows a quiet `Reopened by you` line at the time of each history entry
+  that starts `Reopened:` with `who: 'james'`, in time order with the messages.
+- Criterion 27 needs no new code beyond `doneAt: null`: a reopened task is not done, so it is in
+  Threads and the Live tab whatever its old `doneAt` was; tests assert it on screen.
+- Instrumentation, through `track`: `user_action` `reopen` (target the task id);
+  `milestone_reached` `task_reopened` (target the task id, same `request_id`) once
+  `reopenTask` resolves; a failed write logs `api_call_failed`. Opening the History sheet is not
+  logged.
+
+**Unresolved:** none for B1–B6 (open questions 1–4 answered at confirmation).
 
 ## Files & modules affected
 
