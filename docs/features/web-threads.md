@@ -543,7 +543,8 @@ attached the spec yet.`). Buttons `Approve v<N>` and `Changes…`; in mode `chan
   the project Done tab): a dialog named `Decision history` with the task title as its heading.
   It lists `task.log` entries oldest first (newest last), each with who (`You` for james,
   `Session` for session, `Board` for system), its time (`Today HH:MM`, `Yesterday HH:MM`, else
-  `<day> <Mon> HH:MM`) and its text. No entries: `Nothing recorded yet.` Comments never appear
+  `<day> <Mon> HH:MM`, always day first with an English month abbreviation such as
+  `24 Oct 13:00`, in the device's time zone and whatever its locale) and its text. No entries: `Nothing recorded yet.` Comments never appear
   in it. When the task's log is at `LOG_CAP` (older entries were archived), a button
   `Show earlier history` loads `tasks/{id}/log_archive` (new hook `useLogArchive(taskId,
 enabled)` in `data.ts`, `Live`, ordered by `at`) and lists those entries above the rest. A
