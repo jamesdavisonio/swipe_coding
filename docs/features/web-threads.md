@@ -466,7 +466,69 @@ attached the spec yet.`). Buttons `Approve v<N>` and `Changes…`; in mode `chan
   checkboxes are controlled by the task's `afterDone`, so a later snapshot (a tick from
   another device) updates any step without a pending tick of its own.
 
-**Unresolved:** none for B1–B4 (open questions 1–4 answered at confirmation).
+**B5 contract details fixed at test time** (planner decisions, 2026-11-04):
+
+- Screens and routes, replacing the Phase 1 pages (`pages/Home.tsx`, `pages/Board.tsx` and the
+  `ui.tsx` / `lib/legacy-status.ts` pieces only they use are retired): `pages/Projects.tsx` at
+  `/projects`, `pages/Project.tsx` at `/p/:projectId` (tab in the `tab` search param: `live`
+  default, `james`, `done`), `pages/NewTask.tsx` at `/new` (`?project=<id>` preselects the
+  project). Each renders `BottomNav`. Data from `data.ts`: `useProjects`, `useAgents`,
+  `useAllTasks`, `useOpenTodos`, `useProject(id)`, `useProjectTasks(id)`,
+  `useProjectTodos(id)` (all `Live` with `retry()`); writes `createTask`, `toggleTodo`,
+  `addTodo`. Those are the only `data.ts` names these screens import.
+- Projects: heading `Projects`, and `<N> sessions live` (projects with an online agent;
+  `1 session live`). One link per project (in `useProjects` order) to `/p/<id>`, named by the
+  project name, showing the host (`hostname`), `session live` or `no session` (the live dot
+  carries this text), and counts: `<N> need you` (only when above zero, same count as the
+  Threads chip), `<N> live` (visible tasks that are not done, `for_james` excluded),
+  `<N> done this week` (done within 7 days), `<N> for James` (open todos, only when above
+  zero). No projects: `No projects yet. Start a Claude session in a folder to add one.`
+- Project: a `Back to projects` link to `/projects`; heading the project name; under it
+  `<host> · session live` or `<host> · no session`; a `+ Task` link to `/new?project=<id>`.
+  Tabs are buttons with `aria-pressed`: `Live · <N>`, `For James · <open N>`,
+  `Done · <N within 7 days>`; choosing one sets `tab`.
+  - Live: tasks not done (`for_james` excluded), needing James first, then most recently
+    updated. Each is a link to `/t/<id>` with its type, `stageText`, title, the
+    `StageStepper`, and `<N> after-deploy step(s) for you at the end` when it has steps.
+    None: `Nothing live. Queue a task from New task.`
+  - For James: the project's todos, open before done, newest first. Each has a checkbox
+    labelled by its text (ticking calls `toggleTodo`), and an `Open` link to `todo.link` in a
+    new tab when the link is http/https and the todo is open. A text field labelled
+    `Add something to do by hand` and an `Add` button (disabled while the trimmed text is
+    empty) call `addTodo(projectId, text)`. None: `Nothing for you to do by hand.`
+  - Done: tasks done within 7 days, newest `doneAt` first, each a link to `/t/<id>` with its
+    title, summary and `done <relative time>`. When older done tasks exist, a button
+    `Show <N> older` reveals them below (newest first) and becomes `Hide <N> older`.
+    None within 7 days: `Nothing finished this week.` History and Reopen are B6's.
+- New task: a select labelled `Project` (projects by name; default the `project` param, else
+  the first project), type buttons `Feature`, `Bug fix`, `Chore` with `aria-pressed`
+  (default Feature), a field labelled `Title` (required), a textarea labelled
+  `Description for the session`, a checkbox labelled `I have steps to do after deploy` that
+  reveals a textarea labelled `One per line`, and a preview `Stages: <labels joined by
+" → ">` from `stagesFor(type, has steps)` and `STAGE_LABEL`, updating as the choices
+  change. `Queue task` is disabled while the trimmed title is empty or the save is pending.
+  Saving calls `createTask(projectId, { type, title, description, afterDeploy })` once, with
+  the title and description trimmed and the steps split by line, trimmed, blanks dropped;
+  when it resolves it navigates to `/`. If it rejects: `role="alert"`
+  `Couldn't save. Try again.`, the form kept.
+- `createTask` (tested in the emulator): writes the task from `initialTaskFields` (stage the
+  first of its chain, `agentId: null`, so queued), title and description trimmed and capped
+  (title 200, description 4000), `afterDeploy` the steps (each capped at 300, at most 20) with
+  `afterDone` all false, and one history entry `who: 'james'`: `Queued: <title>`, plus
+  ` · 1 after-deploy step` or ` · <N> after-deploy steps` when there are steps. It returns the
+  new id. A blank title writes nothing and rejects. `addTodo` trims, refuses blank text
+  (writes nothing) and caps at 500.
+- The queue line (criterion 23's "system message"): the B1 rules forbid the browser from
+  writing session or system comments, so it is not stored. While a task created by James is
+  queued and its thread has no messages, the thread view shows the quiet line
+  `Queued by you · waiting for a session in <project name>` instead of `No messages yet.`;
+  it goes once the session posts.
+- Instrumentation, through `track` (one `request_id` per tap): `user_action` with action
+  `queue_task` (target the new task id), `todo_add` (target the project id), `todo_done` or
+  the untick (target the todo id); `milestone_reached` `task_queued` (target the task id)
+  after `createTask` resolves; failed writes log `api_call_failed` with the Firestore code.
+
+**Unresolved:** none for B1–B5 (open questions 1–4 answered at confirmation).
 
 ## Files & modules affected
 
