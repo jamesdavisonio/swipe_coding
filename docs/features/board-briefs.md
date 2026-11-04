@@ -166,6 +166,16 @@ replyPhrase }`:
 
 - **Unresolved:** none.
 
+- Fidelity round 1 decisions (B7): the PR sheet shows the most recent session message whose
+  body parses as a `summary` brief, even when plainer session messages came after it (a
+  summary ask, then "ship it", then "PR is up." is the usual order). A one-tap gate answer goes
+  through `track` with action `gate_reply`, so it carries one `request_id` and a failed write
+  logs `api_call_failed` with that `request_id`; in the sheet a failure shows the B4 inline
+  alert `Couldn't save. Try again.` and keeps the sheet open; on a Threads row it is logged
+  only (as B2's quick replies). `copy_suggestion` also goes through `track`. `Copied` shows on
+  the tapped button for two seconds, then it reads `Copy` again. The done instruction says the
+  summary ends with `### Suggested next`, one suggestion per line, when there are follow-ups.
+
 ## Files & modules affected
 
 - `packages/web/src/lib/` — brief parsing, speech helpers.
