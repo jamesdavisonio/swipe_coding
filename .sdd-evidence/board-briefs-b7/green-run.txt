@@ -1,0 +1,67 @@
+=== npm run lint
+> lint
+> eslint .
+
+exit 0
+=== npm run typecheck
+> @kanban/web@0.0.1 typecheck
+> tsc -p tsconfig.json
+
+exit 0
+=== npx vitest run
+
+ Test Files  48 passed (48)
+      Tests  521 passed (521)
+   Start at  13:54:49
+   Duration  17.40s (transform 3.01s, setup 0ms, collect 57.91s, tests 87.08s, environment 71.04s, prepare 10.27s)
+
+exit 0
+=== npm run build:web
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 3.89s
+exit 0
+=== node scripts/check-contrast.mjs
+✓ contrast passes WCAG AA for 38 pairs (:root + .dark).
+exit 0
+=== npm run test:rules
+   Duration  20.76s (transform 276ms, setup 0ms, collect 4.79s, tests 11.71s, environment 662ms, prepare 1.21s)
+
++  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+exit 0
+=== npx firebase emulators:exec --only firestore --project demo-kanban 'npm run test:agent'
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+exit 0
+=== node scripts/check-firestore-rules.mjs
+✓ firestore.rules passed lint.
+exit 0
+=== npx prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+exit 0
+=== tests diff vs red
+ tests/board-briefs-b7-36.test.tsx | 3 +++
+ 1 file changed, 3 insertions(+)
+=== secrets (diff since main)
+0 hits
+=== stray (added lines)
+0 hits
+=== largest functions/files
+  587 packages/agent/src/board.ts
+  174 packages/web/src/lib/brief.ts
+  172 packages/web/src/components/SpecDecision.tsx
+  933 total
+ 33 files changed, 2213 insertions(+), 62 deletions(-)
+ Test Files  16 passed (16)
+      Tests  124 passed (124)
+ok - todo_for_james created
+ok - update_task done moves stage to done
+ok - stored task is done, unbound, doneAt stamped, pr recorded
+all good

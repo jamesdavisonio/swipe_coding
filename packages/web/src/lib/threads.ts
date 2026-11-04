@@ -14,6 +14,7 @@ import {
   type TaskNeed,
   type Todo,
 } from '@kanban/shared'
+import { briefHeadline, parseBrief } from './brief.ts'
 
 const MINUTE_MS = 60_000
 const HOUR_MS = 60 * MINUTE_MS
@@ -207,6 +208,7 @@ export type QuickReply =
   | { kind: 'approve'; label: string }
   | { kind: 'change'; label: string }
   | { kind: 'answer'; label: string; option: { key: string; label: string } }
+  | { kind: 'phrase'; label: string }
   | { kind: 'pr_link'; label: string; href: string }
   | { kind: 'merged'; label: string }
   | { kind: 'read'; label: string }
@@ -219,6 +221,31 @@ export function questionOptions(need: TaskNeed): { key: string; label: string }[
 }
 
 const READ_MORE: QuickReply = { kind: 'read', label: 'Read more' }
+
+// The brief a question is, when the session asked it as one (fix, round and summary briefs).
+export const questionBrief = (need: Pick<TaskNeed, 'question'>) =>
+  typeof need.question === 'string' ? parseBrief(need.question) : null
+
+// What a row says under its title: "<label> — <task title>" for a question that is a brief
+// (never its raw markdown), else the task's summary.
+export function rowPreview(task: Task): string {
+  const need = activeNeed(task)
+  const brief = need?.kind === 'question' ? questionBrief(need) : null
+  if (brief) return briefHeadline(brief, task.title)
+  return typeof task.summary === 'string' ? task.summary : ''
+}
+
+// What a question's sheet is titled: the brief's headline, or the question as asked.
+export function questionTitle(task: Task, need: TaskNeed): string {
+  const brief = questionBrief(need)
+  return brief ? briefHeadline(brief, task.title) : need.question || 'Question'
+}
+
+// The one-tap answer a brief's closing Reply line offers, if it has one.
+const phraseReply = (need: TaskNeed): QuickReply[] => {
+  const phrase = questionBrief(need)?.replyPhrase
+  return phrase ? [{ kind: 'phrase', label: phrase }] : []
+}
 
 function prReplies(task: Task): QuickReply[] {
   const href = webUrl(task.pr?.url)
@@ -240,6 +267,7 @@ export function quickReplies(task: Task): QuickReply[] {
       ]
     case 'question':
       return [
+        ...phraseReply(need),
         ...questionOptions(need).map((option): QuickReply => ({
           kind: 'answer',
           label: `${option.key} · ${option.label}`,

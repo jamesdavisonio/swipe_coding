@@ -82,6 +82,9 @@ export function useThreadActions(openSheet: (task: Task, mode: SheetMode) => voi
         case 'answer':
           void track('answer', task.id, () => answerQuestion(task, quick.option))
           break
+        case 'phrase':
+          void track('gate_reply', task.id, () => answerQuestion(task, { label: quick.label }))
+          break
         case 'merged':
           void track('merged', task.id, () => markMerged(task))
           break

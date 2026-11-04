@@ -8,6 +8,7 @@ import {
   isDateable,
   quickReplies,
   relativeTime,
+  rowPreview,
   stageText,
   type QuickReply,
 } from '../lib/threads.ts'
@@ -113,7 +114,7 @@ export function TaskRow({
             {unread ? <span className="sr-only"> · unread</span> : null}
           </>
         }
-        preview={typeof task.summary === 'string' ? task.summary : ''}
+        preview={rowPreview(task)}
         unread={unread}
         onClick={() => onOpen(task)}
       />

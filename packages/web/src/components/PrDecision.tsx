@@ -3,11 +3,13 @@ import { markMerged } from '../data.ts'
 import { ExternalLink } from '../lib/icons.ts'
 import { webUrl } from '../lib/threads.ts'
 import { useDecision } from '../lib/use-decision.ts'
+import { useLatestBrief } from '../lib/use-latest-brief.ts'
+import BriefCard from './BriefCard.tsx'
 import SaveError from './SaveError.tsx'
 import { Button } from './ui/button.tsx'
 import { SheetContent } from './ui/sheet.tsx'
 
-// The PR decision: the session's summary, the PR in GitHub (web links only, new tab) and Merged it.
+// The PR decision: the session's latest summary brief, its summary, the PR in GitHub (web links only, new tab) and Merged it.
 export default function PrDecision({
   task,
   close,
@@ -18,12 +20,14 @@ export default function PrDecision({
   returnFocus: (event: Event) => void
 }) {
   const { pending, failed, decide } = useDecision(task.id, close)
+  const summaryBrief = useLatestBrief(task.id, 'summary')
   const href = webUrl(task.pr?.url)
   const title = task.pr ? `PR #${task.pr.number} is ready to merge` : 'PR is ready to merge'
 
   return (
     <SheetContent onCloseAutoFocus={returnFocus} title={title} aria-describedby={undefined}>
       <div className="flex flex-col gap-4">
+        {summaryBrief ? <BriefCard brief={summaryBrief.brief} /> : null}
         {task.summary ? <p className="text-base leading-relaxed">{task.summary}</p> : null}
         <SaveError failed={failed} />
         {href && task.pr ? (

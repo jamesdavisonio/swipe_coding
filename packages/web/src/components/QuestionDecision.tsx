@@ -2,15 +2,18 @@ import { useId, useState } from 'react'
 import type { Task, TaskNeed } from '@kanban/shared'
 import { answerQuestion } from '../data.ts'
 import { MAX_COMMENT_CHARS } from '../lib/limits.ts'
-import { questionOptions } from '../lib/threads.ts'
+import { withoutReplyLine } from '../lib/brief.ts'
+import { questionBrief, questionOptions, questionTitle } from '../lib/threads.ts'
 import { useDecision } from '../lib/use-decision.ts'
+import BriefBlock from './BriefBlock.tsx'
 import SaveError from './SaveError.tsx'
 import { Button } from './ui/button.tsx'
 import { Textarea } from './ui/input.tsx'
 import { Label } from './ui/label.tsx'
 import { SheetContent } from './ui/sheet.tsx'
 
-// The question decision: one button per option the session offered, plus James's own words.
+// The question decision: one button per option the session offered, plus James's own words. A
+// question that is a decision brief shows as its card, with the gate's reply phrase as one tap.
 export default function QuestionDecision({
   task,
   need,
@@ -25,15 +28,29 @@ export default function QuestionDecision({
   const [text, setText] = useState('')
   const { pending, failed, decide } = useDecision(task.id, close)
   const boxId = useId()
+  const brief = questionBrief(need)
+  const phrase = brief?.replyPhrase ?? null
+  const after = brief ? withoutReplyLine(brief.after) : ''
 
   return (
     <SheetContent
       onCloseAutoFocus={returnFocus}
-      title={need.question || 'Question'}
+      title={questionTitle(task, need)}
       aria-describedby={undefined}
     >
       <div className="flex flex-col gap-4">
+        {brief ? <BriefBlock brief={brief} after={after} /> : null}
         <div className="flex flex-col gap-2">
+          {phrase ? (
+            <Button
+              disabled={pending}
+              onClick={() =>
+                void decide('gate_reply', () => answerQuestion(task, { label: phrase }))
+              }
+            >
+              {phrase}
+            </Button>
+          ) : null}
           {questionOptions(need).map((option) => (
             <Button
               key={option.key}

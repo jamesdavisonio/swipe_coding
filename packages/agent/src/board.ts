@@ -277,8 +277,13 @@ export class Board {
     if (input.title) patch.title = input.title.trim()
     if (input.pr_url !== undefined) Object.assign(patch, prPatch(task, input.pr_url))
     if (input.status === 'in_progress') patch.needs = null
-    if (input.status === 'done') Object.assign(patch, donePatch(t))
-    await this.db.collection(C.tasks).doc(task.id).update(patch)
+    if (input.status === 'done' && !isDone(task)) {
+      // Finishing: the Done message and the unread mark go in the same batch as the done patch.
+      Object.assign(patch, donePatch(t), { unread: true })
+      await this.writeAgentComment(task, input.summary?.trim() || DONE_BODY, 'done', patch)
+    } else {
+      await this.db.collection(C.tasks).doc(task.id).update(patch)
+    }
     log(`updated task ${task.id}: ${Object.keys(patch).join(',')}`)
     return { ...task, ...(patch as Partial<Task>) }
   }
@@ -525,16 +530,23 @@ function donePatch(t: number): Record<string, unknown> {
   return { stage: 'done', doneAt: t, agentId: null, needs: null, working: false }
 }
 
-// pr_url sets the PR (its number is the last number in the URL) and brings the task to the
-// pr stage when it is still earlier; an empty url clears the PR.
+// The Done message's body when the session gives no summary.
+const DONE_BODY = 'Done.'
+
+// The stages in which a reported PR is the work's result, so the task then waits on James's
+// merge decision: build (fix for a bugfix, do for a chore) and pr itself.
+const PR_READY_FROM: readonly Stage[] = ['build', 'fix', 'do', 'pr']
+
+// pr_url sets the PR (its number is the last number in the URL). From a build stage or pr it
+// also moves the task to pr and makes it wait on James's merge; at an earlier or later stage it
+// only records the PR. An empty url clears it.
 function prPatch(task: Task, url: string): Record<string, unknown> {
   if (!url) return { pr: null }
   const number = /(\d+)\/?(?:[?#].*)?$/.exec(url)?.[1]
   if (!number) throw new BoardError('pr_url must end in the pull request number')
-  const chain = taskStages(task)
-  const earlier = chain.indexOf(task.stage) < chain.indexOf('pr')
-  const stage = chain.includes('pr') && earlier ? { stage: 'pr' } : {}
-  return { pr: { number: Number(number), url }, ...stage }
+  const pr = { pr: { number: Number(number), url } }
+  const ready = PR_READY_FROM.includes(task.stage) && taskStages(task).includes('pr')
+  return ready ? { ...pr, stage: 'pr', needs: { kind: 'pr' } satisfies TaskNeed } : pr
 }
 
 // Moves the task past `stage`: to the next stage of its chain (done after the last), clearing
