@@ -120,8 +120,12 @@ export interface AgentDoc {
   startedAt: number
   lastSeen: number // heartbeat; online = now - lastSeen < AGENT_STALE_MS
 }
-export const AGENT_HEARTBEAT_MS = 30_000
-export const AGENT_STALE_MS = 90_000
+// One heartbeat write per agent every five minutes keeps a fleet of always-on agents well
+// inside Firestore's free daily write quota (30 s beats drained it on 2026-11-04). Stale is
+// two missed beats plus margin, so a running session stays live throughout; the trade-off is
+// that the live dot may lag a closed session by up to twelve minutes.
+export const AGENT_HEARTBEAT_MS = 5 * 60 * 1000
+export const AGENT_STALE_MS = 12 * 60 * 1000
 
 export interface Task {
   id: string
