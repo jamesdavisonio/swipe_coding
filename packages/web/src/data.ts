@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   collection,
   doc,
-  limit,
   onSnapshot,
   orderBy,
   query,
@@ -32,7 +31,14 @@ import {
 } from '@kanban/shared'
 import { db } from './firebase.ts'
 import { log } from './lib/log.ts'
-import { MAX_COMMENT_CHARS } from './lib/limits.ts'
+import {
+  MAX_COMMENT_CHARS,
+  MAX_DESCRIPTION_CHARS,
+  MAX_STEPS,
+  MAX_STEP_CHARS,
+  MAX_TITLE_CHARS,
+  MAX_TODO_CHARS,
+} from './lib/limits.ts'
 import { jamesComment, replyKind } from './lib/messages.ts'
 import { newRequestId } from './lib/request-id.ts'
 import { specVersion } from './lib/threads.ts'
@@ -142,10 +148,6 @@ export const useAllTasks = () =>
 // Every agent, for the live dot on a project (online = recent heartbeat).
 export const useAgents = () => useCollection<AgentDoc>(COLLECTIONS.agents, [], [])
 
-// Recent tasks across all projects for the home-page counters (single-field orderBy).
-export const useRecentTasks = (max = 500) =>
-  useCollection<Task>(COLLECTIONS.tasks, [orderBy('updatedAt', 'desc'), limit(max)], [max])
-
 // A project's tasks — composite index tasks(projectId, updatedAt desc).
 export const useProjectTasks = (projectId: string | undefined) =>
   useCollection<Task>(
@@ -185,26 +187,52 @@ export const useTask = (id: string | undefined) => useDocument<Task>(COLLECTIONS
 const now = () => Date.now()
 const LOG_ARCHIVE = 'log_archive'
 
-export async function renameProject(projectId: string, name: string) {
-  await updateDoc(doc(db, COLLECTIONS.projects, projectId), { name, updatedAt: now() })
+// Free text from James: trimmed and capped before it is written anywhere. A text that gets a
+// prefix in his message is capped so the whole message fits, which keeps the message and the
+// history line on the same words.
+const cleanText = (text: string, max = MAX_COMMENT_CHARS): string =>
+  text.trim().slice(0, max).trimEnd()
+
+export interface NewTaskInput {
+  type: TaskType
+  title: string
+  description: string
+  afterDeploy: string[]
 }
 
-export async function createTask(
-  projectId: string,
-  input: { title: string; type: TaskType; description: string }
-) {
+// "Queued: <title>", plus the number of after-deploy steps when there are any.
+function queuedEntry(title: string, steps: number): string {
+  if (steps === 0) return `Queued: ${title}`
+  return `Queued: ${title} · ${steps} after-deploy ${steps === 1 ? 'step' : 'steps'}`
+}
+
+// James queues a task for the next session in a project: the shared initial shape (first stage of
+// its chain, bound to no agent), his text trimmed and capped, one history line by him, and the
+// project touched so it moves up the list. One batch, so the task and the touch land together
+// (or, offline, are queued together). A blank title writes nothing and rejects. Returns the id.
+export async function createTask(projectId: string, input: NewTaskInput): Promise<string> {
+  const title = cleanText(input.title, MAX_TITLE_CHARS)
+  if (title === '') throw new Error('A task needs a title')
+  const steps = input.afterDeploy
+    .map((step) => cleanText(step, MAX_STEP_CHARS))
+    .filter((step) => step !== '')
+    .slice(0, MAX_STEPS)
+  const t = now()
   const ref = doc(collection(db, COLLECTIONS.tasks))
   const task = initialTaskFields({
     projectId,
     type: input.type,
-    title: input.title.trim(),
-    description: input.description.trim(),
+    title,
+    description: cleanText(input.description, MAX_DESCRIPTION_CHARS),
     createdBy: 'james',
-    afterDeploy: [],
-    now: now(),
+    afterDeploy: steps,
+    now: t,
   })
-  await setDoc(ref, task)
-  await touchProject(projectId)
+  const entry: LogEntry = { at: t, who: 'james', text: queuedEntry(title, steps.length) }
+  const batch = writeBatch(db)
+  batch.set(ref, { ...task, log: [entry] })
+  batch.update(doc(db, COLLECTIONS.projects, projectId), { updatedAt: t })
+  await batch.commit()
   return ref.id
 }
 
@@ -243,11 +271,6 @@ async function transitionTask(
   })
 }
 
-// Free text from James: trimmed and capped before it is written anywhere. A text that gets a
-// prefix in his message is capped so the whole message fits, which keeps the message and the
-// history line on the same words.
-const cleanText = (text: string, max = MAX_COMMENT_CHARS): string =>
-  text.trim().slice(0, max).trimEnd()
 const CHANGE_PREFIX = 'Change: '
 
 // A fresh comment id, generated on the device before anything is written, so the screen can show
@@ -395,12 +418,16 @@ export async function toggleTodo(todo: Todo) {
   })
 }
 
+// A hand-done item James adds to a project's For James list: trimmed, capped, never blank (a
+// blank text writes nothing and rejects).
 export async function addTodo(projectId: string, body: string) {
+  const text = cleanText(body, MAX_TODO_CHARS)
+  if (text === '') throw new Error('A to-do needs some text')
   const ref = doc(collection(db, COLLECTIONS.todos))
   const todo: Todo = {
     id: ref.id,
     projectId,
-    body: body.trim(),
+    body: text,
     link: null,
     done: false,
     sourceTaskId: null,
@@ -408,10 +435,6 @@ export async function addTodo(projectId: string, body: string) {
     doneAt: null,
   }
   await setDoc(ref, todo)
-}
-
-async function touchProject(projectId: string) {
-  await updateDoc(doc(db, COLLECTIONS.projects, projectId), { updatedAt: now() }).catch(() => {})
 }
 
 export { forJamesTaskId }

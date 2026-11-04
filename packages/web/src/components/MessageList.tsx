@@ -6,18 +6,20 @@ import { JamesMessage, SessionMessage, SystemLine, Typing } from './Messages.tsx
 // The conversation, oldest first: quiet centred system lines, the session's messages on the
 // left under their kind label, James's on the right with time and ticks, and the typing dots
 // after the last one while the session works. Only the message `readMoreId` names carries Read
-// more.
+// more. An empty conversation says `emptyText`.
 export default function MessageList({
   messages,
   now,
   readMoreId,
   working,
+  emptyText,
   onReadMore,
 }: {
   messages: Comment[]
   now: number
   readMoreId: string | null
   working: boolean
+  emptyText: string
   onReadMore: () => void
 }) {
   const view = (comment: Comment): ReactNode => {
@@ -41,7 +43,7 @@ export default function MessageList({
   return (
     <div role="log" aria-label="Conversation" className="flex flex-col gap-3 py-3">
       {messages.length === 0 ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">No messages yet.</p>
+        <p className="py-10 text-center text-sm text-muted-foreground">{emptyText}</p>
       ) : null}
       {messages.map(view)}
       {working ? <Typing /> : null}

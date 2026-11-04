@@ -103,3 +103,18 @@ export function stagesOf(task: Pick<Task, 'type' | 'afterDeploy'>): Stage[] {
   const afterDeploy = Array.isArray(task.afterDeploy) ? task.afterDeploy : []
   return taskStages({ type: task.type, afterDeploy })
 }
+
+export const NO_MESSAGES_TEXT = 'No messages yet.'
+
+// What a thread with no messages says. A task James queued that no session has picked up yet
+// says so (the line is not stored: the rules keep James from writing session or system
+// comments); anything else is the plain empty note.
+export function emptyThreadText(
+  task: Pick<Task, 'type' | 'afterDeploy' | 'stage' | 'agentId' | 'createdBy'>,
+  projectName: string | null
+): string {
+  const waiting =
+    task.createdBy === 'james' && task.agentId === null && stagesOf(task)[0] === task.stage
+  if (!waiting) return NO_MESSAGES_TEXT
+  return `Queued by you · waiting for a session${projectName ? ` in ${projectName}` : ''}`
+}

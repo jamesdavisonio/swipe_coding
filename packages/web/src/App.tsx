@@ -1,9 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthGate } from './auth.tsx'
-import Home from './pages/Home.tsx'
-import Threads from './pages/Threads.tsx'
-import Board from './pages/Board.tsx'
+import NewTask from './pages/NewTask.tsx'
+import Project from './pages/Project.tsx'
+import Projects from './pages/Projects.tsx'
 import Thread from './pages/Thread.tsx'
+import Threads from './pages/Threads.tsx'
 
 export default function App() {
   return (
@@ -11,10 +12,10 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Threads />} />
-          {/* The Phase 1 project list, until the Projects screen (B5) replaces it. */}
-          <Route path="/projects" element={<Home />} />
-          <Route path="/p/:projectId" element={<Board />} />
           <Route path="/t/:taskId" element={<Thread />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/p/:projectId" element={<Project />} />
+          <Route path="/new" element={<NewTask />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
