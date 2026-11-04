@@ -155,7 +155,10 @@ React + Vite + Tailwind PWA, installable on the phone.
   quick replies, Decision history button. Read more and the quick replies open the decision
   sheet (B4): approve or change a spec, answer, merge, tick after-deploy steps (ticks work
   offline), each recorded in the task's history. Phase 1's mark done / re-queue menu and the
-  `claude --resume` copy button were retired with the old task page; Reopen returns in B6.
+  `claude --resume` copy button were retired with the old task page. The clock icon opens the
+  **decision history** (B6; older entries load from the archive on demand), and a done task can
+  be **reopened with a note** from its thread, its Done card or the history (back one stage; the
+  thread shows "Reopened by you").
 - `/projects` **Projects** (B5): each project with host, live dot and counts (need you, live,
   done this week, for James). `/p/:project` a project's **Live / For James / Done** tabs
   (`?tab=`), Done with Show older. `/new` **New task** with a stage preview and optional

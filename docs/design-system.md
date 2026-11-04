@@ -51,5 +51,6 @@ B3 added `StageStepper`, `Ticks`, `Messages`, `MessageList`, `Composer`, `Thread
 `ThreadFooter`, `ThreadState`, `ThreadView`, `HistorySheet`; B4 filled `DecisionSheet` with
 `SpecDecision`, `QuestionDecision`, `PrDecision`, `AfterDeployDecision`, `SaveError`; B5 added `Screen`, `ScreenState`,
 `PageHeader`, `ProjectList`, `ProjectCard`, `ProjectTile`, `LiveList`, `DoneList`, `TodoList`,
-`TaskCards`, `NewTaskForm`, `AfterDeployFields`. No component catalog: the prototype is the reference.
+`TaskCards`, `NewTaskForm`, `AfterDeployFields`; B6 filled `HistorySheet` and added `HistoryList`
+and `ReopenSheet` (sheets return focus to their opener through `lib/use-return-focus.ts`). No component catalog: the prototype is the reference.
 No i18n: single owner, English.
