@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
+import { LoadFailed, LoadingStatus } from './ScreenState.tsx'
 import { Button } from './ui/button.tsx'
-import { Loader2 } from '../lib/icons.ts'
 
 const PAGE =
   'mx-auto flex min-h-dvh w-full max-w-(--content-max) flex-col items-center justify-center p-10'
@@ -9,9 +9,7 @@ const PAGE =
 export function ThreadLoading() {
   return (
     <div className={PAGE}>
-      <div role="status" aria-label="Loading thread" className="text-muted-foreground">
-        <Loader2 aria-hidden="true" className="size-6 animate-spin" />
-      </div>
+      <LoadingStatus label="Loading thread" />
     </div>
   )
 }
@@ -20,13 +18,7 @@ export function ThreadLoading() {
 export function ThreadFailed({ failed }: { failed: { retry: () => void }[] }) {
   return (
     <div className={PAGE}>
-      <div role="alert" className="flex flex-col items-center gap-3 text-center">
-        <p className="font-bold">Couldn't load this thread</p>
-        <p className="text-sm text-muted-foreground">Check the connection, then try again.</p>
-        <Button variant="outline" onClick={() => failed.forEach((source) => source.retry())}>
-          Retry
-        </Button>
-      </div>
+      <LoadFailed title="Couldn't load this thread" failed={failed} />
     </div>
   )
 }

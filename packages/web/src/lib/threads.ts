@@ -45,7 +45,7 @@ export function activeNeed(task: Pick<Task, 'needs'>): TaskNeed | null {
   return NEED_KINDS.some((k) => k === kind) ? (need as TaskNeed) : null
 }
 
-function stepCount(task: Pick<Task, 'afterDeploy'>): number {
+export function stepCount(task: Pick<Task, 'afterDeploy'>): number {
   return Array.isArray(task.afterDeploy) ? task.afterDeploy.length : 0
 }
 

@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
-import { Button } from './ui/button.tsx'
-import { Loader2 } from '../lib/icons.ts'
+import { EmptyNote, LoadFailed, LoadingStatus } from './ScreenState.tsx'
 import type { ThreadRow } from '../lib/threads.ts'
 
 function Section({
@@ -36,28 +35,9 @@ export default function ThreadList({
   rows: ThreadRow[]
   render: (row: ThreadRow) => ReactNode
 }) {
-  if (loading)
-    return (
-      <div
-        role="status"
-        aria-label="Loading threads"
-        className="flex justify-center p-10 text-muted-foreground"
-      >
-        <Loader2 aria-hidden="true" className="size-6 animate-spin" />
-      </div>
-    )
-  if (failed.length > 0)
-    return (
-      <div role="alert" className="flex flex-col items-center gap-3 p-10 text-center">
-        <p className="font-bold">Couldn't load threads</p>
-        <p className="text-sm text-muted-foreground">Check the connection, then try again.</p>
-        <Button variant="outline" onClick={() => failed.forEach((source) => source.retry())}>
-          Retry
-        </Button>
-      </div>
-    )
-  if (rows.length === 0)
-    return <p className="p-10 text-center text-muted-foreground">No threads for this project.</p>
+  if (loading) return <LoadingStatus label="Loading threads" />
+  if (failed.length > 0) return <LoadFailed title="Couldn't load threads" failed={failed} />
+  if (rows.length === 0) return <EmptyNote>No threads for this project.</EmptyNote>
   return (
     <>
       <Section title="Needs you" rows={rows.filter((r) => r.needs)} render={render} />

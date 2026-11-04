@@ -11,17 +11,8 @@ import {
   stageText,
   type QuickReply,
 } from '../lib/threads.ts'
+import ProjectTile from './ProjectTile.tsx'
 import QuickReplies from './QuickReplies.tsx'
-
-// Initials for the tile: first letters of the first two words of the project name.
-function initials(name: string): string {
-  const letters = name
-    .split(/[-_ ]+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0].toUpperCase())
-  return letters.join('') || '?'
-}
 
 // The row's open control is a button whose accessible name starts with the title: the tile
 // is decorative (aria-hidden) and the meta and preview lines follow the title and time. The
@@ -110,14 +101,7 @@ export function TaskRow({
   return (
     <li className={rowClass(unread)}>
       <RowButton
-        tile={
-          <span aria-hidden="true" className={cn(tileClass, 'bg-muted text-foreground')}>
-            {initials(projectName)}
-            {live && !isDone(task) ? (
-              <span className="absolute -right-1 -bottom-1 size-3 rounded-full border-2 border-card bg-ok" />
-            ) : null}
-          </span>
-        }
+        tile={<ProjectTile name={projectName} live={live && !isDone(task)} />}
         title={task.title}
         at={task.updatedAt}
         now={now}
