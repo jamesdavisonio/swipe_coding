@@ -171,6 +171,20 @@ message, context?, request_id? }): Promise<void>`, severity `WARNING` | `ERROR`,
 - **Not stored**: events logged while signed out; anything about storing logs; the agent's
   ordinary progress lines.
 
+**Test-draft decisions (L1)** (planner answers to the test author's questions, before the
+fidelity audit):
+
+- "Signed in" for `storeLogEvents` is `auth.currentUser` (from `firebase.ts`) being non-null at
+  the moment it is called; events logged while signed out are not stored later.
+- `app-log.ts` learns the agent id and project id when the agent's board registration
+  completes; before that `session_id` is `null` and the context has no `agent_id` /
+  `project_id`. It reads `app.manifest.yaml` and `logging/taxonomy.json` relative to its own
+  file, never the working directory.
+- The per-minute window is measured with `Date.now()`.
+- With `request_id`, `limit` keeps the first `limit` events in oldest-first order.
+- The listener, heartbeat and registration failure sites are covered by the `logFailure`
+  contract and by review, not end to end; tool-call and delivery failures are tested end to end.
+
 ## Files & modules affected
 
 - `logging/logger.browser.js` — an optional `transport(events)` in `initLogger`; when given,
