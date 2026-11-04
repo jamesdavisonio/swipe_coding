@@ -15,11 +15,37 @@ import { Sheet, SheetContent } from './ui/sheet.tsx'
 const EXAMPLE_AFTER_DEPLOY = 'e.g. Ticked the CNAME step by mistake, it is not live yet'
 const EXAMPLE_OTHER = 'e.g. Export is missing the totals row on the production report'
 
+// The required note the session reads first.
+function NoteField({
+  task,
+  note,
+  onNote,
+}: {
+  task: Task
+  note: string
+  onNote: (note: string) => void
+}) {
+  const noteId = useId()
+  const example = stageBeforeDone(task) === 'after_deploy' ? EXAMPLE_AFTER_DEPLOY : EXAMPLE_OTHER
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={noteId}>What is wrong, or what should happen now?</Label>
+      <Textarea
+        id={noteId}
+        rows={4}
+        maxLength={MAX_REOPEN_NOTE_CHARS}
+        placeholder={example}
+        value={note}
+        onChange={(event) => onNote(event.target.value)}
+      />
+    </div>
+  )
+}
+
 // Reopen a done task with a note the session reads first. Saving closes the sheet and, unless
 // James is already on the task's thread, takes him there. A refused save keeps the note.
 export default function ReopenSheet({ task, onClose }: { task: Task; onClose: () => void }) {
   const [note, setNote] = useState('')
-  const noteId = useId()
   const navigate = useNavigate()
   const location = useLocation()
   const returnFocus = useReturnFocus()
@@ -46,19 +72,7 @@ export default function ReopenSheet({ task, onClose }: { task: Task; onClose: ()
       >
         <div className="flex flex-col gap-4">
           <h3 className="text-lg font-extrabold tracking-tight">{task.title}</h3>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor={noteId}>What is wrong, or what should happen now?</Label>
-            <Textarea
-              id={noteId}
-              rows={4}
-              maxLength={MAX_REOPEN_NOTE_CHARS}
-              placeholder={
-                stageBeforeDone(task) === 'after_deploy' ? EXAMPLE_AFTER_DEPLOY : EXAMPLE_OTHER
-              }
-              value={note}
-              onChange={(event) => setNote(event.target.value)}
-            />
-          </div>
+          <NoteField task={task} note={note} onNote={setNote} />
           <SaveError failed={failed} />
           <div className="flex gap-2.5">
             <Button className="flex-1" disabled={pending || note.trim() === ''} onClick={reopen}>
