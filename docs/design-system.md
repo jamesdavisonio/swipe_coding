@@ -6,14 +6,14 @@ interactive copy at https://claude.ai/artifact/G9eMLDsxFLp8S7bhxyC6uU). Decision
 
 ## Where things live
 
-| What            | Path                                            | Rule                                                                    |
-| --------------- | ----------------------------------------------- | ----------------------------------------------------------------------- |
-| Tokens          | `packages/web/src/styles/tokens.css`            | Only place a colour, radius, size or duration is defined                |
-| Tailwind wiring | `packages/web/src/index.css` (`@theme`)         | Utilities like `bg-card`, `text-needs`, `rounded-md` read the tokens    |
-| Components      | `packages/web/src/components/ui/`               | `button`, `input`/`textarea`, `label`, `card`, `badge`, `sheet`         |
-| Helpers         | `packages/web/src/lib/{cn,icons,a11y,theme}.ts` | `cn()` merges classes; icons only via `icons.ts`; theme toggles `.dark` |
-| Contrast gate   | `scripts/check-contrast.mjs`                    | Every fg/bg pair in both themes; runs in CI                             |
-| Checklist       | `docs/security/A11Y_CHECKLIST.md`               | Walked per component PR                                                 |
+| What            | Path                                            | Rule                                                                                           |
+| --------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Tokens          | `packages/web/src/styles/tokens.css`            | Only place a colour, radius, size or duration is defined                                       |
+| Tailwind wiring | `packages/web/src/index.css` (`@theme`)         | Utilities like `bg-card`, `text-needs`, `rounded-md` read the tokens                           |
+| Components      | `packages/web/src/components/ui/`               | `button`, `input`/`textarea`/`select`, `label`, `field`, `segmented`, `card`, `badge`, `sheet` |
+| Helpers         | `packages/web/src/lib/{cn,icons,a11y,theme}.ts` | `cn()` merges classes; icons only via `icons.ts`; theme toggles `.dark`                        |
+| Contrast gate   | `scripts/check-contrast.mjs`                    | Every fg/bg pair in both themes; runs in CI                                                    |
+| Checklist       | `docs/security/A11Y_CHECKLIST.md`               | Walked per component PR                                                                        |
 
 ## Tokens in one glance
 
@@ -49,5 +49,7 @@ Feature components live beside the primitives in `src/components/`: B2 added `Th
 `ProjectChips`, `QuickReplies`, `ThreadList`, `ThreadsHeader`, `BottomNav`, `DecisionSheet`;
 B3 added `StageStepper`, `Ticks`, `Messages`, `MessageList`, `Composer`, `ThreadHeader`,
 `ThreadFooter`, `ThreadState`, `ThreadView`, `HistorySheet`; B4 filled `DecisionSheet` with
-`SpecDecision`, `QuestionDecision`, `PrDecision`, `AfterDeployDecision`, `SaveError`. No component catalog: the prototype is the reference.
+`SpecDecision`, `QuestionDecision`, `PrDecision`, `AfterDeployDecision`, `SaveError`; B5 added `Screen`, `ScreenState`,
+`PageHeader`, `ProjectList`, `ProjectCard`, `ProjectTile`, `LiveList`, `DoneList`, `TodoList`,
+`TaskCards`, `NewTaskForm`, `AfterDeployFields`. No component catalog: the prototype is the reference.
 No i18n: single owner, English.
