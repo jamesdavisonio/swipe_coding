@@ -1,0 +1,819 @@
+
+ RUN  v3.2.7 C:/Users/Intel/Documents/code/kanban
+
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/web-threads-b5-21.test.tsx [ tests/web-threads-b5-21.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/Projects.tsx" from "tests/web-threads-b5-21.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b5-21.test.tsx:10:0
+  11 |  const __vi_import_1__ = await import("@testing-library/react");
+  12 |  const __vi_import_2__ = await import("@testing-library/user-event");
+  13 |  const __vi_import_3__ = await import("../packages/web/src/pages/Projects.tsx");
+     |                                       ^
+  14 |  const __vi_import_4__ = await import("./fixtures/web-threads-b2.tsx");
+  15 |  const __vi_import_5__ = await import("./fixtures/web-threads-b5.tsx");
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/web-threads-b5-22.test.tsx [ tests/web-threads-b5-22.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/Project.tsx" from "tests/web-threads-b5-22.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b5-22.test.tsx:15:0
+  11 |  const __vi_import_1__ = await import("@testing-library/react");
+  12 |  const __vi_import_2__ = await import("@testing-library/user-event");
+  13 |  const __vi_import_3__ = await import("../packages/web/src/pages/Project.tsx");
+     |                                       ^
+  14 |  const __vi_import_4__ = await import("./fixtures/web-threads-b2.tsx");
+  15 |  const __vi_import_5__ = await import("./fixtures/web-threads-b3.tsx");
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/web-threads-b5-23.test.tsx [ tests/web-threads-b5-23.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/NewTask.tsx" from "tests/web-threads-b5-23.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b5-23.test.tsx:13:0
+  20 |  const __vi_import_2__ = await import("@testing-library/user-event");
+  21 |  const __vi_import_3__ = await import("../packages/shared/src/index.ts");
+  22 |  const __vi_import_4__ = await import("../packages/web/src/pages/NewTask.tsx");
+     |                                       ^
+  23 |  const __vi_import_5__ = await import("../packages/web/src/pages/Thread.tsx");
+  24 |  const __vi_import_6__ = await import("../packages/web/src/pages/Threads.tsx");
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/web-threads-b5-24.test.tsx [ tests/web-threads-b5-24.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/NewTask.tsx" from "tests/web-threads-b5-24.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b5-24.test.tsx:11:0
+  19 |  const __vi_import_1__ = await import("@testing-library/react");
+  20 |  const __vi_import_2__ = await import("@testing-library/user-event");
+  21 |  const __vi_import_3__ = await import("../packages/web/src/pages/NewTask.tsx");
+     |                                       ^
+  22 |  const __vi_import_4__ = await import("../packages/web/src/pages/Thread.tsx");
+  23 |  const __vi_import_5__ = await import("./fixtures/web-threads-b2.tsx");
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  tests/web-threads-b5-29.test.tsx [ tests/web-threads-b5-29.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/NewTask.tsx" from "tests/web-threads-b5-29.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b5-29.test.tsx:9:0
+  11 |  const __vi_import_1__ = await import("@testing-library/react");
+  12 |  const __vi_import_2__ = await import("@testing-library/user-event");
+  13 |  const __vi_import_3__ = await import("../packages/web/src/pages/NewTask.tsx");
+     |                                       ^
+  14 |  const __vi_import_4__ = await import("../packages/web/src/pages/Project.tsx");
+  15 |  const __vi_import_5__ = await import("../packages/web/src/pages/Projects.tsx");
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  tests/web-threads-b5-30.test.tsx [ tests/web-threads-b5-30.test.tsx ]
+Error: Failed to resolve import "../packages/web/src/pages/NewTask.tsx" from "tests/web-threads-b5-30.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Intel/Documents/code/kanban/tests/web-threads-b5-30.test.tsx:10:0
+  11 |  const __vi_import_1__ = await import("@testing-library/react");
+  12 |  const __vi_import_2__ = await import("@testing-library/user-event");
+  13 |  const __vi_import_3__ = await import("../packages/web/src/pages/NewTask.tsx");
+     |                                       ^
+  14 |  const __vi_import_4__ = await import("../packages/web/src/pages/Project.tsx");
+  15 |  const __vi_import_5__ = await import("../packages/web/src/pages/Projects.tsx");
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  6 failed (6)
+      Tests  no tests
+   Start at  09:57:50
+   Duration  2.17s (transform 17ms, setup 0ms, collect 0ms, tests 0ms, environment 8.22s, prepare 1.29s)
+
+=== emulator
+
+> test:rules
+> firebase emulators:exec --only firestore --project demo-kanban "vitest run --config vitest.rules.config.ts"
+
+i  emulators: Starting emulators: firestore
+i  emulators: Detected demo project ID "demo-kanban", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Firestore Emulator logging to firestore-debug.log
++  firestore: Firestore Emulator UI websocket is running on 9150.
+i  Running script: vitest run --config vitest.rules.config.ts
+
+ RUN  v3.2.7 C:/Users/Intel/Documents/code/kanban
+
+ ❯ tests/emulator/web-threads-b5-23.test.ts (7 tests | 7 failed) 1729ms
+   × B5-23 createTask in the emulator > stores a queued feature with its history entry and returns the new id 642ms
+     → expected { projectId: 'p1', …(20) } to deeply equal { projectId: 'p1', …(20) }
+   × B5-23 createTask in the emulator > stores the after-deploy steps, unticked, and counts them in the history 57ms
+     → expected { projectId: 'p1', …(20) } to deeply equal { projectId: 'p1', …(20) }
+   × B5-23 createTask in the emulator > says "1 after-deploy step" for one 48ms
+     → expected { projectId: 'p1', …(20) } to deeply equal { projectId: 'p1', …(20) }
+   × B5-23 createTask in the emulator > starts a bugfix at the first stage of its chain (fix) 46ms
+     → expected { projectId: 'p1', …(20) } to deeply equal { projectId: 'p1', …(20) }
+   × B5-23 createTask in the emulator > starts a chore at the first stage of its chain (do) 48ms
+     → expected { projectId: 'p1', …(20) } to deeply equal { projectId: 'p1', …(20) }
+   × B5-23 createTask in the emulator > caps the title at 200, the description at 4000, each step at 300 and the steps at 20 47ms
+     → expected { projectId: 'p1', …(20) } to deeply equal { projectId: 'p1', …(20) }
+   × B5-23 createTask in the emulator > a blank title writes nothing and rejects 26ms
+     → expected false to be true // Object.is equality
+ ❯ tests/emulator/web-threads-b5-22.test.ts (7 tests | 4 failed) 541ms
+   ✓ B5-22 addTodo in the emulator > stores an open todo for the project, text trimmed, no link 222ms
+   × B5-22 addTodo in the emulator > caps the text at 500 characters 40ms
+     → expected 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…' to be 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…' // Object.is equality
+   × B5-22 addTodo in the emulator > refuses blank text "" and writes nothing 29ms
+     → expected [ Array(1) ] to deeply equal []
+   × B5-22 addTodo in the emulator > refuses blank text "   " and writes nothing 24ms
+     → expected [ Array(1) ] to deeply equal []
+   × B5-22 addTodo in the emulator > refuses blank text "\n\t " and writes nothing 23ms
+     → expected [ Array(1) ] to deeply equal []
+   ✓ B5-22 toggleTodo in the emulator > ticking an open todo marks it done with doneAt, nothing else changes 68ms
+   ✓ B5-22 toggleTodo in the emulator > unticking a done todo reopens it and clears doneAt 30ms
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "spec" comment (not a James kind)
+[2026-11-04T08:58:02.735Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d38 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, evaluation error at L39:24 for 'update' @ L39, false for 'update' @ L46, false for 'create' @ L36, false for 'create' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "question" comment (not a James kind)
+[2026-11-04T08:58:02.759Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d39 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, evaluation error at L39:24 for 'update' @ L39, false for 'update' @ L46, false for 'create' @ L36, false for 'create' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "pr" comment (not a James kind)
+[2026-11-04T08:58:02.782Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d3a error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, evaluation error at L39:24 for 'update' @ L39, false for 'update' @ L46, false for 'create' @ L36, false for 'create' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "after_deploy" comment (not a James kind)
+[2026-11-04T08:58:02.804Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d3b error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, evaluation error at L39:24 for 'update' @ L39, false for 'update' @ L46, false for 'create' @ L36, false for 'create' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "done" comment (not a James kind)
+[2026-11-04T08:58:02.839Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d3c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, evaluation error at L39:24 for 'update' @ L39, false for 'update' @ L46, false for 'create' @ L36, false for 'create' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "info" comment (not a James kind)
+[2026-11-04T08:58:02.862Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d3d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, evaluation error at L39:24 for 'update' @ L39, false for 'update' @ L46, false for 'create' @ L36, false for 'create' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "system" comment (not a James kind)
+[2026-11-04T08:58:02.888Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d3e error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, evaluation error at L39:24 for 'update' @ L39, false for 'update' @ L46, false for 'create' @ L36, false for 'create' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "bogus" comment (not a James kind)
+[2026-11-04T08:58:02.918Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d3f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, evaluation error at L39:24 for 'update' @ L39, false for 'update' @ L46, false for 'create' @ L36, false for 'create' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-04T08:58:02.949Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d40 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-04T08:58:02.965Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d41 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-04T08:58:02.983Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d42 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-04T08:58:03.000Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d43 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-04T08:58:03.027Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d44 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-04T08:58:03.059Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d45 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-04T08:58:03.081Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d46 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-04T08:58:03.100Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d47 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-04T08:58:03.123Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d48 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-04T08:58:03.140Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d49 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-04T08:58:03.157Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d4a error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-04T08:58:03.186Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d4b error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-04T08:58:03.205Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d4c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot edit the agent's comment
+[2026-11-04T08:58:03.250Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d4e error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L39:24 for 'update' @ L39, false for 'update' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot change a sent comment's kind
+[2026-11-04T08:58:03.288Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d50 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L39:24 for 'update' @ L39, false for 'update' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot change a sent comment's kind to another James kind
+[2026-11-04T08:58:03.324Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d52 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L39:24 for 'update' @ L39, false for 'update' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot change a sent comment's author
+[2026-11-04T08:58:03.376Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d54 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L39:24 for 'update' @ L39, false for 'update' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > archived task log > stranger can neither read nor write it
+[2026-11-04T08:58:03.477Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d59 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L30, false for 'create' @ L46, false for 'update' @ L30, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > archived task log > unverified James can neither read nor write it
+[2026-11-04T08:58:03.562Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d5c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L30, false for 'create' @ L46, false for 'update' @ L30, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > archived task log > anonymous can neither read nor write it
+[2026-11-04T08:58:03.653Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d5f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L30, false for 'create' @ L46, false for 'update' @ L30, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:03.731Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d62 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L28, false for 'create' @ L46, false for 'update' @ L28, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:03.752Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d63 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L28, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:03.771Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d64 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:03.800Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d66 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L32, false for 'create' @ L46, false for 'update' @ L32, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:03.815Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d67 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L32, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:03.870Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d69 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L25, false for 'create' @ L46, false for 'update' @ L25, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:03.885Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d6a error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L25, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:03.926Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d6c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L26, false for 'create' @ L46, false for 'update' @ L26, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:03.971Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d6e error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:03.987Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d6f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L41, false for 'delete' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.001Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d70 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L28, false for 'delete' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.016Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d71 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L32, false for 'delete' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.028Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d72 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L25, false for 'delete' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.104Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d75 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L28, false for 'create' @ L46, false for 'update' @ L28, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.134Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d76 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L28, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.166Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d77 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.212Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d79 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L32, false for 'create' @ L46, false for 'update' @ L32, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.232Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d7a error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L32, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.290Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d7c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L25, false for 'create' @ L46, false for 'update' @ L25, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.305Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d7d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L25, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.344Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d7f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L26, false for 'create' @ L46, false for 'update' @ L26, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.400Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d81 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.420Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d82 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L41, false for 'delete' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.452Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d83 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L28, false for 'delete' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.466Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d84 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L32, false for 'delete' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.494Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d85 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L25, false for 'delete' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.589Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d88 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L28, false for 'create' @ L46, false for 'update' @ L28, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.619Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d89 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L28, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.652Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d8a error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L36, false for 'create' @ L46, false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.713Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d8c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L32, false for 'create' @ L46, false for 'update' @ L32, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.744Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d8d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L32, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.807Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d8f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L25, false for 'create' @ L46, false for 'update' @ L25, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.838Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d90 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L25, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.915Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d92 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L26, false for 'create' @ L46, false for 'update' @ L26, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.973Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d94 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L39, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:04.986Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d95 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L41, false for 'delete' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:05.002Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d96 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L28, false for 'delete' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:05.017Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d97 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L32, false for 'delete' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-04T08:58:05.040Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d98 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L25, false for 'delete' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > agents stay read-only from the browser > James reads an agent but cannot create, update or delete one
+[2026-11-04T08:58:05.113Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d9b error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L26, false for 'create' @ L46, false for 'update' @ L26, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > agents stay read-only from the browser > James reads an agent but cannot create, update or delete one
+[2026-11-04T08:58:05.136Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d9c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L26, false for 'update' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > agents stay read-only from the browser > James reads an agent but cannot create, update or delete one
+[2026-11-04T08:58:05.150Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d9d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L26, false for 'delete' @ L46
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > default deny > James is refused on a collection the rules do not name
+[2026-11-04T08:58:05.182Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x51758d9e error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'update' @ L46
+
+ ✓ tests/rules/web-threads-b1-4.rules.test.ts (34 tests) 3270ms
+   ✓ any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents  375ms
+   ✓ any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents  466ms
+   ✓ any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents  546ms
+ ✓ tests/emulator/web-threads-b4-16.test.ts (16 tests) 1347ms
+ ✓ tests/emulator/web-threads-b4-17.test.ts (9 tests) 736ms
+ ✓ tests/emulator/web-threads-b4-19.test.ts (8 tests) 631ms
+ ✓ tests/emulator/web-threads-b4-18.test.ts (5 tests) 611ms
+ ✓ tests/emulator/web-threads-b4-28.test.ts (2 tests) 1036ms
+   ✓ B4-28 tickStep while offline > shows the tick locally at once, waits, and lands when the network returns  621ms
+   ✓ B4-28 tickStep history past LOG_CAP > appends past the cap, and the next transactional write archives the overflow  331ms
+ ✓ tests/emulator/web-threads-b4-14.test.ts (4 tests) 423ms
+ ✓ tests/emulator/web-threads-b4-11.test.ts (2 tests) 307ms
+ ✓ tests/emulator/web-threads-b5-24.test.ts (1 test) 229ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/emulator/web-threads-b5-22.test.ts > B5-22 addTodo in the emulator > caps the text at 500 characters
+AssertionError: expected 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…' to be 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…' // Object.is equality
+
+Expected: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+Received: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+ ❯ tests/emulator/web-threads-b5-22.test.ts:40:23
+     38|     await data.addTodo('p1', 'x'.repeat(600))
+     39|     const [todo] = await readTodos()
+     40|     expect(todo.body).toBe('x'.repeat(500))
+       |                       ^
+     41|   })
+     42| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  tests/emulator/web-threads-b5-22.test.ts > B5-22 addTodo in the emulator > refuses blank text "" and writes nothing
+ FAIL  tests/emulator/web-threads-b5-22.test.ts > B5-22 addTodo in the emulator > refuses blank text "   " and writes nothing
+ FAIL  tests/emulator/web-threads-b5-22.test.ts > B5-22 addTodo in the emulator > refuses blank text "\n\t " and writes nothing
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "body": "",
++     "createdAt": 1793782681290,
++     "done": false,
++     "doneAt": null,
++     "id": "1v7gW0wv1jBwlHVWvcdv",
++     "link": null,
++     "projectId": "p1",
++     "sourceTaskId": null,
++   },
++ ]
+
+ ❯ tests/emulator/web-threads-b5-22.test.ts:45:31
+     43|   it.each(['', '   ', '\n\t '])('refuses blank text %j and writes noth…
+     44|     await data.addTodo('p1', text).catch(() => undefined)
+     45|     expect(await readTodos()).toEqual([])
+       |                               ^
+     46|   })
+     47| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  tests/emulator/web-threads-b5-23.test.ts > B5-23 createTask in the emulator > stores a queued feature with its history entry and returns the new id
+AssertionError: expected { projectId: 'p1', …(20) } to deeply equal { projectId: 'p1', …(20) }
+
+- Expected
++ Received
+
+@@ -5,17 +5,11 @@
+    "createdAt": 1793782679956,
+    "createdBy": "james",
+    "description": "Find any task by its title",
+    "doneAt": null,
+    "lastCommentAt": null,
+-   "log": [
+-     {
+-       "at": Any<Number>,
+-       "text": "Queued: Add search",
+-       "who": "james",
+-     },
+-   ],
++   "log": [],
+    "needs": null,
+    "pr": null,
+    "projectId": "p1",
+    "reopenedAt": null,
+    "spec": null,
+
+ ❯ expectStored tests/emulator/web-threads-b5-23.test.ts:40:18
+     38| ) {
+     39|   const stored = await readTask(id)
+     40|   expect(stored).toEqual({
+       |                  ^
+     41|     ...initialTaskFields({
+     42|       projectId: 'p1',
+ ❯ tests/emulator/web-threads-b5-23.test.ts:69:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  tests/emulator/web-threads-b5-23.test.ts > B5-23 createTask in the emulator > stores the after-deploy steps, unticked, and counts them in the history
+AssertionError: expected { projectId: 'p1', …(20) } to deeply equal { projectId: 'p1', …(20) }
+
+- Expected
++ Received
+
+@@ -1,27 +1,15 @@
+  {
+-   "afterDeploy": [
+-     "Open the site",
+-     "Check the logs",
+-   ],
+-   "afterDone": [
+-     false,
+-     false,
+-   ],
++   "afterDeploy": [],
++   "afterDone": [],
+    "agentId": null,
+    "createdAt": 1793782680222,
+    "createdBy": "james",
+    "description": "",
+    "doneAt": null,
+    "lastCommentAt": null,
+-   "log": [
+-     {
+-       "at": Any<Number>,
+-       "text": "Queued: Ship the footer · 2 after-deploy steps",
+-       "who": "james",
+-     },
+-   ],
++   "log": [],
+    "needs": null,
+    "pr": null,
+    "projectId": "p1",
+    "reopenedAt": null,
+    "spec": null,
+
+ ❯ expectStored tests/emulator/web-threads-b5-23.test.ts:40:18
+     38| ) {
+     39|   const stored = await readTask(id)
+     40|   expect(stored).toEqual({
+       |                  ^
+     41|     ...initialTaskFields({
+     42|       projectId: 'p1',
+ ❯ tests/emulator/web-threads-b5-23.test.ts:88:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ FAIL  tests/emulator/web-threads-b5-23.test.ts > B5-23 createTask in the emulator > says "1 after-deploy step" for one
+AssertionError: expected { projectId: 'p1', …(20) } to deeply equal { projectId: 'p1', …(20) }
+
+- Expected
++ Received
+
+@@ -1,25 +1,15 @@
+  {
+-   "afterDeploy": [
+-     "Clear it",
+-   ],
+-   "afterDone": [
+-     false,
+-   ],
++   "afterDeploy": [],
++   "afterDone": [],
+    "agentId": null,
+    "createdAt": 1793782680271,
+    "createdBy": "james",
+    "description": "",
+    "doneAt": null,
+    "lastCommentAt": null,
+-   "log": [
+-     {
+-       "at": Any<Number>,
+-       "text": "Queued: Tidy up · 1 after-deploy step",
+-       "who": "james",
+-     },
+-   ],
++   "log": [],
+    "needs": null,
+    "pr": null,
+    "projectId": "p1",
+    "reopenedAt": null,
+    "spec": null,
+
+ ❯ expectStored tests/emulator/web-threads-b5-23.test.ts:40:18
+     38| ) {
+     39|   const stored = await readTask(id)
+     40|   expect(stored).toEqual({
+       |                  ^
+     41|     ...initialTaskFields({
+     42|       projectId: 'p1',
+ ❯ tests/emulator/web-threads-b5-23.test.ts:100:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
+
+ FAIL  tests/emulator/web-threads-b5-23.test.ts > B5-23 createTask in the emulator > starts a bugfix at the first stage of its chain (fix)
+ FAIL  tests/emulator/web-threads-b5-23.test.ts > B5-23 createTask in the emulator > starts a chore at the first stage of its chain (do)
+AssertionError: expected { projectId: 'p1', …(20) } to deeply equal { projectId: 'p1', …(20) }
+
+- Expected
++ Received
+
+@@ -5,17 +5,11 @@
+    "createdAt": 1793782680321,
+    "createdBy": "james",
+    "description": "",
+    "doneAt": null,
+    "lastCommentAt": null,
+-   "log": [
+-     {
+-       "at": Any<Number>,
+-       "text": "Queued: Fix the header",
+-       "who": "james",
+-     },
+-   ],
++   "log": [],
+    "needs": null,
+    "pr": null,
+    "projectId": "p1",
+    "reopenedAt": null,
+    "spec": null,
+
+ ❯ expectStored tests/emulator/web-threads-b5-23.test.ts:40:18
+     38| ) {
+     39|   const stored = await readTask(id)
+     40|   expect(stored).toEqual({
+       |                  ^
+     41|     ...initialTaskFields({
+     42|       projectId: 'p1',
+ ❯ tests/emulator/web-threads-b5-23.test.ts:114:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯
+
+ FAIL  tests/emulator/web-threads-b5-23.test.ts > B5-23 createTask in the emulator > caps the title at 200, the description at 4000, each step at 300 and the steps at 20
+AssertionError: expected { projectId: 'p1', …(20) } to deeply equal { projectId: 'p1', …(20) }
+
+- Expected
++ Received
+
+  {
+-   "afterDeploy": [
+-     "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+-     "Step 1",
+-     "Step 2",
+-     "Step 3",
+-     "Step 4",
+-     "Step 5",
+-     "Step 6",
+-     "Step 7",
+-     "Step 8",
+-     "Step 9",
+-     "Step 10",
+-     "Step 11",
+-     "Step 12",
+-     "Step 13",
+-     "Step 14",
+-     "Step 15",
+-     "Step 16",
+-     "Step 17",
+-     "Step 18",
+-     "Step 19",
+-   ],
+-   "afterDone": [
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-     false,
+-   ],
++   "afterDeploy": [],
++   "afterDone": [],
+    "agentId": null,
+    "createdAt": 1793782680410,
+    "createdBy": "james",
+-   "description": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
++   "description": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "doneAt": null,
+    "lastCommentAt": null,
+-   "log": [
+-     {
+-       "at": Any<Number>,
+-       "text": "Queued: tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt · 20 after-deploy steps",
+-       "who": "james",
+-     },
+-   ],
++   "log": [],
+    "needs": null,
+    "pr": null,
+    "projectId": "p1",
+    "reopenedAt": null,
+    "spec": null,
+    "stage": "spec",
+    "summary": "",
+-   "title": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt",
++   "title": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt",
+    "type": "feature",
+    "unread": false,
+    "updatedAt": 1793782680410,
+    "working": false,
+  }
+
+ ❯ expectStored tests/emulator/web-threads-b5-23.test.ts:40:18
+     38| ) {
+     39|   const stored = await readTask(id)
+     40|   expect(stored).toEqual({
+       |                  ^
+     41|     ...initialTaskFields({
+     42|       projectId: 'p1',
+ ❯ tests/emulator/web-threads-b5-23.test.ts:132:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/11]⎯
+
+ FAIL  tests/emulator/web-threads-b5-23.test.ts > B5-23 createTask in the emulator > a blank title writes nothing and rejects
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/emulator/web-threads-b5-23.test.ts:147:22
+    145|       rejected = true
+    146|     })
+    147|     expect(rejected).toBe(true)
+       |                      ^
+    148|     expect(await readTasks()).toEqual([])
+    149|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/11]⎯
+
+
+ Test Files  2 failed | 9 passed (11)
+      Tests  11 failed | 84 passed (95)
+   Start at  09:57:58
+   Duration  17.22s (transform 159ms, setup 0ms, collect 3.14s, tests 10.86s, environment 1ms, prepare 1.04s)
+
+!  Script exited unsuccessfully (code 1)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+
+Error: Script "vitest run --config vitest.rules.config.ts" exited with code 1

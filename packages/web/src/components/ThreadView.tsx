@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Comment, Task } from '@kanban/shared'
-import { readMoreId } from '../lib/messages.ts'
+import { emptyThreadText, readMoreId } from '../lib/messages.ts'
 import { activeNeed } from '../lib/threads.ts'
 import { useReply } from '../lib/use-reply.ts'
 import { useThreadActions, type SheetMode } from '../lib/use-thread-actions.ts'
@@ -56,6 +56,7 @@ export default function ThreadView({
           now={now}
           readMoreId={readMoreId(reply.messages, activeNeed(task))}
           working={task.working === true}
+          emptyText={emptyThreadText(task, projectName)}
           onReadMore={() => setSheet('read')}
         />
       </main>

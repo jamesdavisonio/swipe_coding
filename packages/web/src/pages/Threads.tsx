@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import BottomNav from '../components/BottomNav.tsx'
 import DecisionSheet from '../components/DecisionSheet.tsx'
 import { ALL_PROJECTS } from '../components/ProjectChips.tsx'
 import ThreadList from '../components/ThreadList.tsx'
+import Screen from '../components/Screen.tsx'
 import { ForJamesRow, TaskRow } from '../components/ThreadRow.tsx'
 import ThreadsHeader from '../components/ThreadsHeader.tsx'
 import type { ThreadRow } from '../lib/threads.ts'
@@ -60,28 +60,26 @@ export default function Threads() {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-(--content-max) flex-col">
-      <ThreadsHeader
-        waiting={waiting}
-        projects={board.projects.data}
-        filter={filter}
-        countFor={board.countFor}
-        onSelect={selectProject}
-      />
-
-      <main className="flex-1 pb-28">
-        <ThreadList
-          loading={board.loading}
-          failed={board.failed}
-          rows={board.rows}
-          render={(row) => rowView(row, board, actions)}
+    <Screen
+      header={
+        <ThreadsHeader
+          waiting={waiting}
+          projects={board.projects.data}
+          filter={filter}
+          countFor={board.countFor}
+          onSelect={selectProject}
         />
-      </main>
-
-      <BottomNav />
+      }
+    >
+      <ThreadList
+        loading={board.loading}
+        failed={board.failed}
+        rows={board.rows}
+        render={(row) => rowView(row, board, actions)}
+      />
       {sheet && sheetTask ? (
         <DecisionSheet task={sheetTask} mode={sheet.mode} onClose={() => setSheet(null)} />
       ) : null}
-    </div>
+    </Screen>
   )
 }

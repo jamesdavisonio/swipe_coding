@@ -156,8 +156,11 @@ React + Vite + Tailwind PWA, installable on the phone.
   sheet (B4): approve or change a spec, answer, merge, tick after-deploy steps (ticks work
   offline), each recorded in the task's history. Phase 1's mark done / re-queue menu and the
   `claude --resume` copy button were retired with the old task page; Reopen returns in B6.
-- `/projects` the Phase 1 project list and `/p/:project` the Phase 1 board, until the
-  Projects screen (B5) replaces them.
+- `/projects` **Projects** (B5): each project with host, live dot and counts (need you, live,
+  done this week, for James). `/p/:project` a project's **Live / For James / Done** tabs
+  (`?tab=`), Done with Show older. `/new` **New task** with a stage preview and optional
+  after-deploy steps; a queued task's empty thread says it is waiting for a session. The
+  Phase 1 pages are retired, and with them the sign-out button (not in the spec).
 - Web Push for `kanban_ask`, `Stop` with open question, PR opened, permission prompt.
 
 ### Data model (Firestore)

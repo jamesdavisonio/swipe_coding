@@ -1,8 +1,9 @@
 import { useParams } from 'react-router-dom'
-import { isAgentOnline, isDone } from '@kanban/shared'
+import { isDone } from '@kanban/shared'
 import { useAgents, useProjects, useTask, useTaskComments } from '../data.ts'
 import ThreadView from '../components/ThreadView.tsx'
 import { ThreadFailed, ThreadGone, ThreadLoading } from '../components/ThreadState.tsx'
+import { liveProjectIds } from '../lib/projects.ts'
 import { useNow } from '../lib/use-now.ts'
 
 // /t/:taskId — one task as a conversation. Only the task and its comments gate the screen; the
@@ -22,9 +23,7 @@ export default function Thread() {
   if (!task.data) return <ThreadGone />
 
   const shown = task.data
-  const live =
-    !isDone(shown) &&
-    agents.data.some((agent) => agent.projectId === shown.projectId && isAgentOnline(agent, now))
+  const live = !isDone(shown) && liveProjectIds(agents.data, now).has(shown.projectId)
   return (
     <ThreadView
       key={shown.id}
