@@ -1,27 +1,18 @@
 import { useMemo, type ReactNode } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import type { Project as ProjectDoc, Task, Todo } from '@kanban/shared'
 import { useAgents, useProject, useProjectTasks, useProjectTodos } from '../data.ts'
 import DoneList from '../components/DoneList.tsx'
+import LiveList from '../components/LiveList.tsx'
 import PageHeader from '../components/PageHeader.tsx'
 import Screen from '../components/Screen.tsx'
 import { EmptyNote, LoadFailed, LoadingStatus } from '../components/ScreenState.tsx'
-import { LiveTaskCard } from '../components/TaskCards.tsx'
 import TodoList from '../components/TodoList.tsx'
 import { Button } from '../components/ui/button.tsx'
 import { Segmented } from '../components/ui/segmented.tsx'
 import { Plus } from '../lib/icons.ts'
-import {
-  PROJECT_TAB_PARAM,
-  doneTasks,
-  hostLine,
-  isDefaultTab,
-  liveProjectIds,
-  liveTasks,
-  orderTodos,
-  parseTab,
-  type ProjectTab,
-} from '../lib/projects.ts'
+import { doneTasks, hostLine, liveProjectIds, liveTasks, orderTodos } from '../lib/projects.ts'
+import { useProjectTab } from '../lib/use-project-tab.ts'
 import { useNow } from '../lib/use-now.ts'
 
 const BACK = { to: '/projects', label: 'Back to projects' }
@@ -41,19 +32,9 @@ function ProjectView({
   live: boolean
   now: number
 }) {
-  const [params, setParams] = useSearchParams()
-  const tab = parseTab(params.get(PROJECT_TAB_PARAM))
+  const [tab, choose] = useProjectTab()
   const inFlight = useMemo(() => liveTasks(tasks), [tasks])
   const done = useMemo(() => doneTasks(tasks, now), [tasks, now])
-  const ordered = useMemo(() => orderTodos(todos), [todos])
-
-  function choose(next: ProjectTab) {
-    const nextParams = new URLSearchParams(params)
-    if (isDefaultTab(next)) nextParams.delete(PROJECT_TAB_PARAM)
-    else nextParams.set(PROJECT_TAB_PARAM, next)
-    setParams(nextParams, { replace: true })
-  }
-
   const tabs = [
     { id: 'live', label: `Live · ${inFlight.length}` },
     { id: 'james', label: `For James · ${todos.filter((todo) => !todo.done).length}` },
@@ -67,35 +48,30 @@ function ProjectView({
           title={project.name}
           sub={hostLine(project.hostname, live)}
           back={BACK}
-          right={
-            <Button asChild>
-              <Link to={`/new?project=${encodeURIComponent(project.id)}`}>
-                <Plus aria-hidden="true" />
-                Task
-              </Link>
-            </Button>
-          }
+          right={<AddTaskLink projectId={project.id} />}
         >
           <Segmented label="Project tabs" options={tabs} value={tab} onChange={choose} />
         </PageHeader>
       }
     >
       <div className="px-4">
-        {tab === 'live' ? (
-          inFlight.length === 0 ? (
-            <EmptyNote>Nothing live. Queue a task from New task.</EmptyNote>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {inFlight.map((task) => (
-                <LiveTaskCard key={task.id} task={task} />
-              ))}
-            </ul>
-          )
-        ) : null}
-        {tab === 'james' ? <TodoList projectId={project.id} todos={ordered} /> : null}
+        {tab === 'live' ? <LiveList tasks={inFlight} /> : null}
+        {tab === 'james' ? <TodoList projectId={project.id} todos={orderTodos(todos)} /> : null}
         {tab === 'done' ? <DoneList recent={done.recent} older={done.older} now={now} /> : null}
       </div>
     </Screen>
+  )
+}
+
+// The "+ Task" button: New task with this project preselected.
+function AddTaskLink({ projectId }: { projectId: string }) {
+  return (
+    <Button asChild>
+      <Link to={`/new?project=${encodeURIComponent(projectId)}`}>
+        <Plus aria-hidden="true" />
+        Task
+      </Link>
+    </Button>
   )
 }
 

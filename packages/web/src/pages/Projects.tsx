@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
 import { useAgents, useAllTasks, useOpenTodos, useProjects } from '../data.ts'
 import PageHeader from '../components/PageHeader.tsx'
-import ProjectCard from '../components/ProjectCard.tsx'
+import ProjectList from '../components/ProjectList.tsx'
 import Screen from '../components/Screen.tsx'
 import { EmptyNote, LoadFailed, LoadingStatus } from '../components/ScreenState.tsx'
-import { NO_PROJECTS_TEXT, liveProjectIds, projectCounts } from '../lib/projects.ts'
+import { NO_PROJECTS_TEXT, liveProjectIds } from '../lib/projects.ts'
 import { useNow } from '../lib/use-now.ts'
 
 // /projects — one card per folder James has run a session in, in the order useProjects returns
@@ -28,21 +28,13 @@ export default function Projects() {
   else if (projects.data.length === 0) body = <EmptyNote>{NO_PROJECTS_TEXT}</EmptyNote>
   else
     body = (
-      <ul className="flex flex-col gap-3 px-4">
-        {projects.data.map((project) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            live={liveIds.has(project.id)}
-            counts={projectCounts({
-              tasks: tasks.data,
-              todos: todos.data,
-              projectId: project.id,
-              now,
-            })}
-          />
-        ))}
-      </ul>
+      <ProjectList
+        projects={projects.data}
+        tasks={tasks.data}
+        todos={todos.data}
+        liveIds={liveIds}
+        now={now}
+      />
     )
 
   const sessions =
