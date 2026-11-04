@@ -40,6 +40,7 @@ import {
   MAX_TODO_CHARS,
 } from './lib/limits.ts'
 import { jamesComment, replyKind } from './lib/messages.ts'
+import { MAX_REOPEN_NOTE_CHARS, REOPEN_PREFIX, stageBeforeDone } from './lib/reopen.ts'
 import { newRequestId } from './lib/request-id.ts'
 import { specVersion } from './lib/threads.ts'
 
@@ -70,6 +71,8 @@ function useRetry(): [number, () => void] {
   const [attempt, setAttempt] = useState(0)
   return [attempt, useCallback(() => setAttempt((n) => n + 1), [])]
 }
+
+const LOG_ARCHIVE = 'log_archive'
 
 // --- read hooks ---------------------------------------------------------------
 // `deps` controls re-subscription; constraints are rebuilt only when deps change.
@@ -179,13 +182,22 @@ export const useTaskComments = (taskId: string | undefined) =>
     !!taskId
   )
 
+// A task's archived history (tasks/{id}/log_archive), oldest first. Reads nothing until `enabled`
+// (the History sheet asks for it on "Show earlier history"). Single-field index on `at`.
+export const useLogArchive = (taskId: string | undefined, enabled: boolean) =>
+  useCollection<LogEntry>(
+    `${COLLECTIONS.tasks}/${taskId}/${LOG_ARCHIVE}`,
+    [orderBy('at', 'asc')],
+    [taskId],
+    enabled && !!taskId
+  )
+
 export const useProject = (id: string | undefined) => useDocument<Project>(COLLECTIONS.projects, id)
 export const useTask = (id: string | undefined) => useDocument<Task>(COLLECTIONS.tasks, id)
 
 // --- writes ------------------------------------------------------------------
 
 const now = () => Date.now()
-const LOG_ARCHIVE = 'log_archive'
 
 // Free text from James: trimmed and capped before it is written anywhere. A text that gets a
 // prefix in his message is capped so the whole message fits, which keeps the message and the
@@ -248,7 +260,7 @@ interface Transition {
 }
 async function transitionTask(
   taskId: string,
-  plan: (current: Task) => Transition | null
+  plan: (current: Task, at: number) => Transition | null
 ): Promise<void> {
   const taskRef = doc(db, COLLECTIONS.tasks, taskId)
   const commentRef = doc(collection(db, COLLECTIONS.comments))
@@ -256,9 +268,9 @@ async function transitionTask(
     const snap = await tx.get(taskRef)
     if (!snap.exists()) return
     const current = { ...(snap.data() as Task), id: snap.id }
-    const next = plan(current)
-    if (!next) return
     const t = now()
+    const next = plan(current, t)
+    if (!next) return
     const entry: LogEntry = { at: t, who: 'james', text: next.history }
     const { log: kept, archived } = appendLog(Array.isArray(current.log) ? current.log : [], entry)
     const archive = collection(db, COLLECTIONS.tasks, taskId, LOG_ARCHIVE)
@@ -355,6 +367,29 @@ export async function markMerged(task: Task) {
         }
       : null
   )
+}
+
+// Reopens a done task with a note for the session: only from stage `done` (a double tap or a stale
+// screen writes nothing), back to the stage before `done` in the task's own chain, re-arming the
+// after-deploy need when that is where it lands. `afterDone` stays as it is: James unticks the
+// step himself. A blank note writes nothing.
+export async function reopenTask(task: Task, note: string) {
+  const text = cleanText(note, MAX_REOPEN_NOTE_CHARS)
+  if (text === '') return
+  await transitionTask(task.id, (cur, at) => {
+    const back = cur.stage === 'done' ? stageBeforeDone(cur) : null
+    if (back === null) return null
+    return {
+      patch: {
+        stage: back,
+        needs: back === 'after_deploy' ? { kind: 'after_deploy' } : null,
+        doneAt: null,
+        reopenedAt: at,
+      },
+      history: `${REOPEN_PREFIX}${text}`,
+      comment: { kind: 'reopen', body: `${REOPEN_PREFIX}${text}` },
+    }
+  })
 }
 
 // Ticks (or unticks) one after-deploy step. A batch built from the task as the screen has it, so

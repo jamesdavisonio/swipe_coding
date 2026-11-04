@@ -49,6 +49,11 @@ export async function track(
   return true
 }
 
+// A milestone that follows a write, under the request id of the tap that caused it.
+export function logMilestone(milestone: string, target: string, requestId: string) {
+  log.event('milestone_reached', { feature: FEATURE, milestone, target, request_id: requestId })
+}
+
 // The Firestore error code ('permission-denied', 'unavailable', ...) when `err` is a
 // FirebaseError, else null.
 function firestoreCode(err: unknown): string | null {

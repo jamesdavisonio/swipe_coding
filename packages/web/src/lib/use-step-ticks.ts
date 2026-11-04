@@ -5,8 +5,7 @@
 import { useEffect, useState } from 'react'
 import type { Task } from '@kanban/shared'
 import { tickStep } from '../data.ts'
-import { log } from './log.ts'
-import { FEATURE, track } from './use-thread-actions.ts'
+import { logMilestone, track } from './use-thread-actions.ts'
 
 export function useStepTicks(task: Task) {
   const [chosen, setChosen] = useState<Record<number, boolean>>({})
@@ -36,15 +35,7 @@ export function useStepTicks(task: Task) {
       next ? 'tick_step' : 'untick_step',
       task.id,
       () => tickStep(shown, index),
-      completes
-        ? (requestId) =>
-            log.event('milestone_reached', {
-              feature: FEATURE,
-              milestone: 'task_done',
-              target: task.id,
-              request_id: requestId,
-            })
-        : undefined
+      completes ? (requestId) => logMilestone('task_done', task.id, requestId) : undefined
     )
     if (ok) return
     setChosen(({ [index]: _dropped, ...rest }) => rest)
