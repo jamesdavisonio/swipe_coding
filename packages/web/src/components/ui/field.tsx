@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
 import { Label } from './label.tsx'
 
-// A label above a control. Pass `htmlFor` for a single control; leave it out when the control is
-// a group that names itself (a Segmented).
+// A caption above a control. With `htmlFor` it is a <label> for that control. Without it the
+// control is a group that names itself (a Segmented), so the caption is plain text, hidden from
+// assistive tech because the group already announces the same name.
 export function Field({
   label,
   htmlFor,
@@ -14,7 +15,13 @@ export function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={htmlFor}>{label}</Label>
+      {htmlFor ? (
+        <Label htmlFor={htmlFor}>{label}</Label>
+      ) : (
+        <span aria-hidden="true" className="text-sm font-semibold text-foreground select-none">
+          {label}
+        </span>
+      )}
       {children}
     </div>
   )
