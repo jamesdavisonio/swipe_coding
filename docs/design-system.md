@@ -52,5 +52,5 @@ B3 added `StageStepper`, `Ticks`, `Messages`, `MessageList`, `Composer`, `Thread
 `SpecDecision`, `QuestionDecision`, `PrDecision`, `AfterDeployDecision`, `SaveError`; B5 added `Screen`, `ScreenState`,
 `PageHeader`, `ProjectList`, `ProjectCard`, `ProjectTile`, `LiveList`, `DoneList`, `TodoList`,
 `TaskCards`, `NewTaskForm`, `AfterDeployFields`; B6 filled `HistorySheet` and added `HistoryList`
-and `ReopenSheet` (sheets return focus to their opener through `lib/use-return-focus.ts`). No component catalog: the prototype is the reference.
+and `ReopenSheet` (sheets return focus to their opener through `lib/use-return-focus.ts`). B7 added `BriefCard`, `BriefBlock` (text before, the card, text after), `MessageBody` and `SuggestedNext` (a `You could start next` list with a Copy button per item; `lib/use-copy.ts` shows `Copied` for two seconds); briefs are parsed by `lib/brief.ts`. No component catalog: the prototype is the reference.
 No i18n: single owner, English.

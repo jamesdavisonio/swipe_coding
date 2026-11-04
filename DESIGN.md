@@ -112,21 +112,23 @@ On start it:
    upserts the **project** keyed by `(hostname, cwd)`; heartbeats `lastSeen` every 5 min (offline after 12 min; keeps always-on agents inside the free write quota)
    (presence = heartbeat freshness; no RTDB `onDisconnect`).
 2. Declares the channel capability and `instructions` telling Claude: what the tags
-   mean, that `from="james"` is me, and which tools to call at which point in a task.
+   mean, that `from="james"` is me, and which tools to call at which point in a task
+   (`packages/agent/src/instructions.ts`; since B7 also where each decision brief goes and
+   that a finished task's summary ends with `### Suggested next`).
 3. Exposes tools (all scoped to this agent; the backend binds a task to an agent when
    the agent starts or creates it, so inbound routing needs no Claude session id):
 
-| tool                    | purpose                                                                                                         |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `kanban_list_tasks`     | tasks in this project (open first) so the session can pick one up                                               |
-| `kanban_create_task`    | `{title, type, description?}` → creates task at its chain's first stage, binds to this agent                    |
-| `kanban_start_task`     | `{task_id}` → binds existing task to this agent, `working: true`                                                |
-| `kanban_update_task`    | `{task_id, status? (in_progress or done), summary?, pr_url?}` — `done` sets stage `done`; `pr_url` sets `pr`    |
-| `kanban_subtask`        | `{task_id, key, status, note?}` — `key` is a stage; `awaiting_approval` on `spec` arms `needs`, `done` advances |
-| `kanban_comment`        | `{task_id, body}` — the session's narrative, visible to me                                                      |
-| `kanban_ask`            | `{task_id, question}` — sets `needs {kind: question}`, pushes notification to me; the answer is a channel event |
-| `kanban_todo_for_james` | `{project, body, link?}` — appends to the project's "For James" task                                            |
-| `kanban_get_task`       | full task with comments, so a fresh session can resume one                                                      |
+| tool                    | purpose                                                                                                                                                                                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kanban_list_tasks`     | tasks in this project (open first) so the session can pick one up                                                                                                                                                                           |
+| `kanban_create_task`    | `{title, type, description?}` → creates task at its chain's first stage, binds to this agent                                                                                                                                                |
+| `kanban_start_task`     | `{task_id}` → binds existing task to this agent, `working: true`                                                                                                                                                                            |
+| `kanban_update_task`    | `{task_id, status? (in_progress or done), summary?, pr_url?}` — `done` sets stage `done` and posts the summary as a Done message (once); `pr_url` at build/fix/do/pr sets stage `pr` with `needs {kind: pr}`, otherwise only records the PR |
+| `kanban_subtask`        | `{task_id, key, status, note?}` — `key` is a stage; `awaiting_approval` on `spec` arms `needs`, `done` advances                                                                                                                             |
+| `kanban_comment`        | `{task_id, body}` — the session's narrative, visible to me                                                                                                                                                                                  |
+| `kanban_ask`            | `{task_id, question}` — sets `needs {kind: question}`, pushes notification to me; the answer is a channel event                                                                                                                             |
+| `kanban_todo_for_james` | `{project, body, link?}` — appends to the project's "For James" task                                                                                                                                                                        |
+| `kanban_get_task`       | full task with comments, so a fresh session can resume one                                                                                                                                                                                  |
 
 4. Routes inbound: it listens with `onSnapshot` to
    `collectionGroup('comments') where agentId == me && deliveredAt == null`; each new
