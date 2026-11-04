@@ -12,6 +12,7 @@ unit tests PASS exit 0 (48 files, 521 tests)
 
 ── Full ──
 integration PASS exit 0 (test:rules 16 files / 124 tests; agent protocol on the emulator "all good")
+audit gate PASS exit 0 — 1 high+ advisory, allowlisted until 2027-02-01 (GHSA-m9gg-hp2v-232j); the first run failed to get a report from npm, the retry passed
 contrast PASS exit 0 (38 pairs, :root + .dark)
 rules lint PASS exit 0
 prettier PASS exit 0
