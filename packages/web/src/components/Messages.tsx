@@ -1,6 +1,7 @@
 import { cn } from '../lib/cn.ts'
 import type { Comment } from '@kanban/shared'
 import { bodyText, sentTime, sessionLabel } from '../lib/messages.ts'
+import MessageBody from './MessageBody.tsx'
 import Ticks from './Ticks.tsx'
 
 const LABEL = 'mx-2.5 text-xs font-bold text-muted-foreground'
@@ -27,7 +28,7 @@ export function SessionMessage({
           readMore ? 'border-needs/50' : 'border-border'
         )}
       >
-        <p>{bodyText(comment)}</p>
+        <MessageBody comment={comment} />
         {readMore ? (
           <button
             type="button"
