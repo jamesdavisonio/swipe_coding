@@ -106,6 +106,9 @@ describe('B7-36 the suggestions in a Done message', () => {
 
   it('Copy writes the item to the clipboard and shows Copied on that button', async () => {
     // Timers are fake too, so the two seconds of "Copied" can be stepped through.
+    // installClock() already faked Date, and vitest ignores a second useFakeTimers call,
+    // so reset first or setTimeout stays real.
+    vi.useRealTimers()
     vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] })
     vi.setSystemTime(NOW)
     const { writeText } = showDone(`Shipped.\n\n${NEXT}`)
