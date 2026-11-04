@@ -88,6 +88,89 @@ older than 30 days disappear on their own.
 - Changing what the browser logger samples or keeps.
 - Reading logs from outside a kanban session (a CLI script).
 
+## Public contract and existing boundaries
+
+**L1 contract details fixed at test time** (planner decisions; exact names tests may assert)
+
+- **Shared constants** (`packages/shared/src/index.ts`, exported): `LOG_RETENTION_MS` = 30
+  days; `LOG_MESSAGE_MAX` = 2000; `LOG_CONTEXT_MAX_KEYS` = 30; `LOG_CONTEXT_VALUE_MAX` = 1000;
+  `AGENT_LOG_MAX_PER_MINUTE` = 20; `LOGS_READ_DEFAULT_LIMIT` = 50; `LOGS_READ_MAX_LIMIT` = 200;
+  `LOGS_READ_DEFAULT_MINUTES` = 1440; `LOGS_READ_MAX_MINUTES` = 43200; `LOGS_SCAN_MAX` = 1000.
+- **Stored event** — a top-level `logs/{autoId}` document with exactly these 18 fields: the
+  logger's 15 event fields (`schema_version`, `taxonomy_version`, `timestamp` (ISO string),
+  `severity`, `app_id`, `client_id`, `env`, `source`, `event_type`, `audience`, `session_id`,
+  `trace_id`, `user_id`, `message`, `context`) plus `ts` (numeric ms, from `timestamp`),
+  `expireAt` (a Firestore Timestamp, `ts + LOG_RETENTION_MS`; the one non-numeric time, because
+  TTL needs a Timestamp) and `request_id` (`context.request_id` when it is a string, else
+  `null`). Before storing, `message` is cut to `LOG_MESSAGE_MAX` characters, `context` keeps
+  its first `LOG_CONTEXT_MAX_KEYS` keys, and each string context value is cut to
+  `LOG_CONTEXT_VALUE_MAX`. Nothing updates or deletes a stored event except TTL.
+- **Browser logger** (`logging/logger.browser.js`): `initLogger` accepts an optional
+  `transport(events)` returning a promise. When given, `flush` hands each batch (the same
+  array it would POST, including the dropped-events notice) to `transport` instead of
+  fetch/sendBeacon, whether or not `log_endpoint` is set; a rejected `transport` is retried
+  with the existing `MAX_RETRIES` and backoff; on the hide/pagehide path it is called once and
+  not awaited. Without `transport` the logger behaves exactly as today.
+- **Web store** (`packages/web/src/lib/log-store.ts`): `storeLogEvents(events): Promise<void>`.
+  With no signed-in user it writes nothing and resolves. Otherwise it writes one stored event
+  per input event in one batch write and resolves once the batch is handed to Firestore,
+  without waiting for the server (an offline batch syncs later); a refused or failed commit is
+  swallowed silently and nothing is logged about it. It never rejects. `lib/log.ts` passes it
+  as the logger's `transport`.
+- **Rules** (`match /logs/{id}`): `read`, `update`, `delete`: never. `create`: owner only, keys
+  exactly the 18 above, `severity` in DEBUG/INFO/WARNING/ERROR/CRITICAL, `source ==
+'web_client'`, `env` in prod/staging/dev, `audience` in internal/client/both, `event_type`
+  a string of 1–64 characters, `message` a string of at most `LOG_MESSAGE_MAX`, `context` a
+  map of at most `LOG_CONTEXT_MAX_KEYS` keys, `timestamp` a string of at most 40, `session_id`
+  a string of at most 100, `ts` a number, `expireAt` a timestamp after `request.time` and at
+  most 31 days after it, `request_id` null or a string of at most 100, `trace_id`, `user_id`
+  and `client_id` null or strings of at most 100, `app_id` a string of 1–64,
+  `schema_version` and `taxonomy_version` numbers.
+- **Agent store** (`packages/agent/src/app-log.ts`): `logFailure({ severity, event_type,
+message, context?, request_id? }): Promise<void>`, severity `WARNING` | `ERROR`, event_type
+  `api_call_failed` | `feature_error`. It always writes one `log()` line (stderr and
+  `agent.log`). It then stores one event with source `server` unless the board is offline or
+  the agent has already stored `AGENT_LOG_MAX_PER_MINUTE` events in the last 60 seconds
+  (rolling). Stored fields: `app_id` and `client_id` from `app.manifest.yaml`, `env` from
+  `APP_ENV` (default `prod`), `taxonomy_version` from `logging/taxonomy.json`,
+  `schema_version` 1, `audience` `internal`, `session_id` the agent id (or `null` before
+  registration), `trace_id` and `user_id` `null`; `context` is the caller's context plus
+  `agent_id` and `project_id` (when registered); `request_id` is the caller's, else
+  `agent-<uuid>`. Same truncation and `expireAt` as above. A failed store writes one more
+  `log()` line and nothing else; `logFailure` never rejects and never calls itself.
+- **Failure sites** that call `logFailure`:
+
+  | Failure                                                            | Severity | Event type        | Context                                               |
+  | ------------------------------------------------------------------ | -------- | ----------------- | ----------------------------------------------------- |
+  | A tool call throws anything but `BoardError` / `BoardOfflineError` | ERROR    | `feature_error`   | `feature`: the tool name                              |
+  | A channel delivery fails                                           | WARNING  | `api_call_failed` | `target: 'channel'`, `status: 'failed'`, `task_id`    |
+  | The comment or queued listener errors                              | ERROR    | `api_call_failed` | `target: 'firestore'`, `status`: error code           |
+  | A comment batch, a queued batch or a queued-task announce fails    | WARNING  | `api_call_failed` | `target: 'firestore'`, `status`, `task_id` when known |
+  | A heartbeat write fails                                            | WARNING  | `api_call_failed` | `target: 'firestore'`, `status`                       |
+  | Board registration fails                                           | ERROR    | `api_call_failed` | `target: 'firestore'`, `status`                       |
+
+  `status` is the error's `code` when it has one, else `'unknown'`; the message is the error's
+  message (no stack; the stack stays in `agent.log`).
+
+- **Read tool** `kanban_logs` (logic in `readLogs(args)` in `app-log.ts`; works whether or not
+  the session has a task). Arguments, all optional: `request_id` (string), `min_severity`
+  (one of the five), `since_minutes` (integer 1–`LOGS_READ_MAX_MINUTES`), `source`
+  (`web_client` | `server`), `limit` (integer 1–`LOGS_READ_MAX_LIMIT`). An invalid value or an
+  unknown argument name returns a tool error whose text starts `invalid <name>`.
+  - Without `request_id`: events with `ts` in the last `since_minutes` (default
+    `LOGS_READ_DEFAULT_MINUTES`), at or above `min_severity` (default `WARNING`), of `source`
+    when given, newest first, at most `limit` (default `LOGS_READ_DEFAULT_LIMIT`); it scans at
+    most the `LOGS_SCAN_MAX` newest events in the window.
+  - With `request_id`: every event with that `request_id` (default minimum `DEBUG`, no time
+    bound unless `since_minutes` is given; `source` and `min_severity` still apply), oldest
+    first, at most `limit`.
+  - Result: `{ events: [{ time, severity, event_type, source, message, request_id, context }] }`
+    where `time` is the stored ISO `timestamp`.
+- **Instructions**: `SESSION_INSTRUCTIONS` gains a line telling the session to read
+  `kanban_logs` before asking James to reproduce a board problem.
+- **Not stored**: events logged while signed out; anything about storing logs; the agent's
+  ordinary progress lines.
+
 ## Files & modules affected
 
 - `logging/logger.browser.js` — an optional `transport(events)` in `initLogger`; when given,
