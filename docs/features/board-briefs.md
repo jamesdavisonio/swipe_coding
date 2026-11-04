@@ -108,6 +108,62 @@ Numbering continues from `web-threads.md` (1–30).
   `pr` but no need; with `status: 'done'` and `summary` it sets the summary and finishes the
   task without posting to the thread.
 - **Selected new contract:** fixed at test time per behaviour (B7, B8), as in `web-threads.md`.
+
+**B7 contract details fixed at test time** (planner decisions, 2026-11-04):
+
+- Brief parsing (pure, `packages/web/src/lib/brief.ts`): `parseBrief(text: string)` returns
+  `null` unless the text holds a line `## Decision brief (<gate>)` (gate `spec`, `fix`, `round`
+  or `summary`) followed by the six `###` sub-headings in this exact order and text:
+  `Where it came from`, `Why it exists`, `What will change`, `Key assumptions`, `Out of scope`,
+  `What you're agreeing to`. Otherwise it returns `{ gate, label, parts, before, after,
+replyPhrase }`:
+  - `label`: `Spec`, `Fix`, `Another round`, `Summary` for the four gates.
+  - `parts`: `{ origin, why, changes, assumptions, out, agreeing }`, each the trimmed text under
+    its sub-heading (lines joined with single spaces).
+  - `agreeing` ends at the first blank line followed by a line that is not a continuation
+    (a heading, `---`, or `Reply "`), or at the end of the text; `before` is the trimmed text
+    above the `##` line, `after` the trimmed text below the brief.
+  - `replyPhrase`: the `<phrase>` of a line `Reply "<phrase>", or tell me what to change.`
+    anywhere in the text, else `null`.
+  - A brief missing any sub-heading, or with them out of order, is not a brief (`null`).
+- Thread (criterion 31): a session message whose body parses renders `before`, then a brief
+  card (a heading `<label>` and the six parts, each under its sub-heading text), then `after`;
+  a body that does not parse renders exactly as today.
+- Spec sheet (criterion 32): when the task waits on a spec and the latest session message
+  holding a spec brief exists, the sheet shows that brief card first, then a button
+  `Full spec` (`aria-expanded`) that reveals the B4 spec content below it (or that message's
+  `before`/`after` text when `task.spec` is null). Approve and Changes are unchanged.
+- Question that is a brief (criterion 33): when `needs.question` parses, the row preview
+  and the sheet title read `<label> — <task title>`; the row's quick replies are a button
+  `<replyPhrase>` (when present) then `Read more`; the sheet shows the brief card, a button
+  `<replyPhrase>`, and the B4 free-text answer. Tapping the phrase calls
+  `answerQuestion(task, { label: <replyPhrase> })` once.
+- PR ready (criterion 34, agent): `kanban_update_task` with a `pr_url` on a task whose stage is
+  its build or fix stage, or `pr`, sets stage `pr` and `needs: { kind: 'pr' }` (besides `pr`);
+  at an earlier stage it records `pr` only; at `merged` or later it records `pr` only and
+  leaves the need. The PR sheet shows the latest session message's summary brief card (gate
+  `summary`) above the B4 content when one exists.
+- Done (criterion 35, agent): `kanban_update_task` with `status: 'done'` on a task that is not
+  done also writes a session comment of kind `done` whose body is the given `summary` (or
+  `Done.` when none) and sets `unread: true`, in the same batch as the done patch; a task
+  already done writes no second message.
+- Suggested next (criterion 36, web, pure helper `suggestedNext(text): string[]` in
+  `lib/brief.ts`): the lines under a `### Suggested next` heading until the next heading or
+  the end, each stripped of a leading `- `, `* ` or `<n>. ` and trimmed, blanks dropped. A
+  done message with suggestions shows a list headed `You could start next`, each item with a
+  `Copy` button (accessible name `Copy: <item>`) that writes the item to the clipboard
+  (`navigator.clipboard.writeText`) and shows `Copied` on that button for a moment; nothing
+  else happens.
+- Instructions (criterion 37, agent): the session instructions move to
+  `packages/agent/src/instructions.ts` as `export const SESSION_INSTRUCTIONS` (index.ts uses
+  it). They say: post the spec brief as the `note` when setting spec to awaiting_approval;
+  post fix, round and summary briefs as a `kanban_ask` question ending with the
+  `Reply "<phrase>"` line; report the PR with `pr_url` when a PR is open; finish with
+  `status: 'done'` and a summary that ends with `### Suggested next` (one per line) when
+  there are follow-ups.
+- Instrumentation, through `track`: `user_action` `gate_reply` (target the task id) for the
+  one-tap phrase, `copy_suggestion` (target the task id); `Full spec` is not logged.
+
 - **Unresolved:** none.
 
 ## Files & modules affected
