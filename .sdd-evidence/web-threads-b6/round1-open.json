@@ -1,0 +1,52 @@
+{
+  "gaps": [
+    {
+      "type": "weak-assertion",
+      "where": "tests/web-threads-b6-26.test.tsx::B6-26 Reopen on the thread > calls reopenTask once with the task and the note, closes, and stays on the thread",
+      "issue": "where() === '/t/t1' cannot tell 'not navigated' from 'navigated to /t/t1 again'; navigating again drops location.state.from, so Back to threads loses the project filter, against the contract's 'if James is not already on that thread'.",
+      "fix": "Render the thread with state { from: '/?project=p-kanban' }, save, then press Back to threads and assert where() is '/?project=p-kanban'."
+    },
+    {
+      "type": "missing-edge-case",
+      "where": "B6-26 Reopen: a `Reopen` button in a done task's thread footer",
+      "issue": "No test asserts that the thread footer of a task that is not done has no Reopen button, so a footer that always renders Reopen passes.",
+      "fix": "Render an in-flight task (e.g. stage main_ci) on the thread and assert queryByRole('button', { name: 'Reopen' }) is null, both there and after the -27 reopen flow."
+    },
+    {
+      "type": "weak-assertion",
+      "where": "tests/web-threads-b6-25.test.tsx::B6-25 the History sheet > stamps today, yesterday and older entries as the prototype does",
+      "issue": "The stamp tests run in the runner's default locale and an unpinned time zone, so device-locale or UTC formatting passes on some runners.",
+      "fix": "Pin a non-UTC TZ and force a non-English, 12-hour default locale, then assert the same stamps."
+    },
+    {
+      "type": "missing-edge-case",
+      "where": "tests/web-threads-b6-29.test.tsx::B6-29 the archive read in the History sheet > shows no loading status once it has loaded",
+      "issue": "The successful archive load never asserts that the error and Retry are absent.",
+      "fix": "Assert no Couldn't load text and no Retry button on the loaded and loading cases."
+    },
+    {
+      "type": "missing-edge-case",
+      "where": "B6-30 Reopen sheet focus return",
+      "issue": "Only Escape checks focus return on the Reopen sheet; Cancel and Close are not checked.",
+      "fix": "Add Cancel and Close cases from the thread footer and a Done card asserting no reopenTask call and focus back on the opener."
+    }
+  ],
+  "gaming_flags": [
+    {
+      "where": "B6-26 stays on the thread",
+      "stub_that_passes": "After reopenTask resolves, always navigate(`/t/${task.id}`) with no state."
+    },
+    {
+      "where": "B6-26 a done task's footer offers Reopen",
+      "stub_that_passes": "ThreadFooter renders Reopen for every task, done or not."
+    },
+    {
+      "where": "B6-29 shows no loading status once it has loaded",
+      "stub_that_passes": "After Show earlier history, always render Couldn't load and Retry next to the entries."
+    },
+    {
+      "where": "B6-25 stamps",
+      "stub_that_passes": "Format with toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) in the device locale."
+    }
+  ]
+}

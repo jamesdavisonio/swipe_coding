@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Task } from '@kanban/shared'
-import { rememberFocus } from '../lib/a11y.ts'
 import { activeNeed } from '../lib/threads.ts'
+import { useReturnFocus } from '../lib/use-return-focus.ts'
 import AfterDeployDecision from './AfterDeployDecision.tsx'
 import PrDecision from './PrDecision.tsx'
 import QuestionDecision from './QuestionDecision.tsx'
@@ -24,20 +24,13 @@ export default function DecisionSheet({
 }) {
   const need = activeNeed(task)
   const [openedFor] = useState(need?.kind)
-  const [restoreFocus] = useState(rememberFocus)
+  const returnFocus = useReturnFocus()
   const closed = useRef(false)
   const close = useCallback(() => {
     if (closed.current) return
     closed.current = true
     onClose()
   }, [onClose])
-
-  // Radix only knows how to hand focus back to a Dialog.Trigger; this sheet is opened by chips
-  // and buttons elsewhere, so the control that had focus when it opened gets it back.
-  const returnFocus = (event: Event) => {
-    event.preventDefault()
-    restoreFocus()
-  }
 
   const moved = !need || need.kind !== openedFor
   useEffect(() => {

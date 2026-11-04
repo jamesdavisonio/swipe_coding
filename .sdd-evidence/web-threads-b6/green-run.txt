@@ -1,0 +1,33 @@
+=== npm run build:web
+✓ built in 4.01s
+exit 0
+=== npm run typecheck
+exit 0
+=== npm run lint
+exit 0
+=== npm test
+ Test Files  40 passed (40)
+      Tests  448 passed (448)
+exit 0
+=== npm run test:rules
+      Tests  111 passed (111)
++  Script exited successfully (code 0)
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+exit 0
+=== npx firebase emulators:exec --only firestore --project demo-kanban "npm run test:agent"
+all good
++  Script exited successfully (code 0)
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+exit 0
+=== npm run audit
+✓ audit gate passed: 1 high+ advisory (all allowlisted), 12 findings in total at any severity.
+exit 0
+=== node scripts/check-firestore-rules.mjs
+✓ firestore.rules passed lint.
+exit 0
+=== node scripts/check-contrast.mjs
+✓ contrast passes WCAG AA for 38 pairs (:root + .dark).
+exit 0
+=== npx prettier --check .
+All matched files use Prettier code style!
+exit 0

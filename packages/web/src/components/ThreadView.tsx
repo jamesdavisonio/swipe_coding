@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Comment, Task } from '@kanban/shared'
-import { emptyThreadText, readMoreId } from '../lib/messages.ts'
+import { emptyThreadText, mergeMessages, readMoreId } from '../lib/messages.ts'
+import { reopenLines } from '../lib/reopen.ts'
 import { activeNeed } from '../lib/threads.ts'
 import { useReply } from '../lib/use-reply.ts'
 import { useThreadActions, type SheetMode } from '../lib/use-thread-actions.ts'
@@ -8,6 +9,7 @@ import { useUnreadCleared } from '../lib/use-unread-cleared.ts'
 import DecisionSheet from './DecisionSheet.tsx'
 import HistorySheet from './HistorySheet.tsx'
 import MessageList from './MessageList.tsx'
+import ReopenSheet from './ReopenSheet.tsx'
 import ThreadFooter from './ThreadFooter.tsx'
 import ThreadHeader from './ThreadHeader.tsx'
 
@@ -37,10 +39,16 @@ export default function ThreadView({
 }) {
   const [sheet, setSheet] = useState<SheetMode | null>(null)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [reopenOpen, setReopenOpen] = useState(false)
   const actions = useThreadActions((_task, mode) => setSheet(mode))
   const reply = useReply(task, comments)
   useUnreadCleared(task)
-  useStickToBottom(reply.messages.length, task.working === true)
+  // The saved and pending messages, with a quiet "Reopened by you" line at each reopen.
+  const messages = useMemo(
+    () => mergeMessages(reply.messages, reopenLines(task)),
+    [reply.messages, task]
+  )
+  useStickToBottom(messages.length, task.working === true)
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-(--content-max) flex-col">
@@ -52,7 +60,7 @@ export default function ThreadView({
       />
       <main className="flex-1 px-4">
         <MessageList
-          messages={reply.messages}
+          messages={messages}
           now={now}
           readMoreId={readMoreId(reply.messages, activeNeed(task))}
           working={task.working === true}
@@ -65,9 +73,11 @@ export default function ThreadView({
         now={now}
         reply={reply}
         onQuickReply={(quick) => actions.reply(task, quick)}
+        onReopen={() => setReopenOpen(true)}
       />
       {sheet ? <DecisionSheet task={task} mode={sheet} onClose={() => setSheet(null)} /> : null}
       {historyOpen ? <HistorySheet task={task} onClose={() => setHistoryOpen(false)} /> : null}
+      {reopenOpen ? <ReopenSheet task={task} onClose={() => setReopenOpen(false)} /> : null}
     </div>
   )
 }

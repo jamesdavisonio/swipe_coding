@@ -18,7 +18,8 @@ import {
 const MINUTE_MS = 60_000
 const HOUR_MS = 60 * MINUTE_MS
 const DAY_MS = 24 * HOUR_MS
-const CLOCK_TEXT_CHARS = 5 // "HH:MM" from Date#toTimeString
+const CLOCK_DIGITS = 2
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const NEED_KINDS: readonly NeedKind[] = ['spec', 'question', 'pr', 'after_deploy']
 
 // 'all', or a project id.
@@ -165,23 +166,29 @@ export function stageText(task: Task): string {
 export const isDateable = (at: unknown): at is number =>
   typeof at === 'number' && Number.isFinite(at) && !Number.isNaN(new Date(at).getTime())
 
+// "HH:MM" on a 24-hour clock in the device's time zone, whatever its locale.
+const clock = (day: Date): string =>
+  [day.getHours(), day.getMinutes()].map((n) => String(n).padStart(CLOCK_DIGITS, '0')).join(':')
+
 // "now", "12 min", the clock time earlier today, "Yesterday", "3 d".
 export function relativeTime(at: number, now: number): string {
   const age = now - at
   if (age < MINUTE_MS) return 'now'
   if (age < HOUR_MS) return `${Math.round(age / MINUTE_MS)} min`
-  if (age < DAY_MS) return new Date(at).toTimeString().slice(0, CLOCK_TEXT_CHARS)
+  if (age < DAY_MS) return clock(new Date(at))
   const days = Math.floor(age / DAY_MS)
   return days === 1 ? 'Yesterday' : `${days} d`
 }
 
-// "Today 14:05", "Yesterday 09:30", "24 Oct 18:00".
+// "Today 14:05", "Yesterday 09:30", "24 Oct 18:00": the device's time zone, the day before an
+// English month abbreviation and a 24-hour clock whatever the device's locale (the locale is
+// never consulted, so a phone set to US English or French reads the same).
 export function dayAndTime(at: number, now: number): string {
   const day = new Date(at)
-  const time = day.toTimeString().slice(0, CLOCK_TEXT_CHARS)
+  const time = clock(day)
   if (day.toDateString() === new Date(now).toDateString()) return `Today ${time}`
   if (day.toDateString() === new Date(now - DAY_MS).toDateString()) return `Yesterday ${time}`
-  return `${day.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} ${time}`
+  return `${day.getDate()} ${MONTHS[day.getMonth()]} ${time}`
 }
 
 // "1 thing to do by hand", "3 things to do by hand".
