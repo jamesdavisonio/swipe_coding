@@ -128,6 +128,10 @@ export async function logFailure(input: FailureInput): Promise<void> {
   } catch (err) {
     // Only a line on stderr: a log about failing to store a log must never be stored.
     log(`storing a log event failed: ${(err as Error).message}`)
+    // Give this call's own slot back: a write that never landed is not a stored event. Later
+    // calls may have pushed entries meanwhile, so remove ours rather than popping the last.
+    const i = storedAt.lastIndexOf(now)
+    if (i !== -1) storedAt.splice(i, 1)
   }
 }
 

@@ -12,8 +12,8 @@ declare module 'virtual:app-manifest' {
   export default manifest
 }
 
-// The vendored governed browser logger is plain JS (logging/logger.browser.js, never edited
-// here); this is its public surface, as documented at the top of that file.
+// The vendored governed browser logger is plain JS (logging/logger.browser.js; its one local
+// change is the optional `transport`); this is its public surface, as documented at the top of that file.
 declare module '*/logging/logger.browser.js' {
   import type { LoggerEvent } from '@kanban/shared'
   type LogContext = Record<string, string | number | boolean | null | undefined>
