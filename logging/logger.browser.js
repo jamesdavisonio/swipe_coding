@@ -31,7 +31,7 @@ const USER_ACTION_SAMPLE_RATE = 0.1; // errors and milestones are always sent
 
 const ALWAYS_SENT = new Set(['feature_error', 'api_call_failed', 'milestone_reached', 'session_start', 'session_end']);
 
-export function initLogger({ manifest, taxonomy, piiKeys, source, env, userId = null }) {
+export function initLogger({ manifest, taxonomy, piiKeys, source, env, userId = null, transport = null }) {
   const resolvedEnv = env || manifest.env || 'prod';
   const isProd = resolvedEnv === 'prod';
   let resolvedSource = source;
@@ -101,15 +101,35 @@ export function initLogger({ manifest, taxonomy, piiKeys, source, env, userId = 
     } catch (_) { /* logging never throws into the host app */ }
   }
 
+  // Optional host-supplied transport(events) -> Promise, used instead of fetch/sendBeacon.
+  // Same bounded retry and backoff as the POST path; on the hide path it is called once, not awaited.
+  async function sendViaTransport(batch, useBeacon) {
+    if (useBeacon) {
+      try { Promise.resolve(transport(batch)).catch(() => {}); } catch (_) { /* never throw */ }
+      return;
+    }
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt += 1) {
+      try {
+        await transport(batch);
+        return;
+      } catch (_) { /* retry below */ }
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+    }
+  }
+
   async function flush(useBeacon = false) {
     try {
       if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
-      if (!queue.length || !manifest.log_endpoint) return;
+      if (!queue.length || (!transport && !manifest.log_endpoint)) return;
       const batch = queue;
       queue = [];
       if (dropped > 0) {
         batch.push(buildEvent('WARNING', 'unclassified', `${dropped} events dropped by queue cap`, { proposed_type: 'log_events_dropped', dropped_count: dropped }));
         dropped = 0;
+      }
+      if (transport) {
+        await sendViaTransport(batch, useBeacon);
+        return;
       }
       const body = JSON.stringify({ events: batch });
       if (useBeacon && navigator.sendBeacon) {

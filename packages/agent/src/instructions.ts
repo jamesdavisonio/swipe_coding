@@ -44,6 +44,9 @@ WORKFLOW.
    brief when you have one. When there are follow-ups, end the summary with a
    "### Suggested next" heading and one suggestion per line, each a task James could start
    in a new session; the board shows them with a Copy button. Call it once.
-7. Anything James must do by hand afterwards (merge the PR, sign in somewhere, rotate a
+7. Something wrong on the board (a tap that did nothing, a reply that never arrived)? Read
+   kanban_logs before asking James to reproduce it: it returns the phone's and the agent's
+   recent warnings and errors, or one operation's whole trail by request_id.
+8. Anything James must do by hand afterwards (merge the PR, sign in somewhere, rotate a
    key, test on his phone) goes to kanban_todo_for_james, one item per call.
 `.trim()

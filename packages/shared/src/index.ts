@@ -312,3 +312,57 @@ export function initialTaskFields(input: {
 }
 
 export * from './templates.ts'
+
+// ---- App logs (docs/features/app-logs.md) ---------------------------------------------------
+
+export const LOG_RETENTION_MS = 30 * 24 * 60 * 60 * 1000
+export const LOG_MESSAGE_MAX = 2000
+export const LOG_CONTEXT_MAX_KEYS = 30
+export const LOG_CONTEXT_VALUE_MAX = 1000
+export const AGENT_LOG_MAX_PER_MINUTE = 20
+export const LOGS_READ_DEFAULT_LIMIT = 50
+export const LOGS_READ_MAX_LIMIT = 200
+export const LOGS_READ_DEFAULT_MINUTES = 1440
+export const LOGS_READ_MAX_MINUTES = 43200
+export const LOGS_SCAN_MAX = 1000
+
+export const LOG_SEVERITIES = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] as const
+export type LogSeverity = (typeof LOG_SEVERITIES)[number]
+
+// The fields the shared logger puts on one event (logging/logger.browser.js buildEvent).
+export interface LoggerEvent {
+  schema_version: number
+  taxonomy_version: number
+  timestamp: string
+  severity: string
+  app_id: string
+  client_id: string | null
+  env: string
+  source: string
+  event_type: string
+  audience: string
+  session_id: string
+  trace_id: string | null
+  user_id: string | null
+  message: string
+  context: Record<string, unknown>
+}
+
+// Cuts message and context to the stored limits (the rules refuse anything larger) and derives
+// ts and request_id. `expireAt` is added by each side as its own Timestamp type.
+export function boundedLogFields(
+  e: Omit<LoggerEvent, 'session_id'> & { session_id: string | null }
+) {
+  const context: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(e.context).slice(0, LOG_CONTEXT_MAX_KEYS))
+    context[key] = typeof value === 'string' ? value.slice(0, LOG_CONTEXT_VALUE_MAX) : value
+  const ts = Date.parse(e.timestamp)
+  const rid = e.context.request_id
+  return {
+    ...e,
+    message: e.message.slice(0, LOG_MESSAGE_MAX),
+    context,
+    ts,
+    request_id: typeof rid === 'string' ? rid : null,
+  }
+}

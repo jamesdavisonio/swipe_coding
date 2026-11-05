@@ -32,7 +32,29 @@ import {
   type TaskType,
   type Todo,
 } from '@kanban/shared'
+import { errorStatus, logFailure, setLogIdentity } from './app-log.ts'
 import { getDb, log } from './firestore.ts'
+
+// A Firestore-side failure of a listener or batch: the stderr / agent.log line, plus a stored
+// event (WARNING for a batch, ERROR for a dead listener).
+function firestoreFailure(
+  severity: 'WARNING' | 'ERROR',
+  what: string,
+  err: Error,
+  taskId?: string
+) {
+  log(`${what}: ${err.message}`)
+  void logFailure({
+    severity,
+    event_type: 'api_call_failed',
+    message: err.message,
+    context: {
+      target: 'firestore',
+      status: errorStatus(err),
+      ...(taskId ? { task_id: taskId } : {}),
+    },
+  })
+}
 
 export class BoardError extends Error {
   constructor(msg: string) {
@@ -153,13 +175,22 @@ export class Board {
     }
     batch.set(this.db.collection(C.agents).doc(agentId), agent)
     await batch.commit()
+    setLogIdentity(agentId, projectId)
 
     this.heartbeat = setInterval(() => {
       this.db
         .collection(C.agents)
         .doc(agentId)
         .update({ lastSeen: now() })
-        .catch((err: Error) => log(`heartbeat failed: ${err.message}`))
+        .catch((err: Error) => {
+          log(`heartbeat failed: ${err.message}`)
+          void logFailure({
+            severity: 'WARNING',
+            event_type: 'api_call_failed',
+            message: err.message,
+            context: { target: 'firestore', status: errorStatus(err) },
+          })
+        })
     }, AGENT_HEARTBEAT_MS)
     log(`registered agent=${agentId} project=${projectId} cwd=${cwd}`)
   }
@@ -399,6 +430,12 @@ export class Board {
           log(`delivered ${c.id} (${c.kind}) task=${c.taskId}`)
         } catch (err) {
           log(`delivery of ${c.id} failed: ${(err as Error).message}`)
+          void logFailure({
+            severity: 'WARNING',
+            event_type: 'api_call_failed',
+            message: (err as Error).message,
+            context: { target: 'channel', status: 'failed', task_id: c.taskId },
+          })
         } finally {
           inflight.delete(c.id)
         }
@@ -406,9 +443,11 @@ export class Board {
     }
     return q.onSnapshot(
       (snap) => {
-        onChanges(snap).catch((err: Error) => log(`comment batch failed: ${err.message}`))
+        onChanges(snap).catch((err: Error) =>
+          firestoreFailure('WARNING', `comment batch failed`, err)
+        )
       },
-      (err) => log(`comment listener error: ${err.message}`)
+      (err) => firestoreFailure('ERROR', 'comment listener error', err)
     )
   }
 
@@ -433,15 +472,17 @@ export class Board {
           log(`announced queued task ${t.id} "${t.title}"`)
         } catch (err) {
           announced.delete(t.id)
-          log(`announce of ${t.id} failed: ${(err as Error).message}`)
+          firestoreFailure('WARNING', `announce of ${t.id} failed`, err as Error, t.id)
         }
       }
     }
     return q.onSnapshot(
       (snap) => {
-        onChanges(snap).catch((err: Error) => log(`queued batch failed: ${err.message}`))
+        onChanges(snap).catch((err: Error) =>
+          firestoreFailure('WARNING', `queued batch failed`, err)
+        )
       },
-      (err) => log(`queued listener error: ${err.message}`)
+      (err) => firestoreFailure('ERROR', 'queued listener error', err)
     )
   }
 

@@ -41,6 +41,41 @@ service cloud.firestore {
       allow delete: if isOwner() && resource.data.author == 'james' && authoredByJames();
     }
 
+    // App logs: the browser can only append one well-formed event (L1); nothing reads, changes
+    // or deletes one from a browser. The agent writes with the Admin SDK; TTL removes old ones.
+    function validLogEvent() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['schema_version', 'taxonomy_version', 'timestamp', 'severity', 'app_id',
+          'client_id', 'env', 'source', 'event_type', 'audience', 'session_id', 'trace_id', 'user_id',
+          'message', 'context', 'ts', 'expireAt', 'request_id'])
+        && d.keys().hasAll(['schema_version', 'taxonomy_version', 'timestamp', 'severity', 'app_id',
+          'client_id', 'env', 'source', 'event_type', 'audience', 'session_id', 'trace_id', 'user_id',
+          'message', 'context', 'ts', 'expireAt', 'request_id'])
+        && d.severity in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+        && d.source == 'web_client'
+        && d.env in ['prod', 'staging', 'dev']
+        && d.audience in ['internal', 'client', 'both']
+        && d.event_type is string && d.event_type.size() >= 1 && d.event_type.size() <= 64
+        && d.message is string && d.message.size() <= 2000
+        && d.context is map && d.context.size() <= 30
+        && d.timestamp is string && d.timestamp.size() <= 40
+        && d.session_id is string && d.session_id.size() <= 100
+        && d.ts is number
+        && d.expireAt is timestamp && d.expireAt > request.time
+        && d.expireAt <= request.time + duration.value(31, 'd')
+        && (d.request_id == null || (d.request_id is string && d.request_id.size() <= 100))
+        && (d.trace_id == null || (d.trace_id is string && d.trace_id.size() <= 100))
+        && (d.user_id == null || (d.user_id is string && d.user_id.size() <= 100))
+        && (d.client_id == null || (d.client_id is string && d.client_id.size() <= 100))
+        && d.app_id is string && d.app_id.size() >= 1 && d.app_id.size() <= 64
+        && d.schema_version is number && d.taxonomy_version is number;
+    }
+
+    match /logs/{id} {
+      allow read, update, delete: if false;
+      allow create: if isOwner() && validLogEvent();
+    }
+
     // Default deny: anything not matched above (scripts/check-firestore-rules.mjs insists).
     match /{document=**} {
       allow read, write: if false;

@@ -6,14 +6,21 @@ warehouse pipeline yet).
 
 ## Where logs go
 
-| Emitter                                 | Logger                                               | Destination today                                                 | Destination when provisioned                                                                             |
-| --------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Desktop agent (`packages/agent`), hooks | `logging/logger.server.js` — one JSON line per event | stderr + `packages/agent/agent.log` (stdout is the MCP transport) | Cloud Logging is not applicable (no GCP runtime); stays local, or forwarded by a later `instrument` step |
-| Web app (`packages/web`)                | `logging/logger.browser.js`, `source: 'web_client'`  | buffered, dropped (no endpoint)                                   | `log_endpoint` in `app.manifest.yaml` once the `jamesdavisonio` client logging project exists            |
+| Emitter                                 | Logger                                                                            | Destination                                                                                                                       |
+| --------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Desktop agent (`packages/agent`), hooks | `log()` lines; failures also through `logFailure` (`src/app-log.ts`)              | stderr + `packages/agent/agent.log` (stdout is the MCP transport); failures also stored in `logs` (at most 20 per rolling minute) |
+| Web app (`packages/web`)                | `logging/logger.browser.js`, `source: 'web_client'`, transport `lib/log-store.ts` | stored in `logs` while James is signed in; dropped while signed out                                                               |
 
-The client's logging block in the registry is still `TBD-jamesdavisonio-logging-project`,
-`provisioned: false`. Until James provisions it (commands in the skills repo,
-`instrument/references/destinations.md`), browser events are not stored anywhere.
+Events live in the top-level Firestore collection `logs` for 30 days (TTL on `expireAt`;
+ADR 0004). Browsers may only create events of the exact shape; nobody reads them from a
+browser. **To read them, a kanban session calls `kanban_logs`**: no arguments gives the last
+24 hours of warnings and worse; `request_id` gives one operation's whole trail across the
+phone and the agents; `min_severity`, `since_minutes`, `source` and `limit` narrow it.
+
+The standard route (ingestion endpoint → Cloud Logging → the client's BigQuery dataset) is
+still unbuilt: the client's registry logging block is `TBD-jamesdavisonio-logging-project`,
+`provisioned: false`. When it exists, set `log_endpoint` in `app.manifest.yaml` and drop the
+transport.
 
 ## Identity
 

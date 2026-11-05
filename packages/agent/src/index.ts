@@ -17,7 +17,18 @@ import {
   ListToolsRequestSchema,
   type Tool,
 } from '@modelcontextprotocol/sdk/types.js'
-import { STAGES, type Comment, type Stage, type Task, type TaskType } from '@kanban/shared'
+import {
+  LOGS_READ_DEFAULT_LIMIT,
+  LOGS_READ_DEFAULT_MINUTES,
+  LOGS_READ_MAX_LIMIT,
+  LOGS_READ_MAX_MINUTES,
+  LOG_SEVERITIES,
+  STAGES,
+  type Comment,
+  type Stage,
+  type Task,
+  type TaskType,
+} from '@kanban/shared'
 import {
   Board,
   BoardError,
@@ -26,6 +37,7 @@ import {
   type SubtaskStatus,
   type UpdateStatus,
 } from './board.ts'
+import { InvalidLogArgError, errorStatus, logFailure, readLogs } from './app-log.ts'
 import { BoardOfflineError, boardStatus, log } from './firestore.ts'
 import { SESSION_INSTRUCTIONS } from './instructions.ts'
 
@@ -152,6 +164,31 @@ const tools: Tool[] = [
     },
   },
   {
+    name: 'kanban_logs',
+    description:
+      'Read the board stored app logs (the phone app and this agent): warnings and worse from the last 24 hours, newest first, by default. Pass request_id for the full oldest-first trail of one operation (any severity, either source). Read this before asking James to reproduce a board problem.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        request_id: { type: 'string', description: 'Every event of one operation, oldest first' },
+        min_severity: { type: 'string', enum: [...LOG_SEVERITIES], description: 'Default WARNING' },
+        since_minutes: {
+          type: 'integer',
+          minimum: 1,
+          maximum: LOGS_READ_MAX_MINUTES,
+          description: `Time window, default ${LOGS_READ_DEFAULT_MINUTES}`,
+        },
+        source: { type: 'string', enum: ['web_client', 'server'] },
+        limit: {
+          type: 'integer',
+          minimum: 1,
+          maximum: LOGS_READ_MAX_LIMIT,
+          description: `Default ${LOGS_READ_DEFAULT_LIMIT}`,
+        },
+      },
+    },
+  },
+  {
     name: 'kanban_whoami',
     description:
       "This session's agent id, project id, working directory and board connection status.",
@@ -189,8 +226,15 @@ function getBoard(): Promise<Board> {
       }
       board = b
       return b
-    })().catch((err) => {
+    })().catch((err: Error) => {
       boardInit = null
+      if (!(err instanceof BoardOfflineError))
+        void logFailure({
+          severity: 'ERROR',
+          event_type: 'api_call_failed',
+          message: err.message,
+          context: { target: 'firestore', status: errorStatus(err) },
+        })
       throw err
     })
   }
@@ -268,6 +312,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
       const b = status.mode === 'offline' ? null : await getBoard().catch(() => null)
       return ok({ ...(b?.id ?? { cwd: process.cwd(), pid: process.pid }), board: status })
     }
+    if (name === 'kanban_logs') return ok(await readLogs(args ?? {}))
     const b = await getBoard()
     switch (name) {
       case 'kanban_list_tasks': {
@@ -326,8 +371,19 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
     }
   } catch (err) {
     const e = err as Error
-    if (!(e instanceof BoardError) && !(e instanceof BoardOfflineError))
+    if (
+      !(e instanceof BoardError) &&
+      !(e instanceof BoardOfflineError) &&
+      !(e instanceof InvalidLogArgError)
+    ) {
       log(`${name} failed: ${e.stack ?? e.message}`)
+      void logFailure({
+        severity: 'ERROR',
+        event_type: 'feature_error',
+        message: e.message,
+        context: { feature: name },
+      })
+    }
     return { isError: true, content: [{ type: 'text', text: e.message }] }
   }
 })

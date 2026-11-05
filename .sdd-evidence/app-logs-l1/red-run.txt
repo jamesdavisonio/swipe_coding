@@ -1,0 +1,53 @@
+=== npx vitest run tests/app-logs
+ ✓ tests/app-logs-2.test.ts (2 tests) 7ms
+   × L1-3 a failing store > is retried at most three times with backoff, then the batch is dropped quietly 8ms
+   × L1-3 a failing store > logs nothing about it: the next batch holds only what the app logged 1ms
+   × L1-3 a failing store > on the hide path is tried once and never throws into the page 1ms
+   × L1-1 the logger hands kept events to the transport > on flush, with every field the store needs and no network call 7ms
+   × L1-1 the logger hands kept events to the transport > uses the transport even when the manifest has a log_endpoint 3ms
+   × L1-1 the logger hands kept events to the transport > flushes on its own within ten seconds 2ms
+   × L1-1 the logger hands kept events to the transport > flushes at twenty events 1ms
+   × L1-1 the logger hands kept events to the transport > hands the batch over once when the page is hidden, and session end when it closes 1ms
+   × L1-1 the logger hands kept events to the transport > keeps warnings, errors, critical events, milestones and its sample of taps 3ms
+ FAIL  tests/app-logs-1.test.ts > L1-1 the logger hands kept events to the transport > on flush, with every field the store needs and no network call
+ FAIL  tests/app-logs-1.test.ts > L1-1 the logger hands kept events to the transport > uses the transport even when the manifest has a log_endpoint
+ FAIL  tests/app-logs-1.test.ts > L1-1 the logger hands kept events to the transport > flushes on its own within ten seconds
+ FAIL  tests/app-logs-1.test.ts > L1-1 the logger hands kept events to the transport > flushes at twenty events
+ FAIL  tests/app-logs-1.test.ts > L1-1 the logger hands kept events to the transport > hands the batch over once when the page is hidden, and session end when it closes
+ FAIL  tests/app-logs-1.test.ts > L1-1 the logger hands kept events to the transport > keeps warnings, errors, critical events, milestones and its sample of taps
+ FAIL  tests/app-logs-3.test.ts > L1-3 a failing store > is retried at most three times with backoff, then the batch is dropped quietly
+ FAIL  tests/app-logs-3.test.ts > L1-3 a failing store > logs nothing about it: the next batch holds only what the app logged
+ FAIL  tests/app-logs-3.test.ts > L1-3 a failing store > on the hide path is tried once and never throws into the page
+ Test Files  2 failed | 1 passed (3)
+      Tests  9 failed | 2 passed (11)
+=== npm run test:rules
+ FAIL  tests/emulator/app-logs-4.test.ts > L1-4 what the store keeps of an event > the limits are the contract values
+ FAIL  tests/emulator/app-logs-4.test.ts > L1-4 what the store keeps of an event > holds no PII key, and its context is flat
+ FAIL  tests/emulator/app-logs-4.test.ts > L1-4 what the store keeps of an event > caps the message, the number of context keys and each string value
+ FAIL  tests/emulator/app-logs-6.test.ts > L1-6 the agent stores its failures > a failed tool call: ERROR feature_error with agent, project and the line in its logs
+ FAIL  tests/emulator/app-logs-6.test.ts > L1-6 the agent stores its failures > a failed delivery: WARNING api_call_failed, target channel, with the task id
+ FAIL  tests/emulator/app-logs-6.test.ts > L1-6 the agent stores its failures > a BoardError and ordinary progress are not stored
+ FAIL  tests/emulator/app-logs-6.test.ts > L1-6 logFailure (in-process) > keeps the caller request id and task id, caps the message and context values
+ FAIL  tests/emulator/app-logs-9.test.ts > L1-9 kanban_logs with no arguments > returns the last day of warnings and worse, newest first, in the read shape
+ FAIL  tests/emulator/app-logs-9.test.ts > L1-9 kanban_logs with no arguments > returns at most 50, the newest
+ FAIL  tests/emulator/app-logs-9.test.ts > L1-9 kanban_logs with no arguments > answers with an empty list when nothing went wrong
+ FAIL  tests/emulator/app-logs-9.test.ts > L1-9 kanban_logs with no arguments > the defaults are the contract values
+ FAIL  tests/emulator/app-logs-9.test.ts > L1-9 the session can find the tool > is listed with its arguments
+ FAIL  tests/emulator/app-logs-9.test.ts > L1-9 the session can find the tool > the session instructions say to read kanban_logs before asking James to reproduce
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > James (either address) stores a well-formed event
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts severity DEBUG
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts severity INFO
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts severity ERROR
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts severity CRITICAL
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts env staging
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts env dev
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts audience client
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts audience both
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts no request id
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts null client id
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts string trace and user ids
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts a message of exactly 2000
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts a context of exactly 30 keys
+ FAIL  tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > accepts expireAt 31 days out
+ Test Files  12 failed | 16 passed (28)
+      Tests  60 failed | 160 passed (220)
