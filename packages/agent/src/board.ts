@@ -591,14 +591,17 @@ function prPatch(task: Task, url: string): Record<string, unknown> {
 }
 
 // Moves the task past `stage`: to the next stage of its chain (done after the last), clearing
-// the need that stage was waiting on. A task already beyond it is left alone.
+// the need of any stage it passes on the way (its current stage through `stage`). A task already
+// beyond `stage` is left alone.
 function advancePast(task: Task, stage: Stage, t: number): Record<string, unknown> {
   const chain = taskStages(task)
   const next = chain.at(chain.indexOf(stage) + 1)
   if (next === undefined || next === 'done') return donePatch(t)
   if (chain.indexOf(task.stage) > chain.indexOf(stage)) return {}
-  const waitingOn = NEED_OF_STAGE[stage]
-  return { stage: next, ...(waitingOn && task.needs?.kind === waitingOn ? { needs: null } : {}) }
+  const passed = chain.slice(Math.max(0, chain.indexOf(task.stage)), chain.indexOf(stage) + 1)
+  const needKind = task.needs?.kind
+  const stale = needKind !== undefined && passed.some((s) => NEED_OF_STAGE[s] === needKind)
+  return { stage: next, ...(stale ? { needs: null } : {}) }
 }
 
 // What kanban_subtask changes on the task for each Phase 1 step status.
