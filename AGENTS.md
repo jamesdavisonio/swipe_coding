@@ -9,7 +9,7 @@ report in through an MCP channel server and receive James's replies as channel e
 - **Runtime:** TypeScript on Node 24 (type stripping: `.ts` imports keep the extension, no enums)
 - **Frontend:** React 19, Vite 7, Tailwind 4 — `packages/web` (PWA)
 - **Backend:** Firestore via firebase-admin from the desktop agent — `packages/agent` (MCP server + Claude Code channel). No Cloud Functions.
-- **Data:** Firestore `eur3`, project `kanban-nullnoise`; collections `projects`, `agents`, `tasks`, `comments`, `todos`
+- **Data:** Firestore `eur3`, project `kanban-nullnoise`; collections `projects`, `agents`, `tasks`, `comments`, `todos`, `logs`
 - **AI:** none in the app
 - **Deploy:** Firebase Hosting + Firestore rules; `npm run deploy`
 
@@ -35,7 +35,8 @@ npm run typecheck          # agent, web and the root tsconfig (tests/, packages/
 - Shared types and stage templates live in `packages/shared`; both packages import `@kanban/shared`.
 - UI: tokens in `packages/web/src/styles/tokens.css` (never hardcode colours/sizes), primitives in `src/components/ui/`, icons only via `src/lib/icons.ts`, dark mode = `.dark` class. WCAG AA: focus ring, name, keyboard path, 44px targets; `docs/design-system.md`.
 - The agent never writes to stdout except MCP; log with `log()` (stderr + `agent.log`).
-- All Firestore timestamps are numeric ms; all collections are top-level.
+- All Firestore timestamps are numeric ms (except `logs.expireAt`, a TTL Timestamp); all collections are top-level.
+- App errors from the phone and the agents: read them with the `kanban_logs` tool (`docs/logging.md`) before reproducing in the emulator.
 - Logging goes through `logging/logger.*.js`; event types only from `logging/taxonomy.json`.
 - Errors follow `docs/error-schema.md`; one `request_id` per operation (`docs/logging.md`).
 

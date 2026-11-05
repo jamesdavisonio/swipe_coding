@@ -129,6 +129,7 @@ On start it:
 | `kanban_ask`            | `{task_id, question}` — sets `needs {kind: question}`, pushes notification to me; the answer is a channel event                                                                                                                             |
 | `kanban_todo_for_james` | `{project, body, link?}` — appends to the project's "For James" task                                                                                                                                                                        |
 | `kanban_get_task`       | full task with comments, so a fresh session can resume one                                                                                                                                                                                  |
+| `kanban_logs`           | `{request_id?, min_severity?, since_minutes?, source?, limit?}` — the stored app logs (phone and agents); no arguments: last 24 h of warnings and worse; `request_id`: one operation's trail, oldest first                                  |
 
 4. Routes inbound: it listens with `onSnapshot` to
    `collectionGroup('comments') where agentId == me && deliveredAt == null`; each new
