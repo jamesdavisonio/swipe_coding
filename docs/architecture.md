@@ -18,10 +18,11 @@ One page. The full design and its history live in [DESIGN.md](../DESIGN.md).
 - **packages/web** — the phone-first PWA. Reads and writes Firestore directly with the
   owner's Google identity. Threads-first UI per `prototype/index.html`.
 - **packages/agent** — one process per Claude Code session, spawned by Claude Code as an
-  MCP server (`claude mcp add --scope user kanban`). Exposes `kanban_*` tools; declares
-  the channel capability so James's comments arrive in the session as `<channel>` events.
-  Uses the Admin SDK with a service-account key; heartbeats presence; announces queued
-  tasks; marks delivery.
+  MCP server (`claude mcp add --scope user kanban`). Exposes `kanban_*` tools; uses the
+  Admin SDK with a service-account key; heartbeats presence; announces queued tasks on the
+  channel. James's comments and answers reach the session through a **watcher**
+  (`src/wait.ts`), a background command the session runs; it prints each reply, marks it
+  received and exits, which wakes the session (ADR 0005).
 - **packages/shared** — types, stage templates, project-id derivation (plain TS).
 - **Firestore** — top-level collections `projects`, `agents`, `tasks`, `comments`,
   `todos`; numeric ms timestamps; rules allow the owner only; agents bypass rules.
@@ -31,8 +32,8 @@ One page. The full design and its history live in [DESIGN.md](../DESIGN.md).
 ## Boundaries and trust
 
 - The browser can only write `author: james` documents; agents only write as themselves.
-- A `<channel from="james">` event is treated by sessions as typed by James; destructive
-  actions still go through Claude Code's own permission prompt.
+- A line the watcher prints (`"from":"james"`) is treated by sessions as typed by James;
+  destructive actions still go through Claude Code's own permission prompt.
 - The desktop connects outbound only; nothing is exposed on the home network.
 - The service-account key lives outside the repo and outside `%APPDATA%` (the MSIX-packaged
   desktop app virtualises AppData for its child processes).

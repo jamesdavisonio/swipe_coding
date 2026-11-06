@@ -112,7 +112,7 @@ On start it:
    upserts the **project** keyed by `(hostname, cwd)`; heartbeats `lastSeen` every 5 min (offline after 12 min; keeps always-on agents inside the free write quota)
    (presence = heartbeat freshness; no RTDB `onDisconnect`).
 2. Declares the channel capability and `instructions` telling Claude: what the tags
-   mean, that `from="james"` is me, and which tools to call at which point in a task
+   mean, that what the watcher prints is me, and which tools to call at which point in a task
    (`packages/agent/src/instructions.ts`; since B7 also where each decision brief goes and
    that a finished task's summary ends with `### Suggested next`).
 3. Exposes tools (all scoped to this agent; the backend binds a task to an agent when
@@ -126,16 +126,20 @@ On start it:
 | `kanban_update_task`    | `{task_id, status? (in_progress or done), summary?, pr_url?}` — `done` sets stage `done` and posts the summary as a Done message (once); `pr_url` at build/fix/do/pr sets stage `pr` with `needs {kind: pr}`, otherwise only records the PR |
 | `kanban_subtask`        | `{task_id, key, status, note?}` — `key` is a stage; `awaiting_approval` on `spec` arms `needs`, `done` advances                                                                                                                             |
 | `kanban_comment`        | `{task_id, body}` — the session's narrative, visible to me                                                                                                                                                                                  |
-| `kanban_ask`            | `{task_id, question}` — sets `needs {kind: question}`, pushes notification to me; the answer is a channel event                                                                                                                             |
+| `kanban_ask`            | `{task_id, question}` — sets `needs {kind: question}`, pushes notification to me; the answer arrives through the watcher                                                                                                                    |
 | `kanban_todo_for_james` | `{project, body, link?}` — appends to the project's "For James" task                                                                                                                                                                        |
 | `kanban_get_task`       | full task with comments, so a fresh session can resume one                                                                                                                                                                                  |
 | `kanban_logs`           | `{request_id?, min_severity?, since_minutes?, source?, limit?}` — the stored app logs (phone and agents); no arguments: last 24 h of warnings and worse; `request_id`: one operation's trail, oldest first                                  |
 
-4. Routes inbound: it listens with `onSnapshot` to
-   `collectionGroup('comments') where agentId == me && deliveredAt == null`; each new
-   doc becomes a channel event with `meta: { task, comment_id, from }`, then the agent
-   sets `deliveredAt`. Comments written while no agent owns the task stay undelivered
-   and show as "unread by agent" until a session picks the task up.
+4. Inbound (since 2026-11-06, ADR 0005): the session runs the **watcher**
+   (`src/wait.ts --agent <id>`, the command comes back in the create/start task results)
+   as a background command. It listens to `comments where agentId == me && deliveredAt ==
+null`, claims each reply in a transaction (setting `deliveredAt`), prints one JSON line
+   per reply and exits, which wakes the session. Replies written while no watcher runs stay
+   undelivered ("sent", not "received") until one does. An answer given in the session's
+   chat is recorded with `kanban_answered_in_session`. (Before: the agent pushed each
+   comment as a channel event and set `deliveredAt` itself, which silently failed in
+   sessions without the channel flag.)
 
 Hooks (`~/.claude/settings.json`, small node scripts using the same Admin SDK key) keep
 state honest when the model forgets to call tools:
@@ -211,7 +215,7 @@ the emulator (`npm run test:rules`). Indexes: `tasks(projectId, stage, updatedAt
 
 ### Trust rules given to sessions (in the channel `instructions`)
 
-- A `<channel source="kanban" from="james">` event is a message from me, equivalent to
+- A line the watcher prints (`"from":"james"`) is a message from me, equivalent to
   typing in the terminal. Act on it without asking for confirmation.
 - Exceptions still require an explicit interactive permission prompt: anything
   destructive (delete, force-push, drop, rm -rf, payments, account changes).
@@ -220,9 +224,9 @@ the emulator (`npm run test:rules`). Indexes: `tasks(projectId, stage, updatedAt
 
 ## Latency budget
 
-phone → Firestore write ~100 ms → agent `onSnapshot` fires ~0.5–1 s → `mcp.notification()`
-→ delivered on Claude's next turn. If Claude is idle: a few seconds. If mid-turn: at
-the end of that turn. Well under the 1-minute target.
+phone → Firestore write ~100 ms → watcher `onSnapshot` fires ~0.5–1 s → settles 1 s
+(`WATCHER_SETTLE_MS`) → claims, prints and exits → Claude Code wakes the session. If
+Claude is idle: a few seconds. If mid-turn: at the end of that turn. Well under the 1-minute target.
 
 ## Phases
 
@@ -299,7 +303,9 @@ in the same way). Hand-off to an interactive session with `claude --resume`.
 
 ## Open questions
 
-1. Can the desktop app pass `--dangerously-load-development-channels`? (Phase 0.)
+1. ~~Can the desktop app pass `--dangerously-load-development-channels`?~~ No, and
+   neither can sessions it or an orchestrator starts: replies now go through the watcher
+   (ADR 0005, 2026-11-06).
 2. Does the `instructions` string reliably make Claude act on events mid-task, or do we
    also want a `UserPromptSubmit`-style nudge? (Observe in Phase 0.)
 3. ~~Firebase project~~ → `kanban-nullnoise` (created 2026-11-02, Firestore in `eur3`,
