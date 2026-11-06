@@ -1,0 +1,16 @@
+
+> lint
+> eslint .
+
+
+C:\Users\Intel\Documents\code\kanban\tests\app-logs-1.test.ts
+  38:36  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban\tests\fixtures\app-logs-emulator.ts
+  107:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  141:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  315:10  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+✖ 4 problems (0 errors, 4 warnings)
+
+exit 0

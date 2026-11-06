@@ -1,0 +1,40 @@
+ ✓ tests/app-logs-2.test.ts (2 tests) 15ms
+ ✓ tests/app-logs-3.test.ts (3 tests) 20ms
+ ✓ tests/board-briefs-b7-36.test.tsx (7 tests) 624ms
+ ✓ tests/web-threads-b1-1.test.ts (6 tests) 6ms
+ ✓ tests/web-threads-b1-2.test.ts (8 tests) 7ms
+ ✓ tests/web-threads-b1-contract.test.ts (15 tests) 16ms
+ ✓ tests/web-threads-b1-4.test.ts (3 tests) 6ms
+ ✓ tests/web-threads-b1-3.test.ts (6 tests) 5ms
+ ✓ tests/sample.test.ts (1 test) 3ms
+ ✓ tests/fix-comments-index.test.ts (6 tests) 5ms
+ ✓ tests/web-threads-b2-29.test.tsx (7 tests) 355ms
+2026-11-06T07:49:19.141Z [45100] firestore mode=offline the test runner never uses the live board; run through npm run test:rules (emulator)
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+ ✓ tests/web-threads-b2-8.test.tsx (6 tests) 384ms
+ ✓ tests/web-threads-b3-2.test.tsx (4 tests) 235ms
+ ✓ tests/board-briefs-b7-37.test.ts (6 tests) 2135ms
+   ✓ B7-37 the session instructions > is what the MCP server sends: initialize returns SESSION_INSTRUCTIONS  2128ms
+ ✓ tests/web-threads-b2-10.test.tsx (4 tests) 97ms
+ ✓ tests/board-briefs-b7-35.test.tsx (3 tests) 155ms
+2026-11-06T07:49:20.109Z [22664] firestore mode=offline the test runner never uses the live board; run through npm run test:rules (emulator)
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+2026-11-06T07:49:20.734Z [34972] firestore mode=offline the test runner never uses the live board; run through npm run test:rules (emulator)
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+2026-11-06T07:49:21.347Z [30552] firestore mode=emulator 127.0.0.1:1 project=demo-kanban
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+2026-11-06T07:49:21.971Z [41764] firestore mode=service_account project=not-a-real-project via C:\Users\Intel\AppData\Local\Temp\tests-never-live-F2zH6H\sa.json
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+ ✓ tests/fix-tests-never-live.test.ts (6 tests) 4512ms
+   ✓ the board connection never uses a key under the test runner > a key named by KANBAN_SA is refused, unread, and the board stays offline  1718ms
+   ✓ the board connection never uses a key under the test runner > a key at a default location (%APPDATA%\kanban\sa.json) is refused, unread  932ms
+   ✓ the board connection never uses a key under the test runner > VITEST alone, as in the runner main process, is enough  619ms
+   ✓ the board connection never uses a key under the test runner > the emulator still works under the test runner  614ms
+   ✓ the board connection never uses a key under the test runner > outside the test runner the same key is used as before (sessions unaffected)  625ms
+
+ Test Files  53 passed (53)
+      Tests  544 passed (544)
+   Start at  08:48:59
+   Duration  22.45s (transform 3.21s, setup 0ms, collect 65.83s, tests 101.11s, environment 88.53s, prepare 12.75s)
+
+exit 0
