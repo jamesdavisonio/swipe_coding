@@ -3,6 +3,9 @@
 // Modes, decided once at import:
 //   emulator        FIRESTORE_EMULATOR_HOST is set → no credentials needed
 //   service_account KANBAN_SA, ../kanban-secrets/sa.json or %APPDATA%\kanban\sa.json → cert()
+//                   never under the test runner (VITEST set): without the emulator the
+//                   connection stays offline and no key is looked at, so a test can
+//                   never reach the live board
 //   offline         neither → the MCP server still starts so the session is not
 //                   broken; every board tool returns a clear error instead.
 //
@@ -80,6 +83,11 @@ function init() {
       db = getFirestore()
       mode = 'emulator'
       detail = `${process.env.FIRESTORE_EMULATOR_HOST} project=${projectId}`
+      return
+    }
+    if (process.env.VITEST) {
+      detail =
+        'the test runner never uses the live board; run through npm run test:rules (emulator)'
       return
     }
     const { path, tried } = findSa()

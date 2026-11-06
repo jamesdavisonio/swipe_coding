@@ -1,0 +1,54 @@
+i  emulators: Starting emulators: firestore
+i  emulators: Detected demo project ID "demo-kanban", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Firestore Emulator logging to firestore-debug.log
++  firestore: Firestore Emulator UI websocket is running on 9150.
+i  Running script: npm run test:agent
+
+> test:agent
+> npm run test -w @kanban/agent
+
+
+> @kanban/agent@0.0.1 test
+> node test/protocol.ts
+
+  [agent] 2026-11-06T07:51:05.731Z [39588] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+  [agent] 2026-11-06T07:51:05.736Z [39588] mcp connected cwd=C:\Users\Intel\Documents\code\kanban board=emulator
+ok - initialize advertises claude/channel
+ok - initialize advertises tools
+ok - instructions mention from="james"
+ok - instructions describe the workflow
+ok - all 10 tools listed
+  [agent] 2026-11-06T07:51:06.612Z [39588] registered agent=rA4nsCrOOqVFZ4DYWkkd project=kanban-514bdcf5 cwd=C:\Users\Intel\Documents\code\kanban
+ok - whoami works (board emulator)
+  [agent] 2026-11-06T07:51:07.116Z [39588] created task dAeOeWJSHBdMhEyghTbd "Protocol test task"
+ok - create_task → dAeOeWJSHBdMhEyghTbd
+ok - list_tasks shows it, For James pinned first
+ok - channel event delivered in 125 ms
+ok - meta {"task":"dAeOeWJSHBdMhEyghTbd","id":"8FVQD7brA8pioVUVM1uq","from":"james","kind":"comment"}
+  [agent] 2026-11-06T07:51:07.332Z [39588] delivered 8FVQD7brA8pioVUVM1uq (comment) task=dAeOeWJSHBdMhEyghTbd
+ok - deliveredAt set after delivery
+ok - subtask spec awaiting_approval → needs spec
+  [agent] 2026-11-06T07:51:07.456Z [39588] asked on dAeOeWJSHBdMhEyghTbd: Approve the spec?
+ok - ask → needs question
+  [agent] 2026-11-06T07:51:07.550Z [39588] delivered TJwmW34RtTpzlcpypSrL (answer) task=dAeOeWJSHBdMhEyghTbd
+ok - answer → needs cleared
+ok - subtask spec done → stage approved
+ok - subtask approved done → stage build
+  [agent] 2026-11-06T07:51:07.788Z [39588] asked on dAeOeWJSHBdMhEyghTbd: Which option?
+  [agent] 2026-11-06T07:51:07.828Z [39588] updated task dAeOeWJSHBdMhEyghTbd: updatedAt,needs
+ok - update_task in_progress after ask → needs null
+  [agent] 2026-11-06T07:51:07.906Z [39588] todo for james: Merge the PR
+ok - todo_for_james created
+  [agent] 2026-11-06T07:51:07.976Z [39588] updated task dAeOeWJSHBdMhEyghTbd: updatedAt,summary,pr,stage,needs,doneAt,agentId,working,unread
+ok - update_task done moves stage to done
+ok - stored task is done, unbound, doneAt stamped, pr recorded
+cleaned up test data
+
+all good
++  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+exit 0

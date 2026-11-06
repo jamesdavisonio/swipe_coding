@@ -1,0 +1,40 @@
+2026-11-06T07:50:29.202Z [29996] storing a log event failed: 7 PERMISSION_DENIED: refused
+
+stderr | tests/emulator/app-logs-8.test.ts > L1-8 the log store fails under the agent > refuses the write: the agent carries on and logs nothing about it to the store
+2026-11-06T07:50:29.203Z [29996] api_call_failed WARNING: heartbeat failed: unavailable
+
+stderr | tests/emulator/app-logs-8.test.ts > L1-8 the log store fails under the agent > is unreachable: the agent carries on and logs nothing about it to the store
+2026-11-06T07:50:29.257Z [29996] api_call_failed ERROR: board registration failed: deadline exceeded
+
+stderr | tests/emulator/app-logs-8.test.ts > L1-8 the log store fails under the agent > is unreachable: the agent carries on and logs nothing about it to the store
+2026-11-06T07:50:29.258Z [29996] storing a log event failed: 14 UNAVAILABLE: no connection
+
+stderr | tests/emulator/app-logs-8.test.ts > L1-8 the log store fails under the agent > is unreachable: the agent carries on and logs nothing about it to the store
+2026-11-06T07:50:29.258Z [29996] api_call_failed WARNING: heartbeat failed: unavailable
+
+ ✓ tests/emulator/app-logs-8.test.ts (2 tests) 196ms
+ ✓ tests/emulator/app-logs-4.test.ts (3 tests) 275ms
+stderr | tests/emulator/agent-heartbeat.test.ts
+2026-11-06T07:50:31.257Z [38400] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/agent-heartbeat.test.ts > agent heartbeat > writes at most 12 heartbeats an hour and is online at every minute of it
+2026-11-06T07:50:31.263Z [38400] registered agent=EZ2HuKrNlq9l8N1gxW4P project=heartbeat-1793951431263-7068787b cwd=/tmp/heartbeat-1793951431263
+
+stderr | tests/emulator/agent-heartbeat.test.ts > agent heartbeat > writes at most 12 heartbeats an hour and is online at every minute of it
+2026-11-06T07:50:31.382Z [38400] agent EZ2HuKrNlq9l8N1gxW4P shut down; 0 task(s) orphaned
+
+ ✓ tests/emulator/agent-heartbeat.test.ts (1 test) 121ms
+ ✓ tests/emulator/web-threads-b6-25.test.ts (3 tests) 555ms
+
+ Test Files  29 passed (29)
+      Tests  233 passed (233)
+   Start at  08:49:35
+   Duration  57.80s (transform 618ms, setup 0ms, collect 21.41s, tests 26.00s, environment 713ms, prepare 3.08s)
+
++  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+exit 0
