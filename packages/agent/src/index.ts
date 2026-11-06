@@ -110,7 +110,7 @@ const tools: Tool[] = [
   {
     name: 'kanban_subtask',
     description:
-      'Advance one stage of the task (e.g. spec → awaiting_approval asks James to approve the spec; done moves the task to its next stage).',
+      'Advance one stage of the task (e.g. spec → awaiting_approval asks James to approve the spec; done moves the task to its next stage, never to done: finish with kanban_update_task status "done" and a summary).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -118,7 +118,7 @@ const tools: Tool[] = [
         key: {
           type: 'string',
           description:
-            'Stage of the task: spec, approved, build, pr, merged, main_ci, after_deploy, done (feature); fix (bugfix); do (chore)',
+            'Stage of the task: spec, approved, build, pr, merged, main_ci, after_deploy (feature); fix (bugfix); do (chore)',
         },
         status: {
           type: 'string',
