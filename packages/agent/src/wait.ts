@@ -98,6 +98,8 @@ function watchReplies(
 function watch(agentId: string): void {
   const db = getDb()
   const pending = new Map<string, Comment>()
+  // Set from the first pending reply until a claim has settled: one timer or one claim at a time,
+  // so only a single claim is ever in flight.
   let settling: NodeJS.Timeout | null = null
   let inflight: Promise<number> | null = null // a claim under way: how many replies it claimed
   let aborting = false // set before any await once a failure starts: no new claim begins
@@ -113,7 +115,7 @@ function watch(agentId: string): void {
         const claimed = await inflight
         if (claimed !== null && claimed > 0) return
       } catch (err) {
-        log(`claim failed while stopping: ${(err as Error).message}`)
+        log(`the claim in flight threw (nothing printed): ${(err as Error).message}`)
       }
       await fail(agentId, line, target, status)
     })()
@@ -127,22 +129,26 @@ function watch(agentId: string): void {
       settling = setTimeout(() => void claim(), WATCHER_SETTLE_MS)
   }
   const claim = async () => {
-    settling = null
     if (aborting) return
     const ids = [...pending.values()].sort((a, b) => a.createdAt - b.createdAt).map((c) => c.id)
     pending.clear()
-    if (ids.length === 0) return
+    if (ids.length === 0) {
+      settling = null
+      return
+    }
     inflight = claimReplies(db, agentId, ids).then((claimed) => {
       log(`claimed ${claimed.length} of ${ids.length} replies`)
       if (claimed.length > 0) finish(claimed.map(replyLine), EXIT_OK)
       return claimed.length
     })
     try {
-      await inflight
+      if ((await inflight) > 0) return // printed; finish() ends the process
     } catch (err) {
       return onError(err as Error)
     }
-    arm() // every reply went to another watcher (or new ones arrived): back to waiting
+    // Every reply went to another watcher: back to waiting, re-arming for any that arrived since.
+    settling = null
+    arm()
   }
 
   watchSession(db, agentId, abort, onError)
