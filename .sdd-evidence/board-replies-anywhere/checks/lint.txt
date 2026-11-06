@@ -1,0 +1,31 @@
+
+> lint
+> eslint .
+
+
+C:\Users\Intel\Documents\code\kanban\packages\agent\test\protocol.ts
+  239:36  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  275:39  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban\tests\app-logs-1.test.ts
+  38:36  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban\tests\emulator\board-replies-anywhere-r1-1.test.ts
+  25:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban\tests\emulator\board-replies-anywhere-r1-9.test.ts
+  43:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  44:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  65:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban\tests\fixtures\app-logs-emulator.ts
+  107:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  141:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  315:10  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban\tests\fixtures\board-replies-anywhere-emulator.ts
+  192:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+✖ 11 problems (0 errors, 11 warnings)
+
+exit 0

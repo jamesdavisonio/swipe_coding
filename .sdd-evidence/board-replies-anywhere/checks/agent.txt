@@ -1,0 +1,40 @@
+ok - initialize advertises tools
+ok - instructions explain the watcher
+ok - instructions describe the workflow
+ok - all 11 tools listed
+  [agent] 2026-11-06T07:15:45.197Z [30656] registered agent=FKvZNH7N8h8bxtQlvWfK project=kanban-514bdcf5 cwd=C:\Users\Intel\Documents\code\kanban
+ok - whoami works (board emulator)
+  [agent] 2026-11-06T07:15:45.688Z [30656] created task 4YsiTt3kAWk5ghwhXSZJ "Protocol test task"
+ok - create_task → 4YsiTt3kAWk5ghwhXSZJ
+ok - list_tasks shows it, For James pinned first
+ok - create_task gives the watcher command
+ok - reply waits undelivered for a watcher
+ok - watcher printed the reply in 1962 ms
+ok - deliveredAt set once printed
+ok - no channel event carries the reply
+ok - subtask spec awaiting_approval → needs spec
+  [agent] 2026-11-06T07:15:47.822Z [30656] asked on 4YsiTt3kAWk5ghwhXSZJ: Approve the spec?
+ok - ask → needs question
+ok - watcher printed the answer
+ok - answer → needs cleared
+ok - no channel event carries the answer
+ok - subtask spec done → stage approved
+ok - subtask approved done → stage build
+  [agent] 2026-11-06T07:15:49.787Z [30656] asked on 4YsiTt3kAWk5ghwhXSZJ: Which option?
+  [agent] 2026-11-06T07:15:49.838Z [30656] updated task 4YsiTt3kAWk5ghwhXSZJ: updatedAt,needs
+ok - update_task in_progress after ask → needs null
+  [agent] 2026-11-06T07:15:49.926Z [30656] todo for james: Merge the PR
+ok - todo_for_james created
+  [agent] 2026-11-06T07:15:49.974Z [30656] updated task 4YsiTt3kAWk5ghwhXSZJ: updatedAt,summary,pr,stage,needs,doneAt,agentId,working,unread
+ok - update_task done moves stage to done
+ok - stored task is done, unbound, doneAt stamped, pr recorded
+cleaned up test data
+
+all good
++  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+exit 0

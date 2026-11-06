@@ -1,0 +1,40 @@
+   ✓ B2-7 project chips > tapping a project shows only its rows, presses its chip and logs the filter  417ms
+   ✓ B2-7 project chips > All resets the filter, clears it from the URL and logs it  426ms
+ ✓ tests/web-threads-b2-6.test.tsx (28 tests) 915ms
+   ✓ B2-6 Threads screen > lists "Needs you" rows in order, then "Quiet" rows in order  351ms
+ ✓ tests/web-threads-b5-21.test.tsx (13 tests) 1029ms
+ ✓ tests/web-threads-b2-9.test.tsx (8 tests) 755ms
+ ✓ tests/web-threads-b4-18.test.tsx (7 tests) 997ms
+   ✓ B4-18 the PR sheet shows the PR > is a dialog named "PR #<n> is ready to merge" showing the summary  339ms
+ ✓ tests/web-threads-b3-2.test.tsx (4 tests) 388ms
+ ✓ tests/web-threads-b4-28.test.tsx (7 tests) 1364ms
+   ✓ B4-28 a tick while offline > shows the tick at once and keeps it while the write is queued  414ms
+ ✓ tests/web-threads-b3-29.test.tsx (10 tests) 706ms
+ ✓ tests/board-briefs-b7-34.test.tsx (3 tests) 910ms
+   ✓ B7-34 the PR sheet leads with the summary brief > shows the session's latest summary brief as a card above the PR content  582ms
+ ✓ tests/board-briefs-b7-31.test.tsx (30 tests) 607ms
+ ✓ tests/board-briefs-b7-36.test.tsx (7 tests) 615ms
+ ✓ tests/app-logs-1.test.ts (6 tests) 25ms
+ ✓ tests/app-logs-3.test.ts (3 tests) 23ms
+ ✓ tests/web-threads-b1-contract.test.ts (15 tests) 14ms
+ ✓ tests/web-threads-b1-2.test.ts (8 tests) 6ms
+ ✓ tests/app-logs-2.test.ts (2 tests) 18ms
+ ✓ tests/web-threads-b1-4.test.ts (3 tests) 6ms
+ ✓ tests/web-threads-b1-1.test.ts (6 tests) 6ms
+ ✓ tests/fix-comments-index.test.ts (6 tests) 5ms
+ ✓ tests/web-threads-b1-3.test.ts (6 tests) 6ms
+ ✓ tests/sample.test.ts (1 test) 3ms
+ ✓ tests/web-threads-b2-12.test.tsx (10 tests) 373ms
+ ✓ tests/web-threads-b2-29.test.tsx (7 tests) 288ms
+ ✓ tests/web-threads-b2-8.test.tsx (6 tests) 312ms
+ ✓ tests/board-briefs-b7-37.test.ts (6 tests) 2410ms
+   ✓ B7-37 the session instructions > is what the MCP server sends: initialize returns SESSION_INSTRUCTIONS  2402ms
+ ✓ tests/web-threads-b2-10.test.tsx (4 tests) 131ms
+ ✓ tests/board-briefs-b7-35.test.tsx (3 tests) 148ms
+
+ Test Files  52 passed (52)
+      Tests  538 passed (538)
+   Start at  08:13:24
+   Duration  19.77s (transform 3.56s, setup 0ms, collect 63.15s, tests 98.71s, environment 78.12s, prepare 11.55s)
+
+exit 0
