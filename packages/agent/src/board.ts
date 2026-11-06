@@ -493,13 +493,24 @@ function clearsQuestion(c: Comment, task: Task): boolean {
 }
 
 // A watcher's claim on James's waiting replies, in one transaction: each reply whose deliveredAt
-// is still unset gets marked received and its task's question settled; the rest were claimed by
-// another watcher and are left out. Returns the claimed replies, oldest first.
-export async function claimReplies(db: Firestore, ids: readonly string[]): Promise<Comment[]> {
+// is still unset and that still belongs to `agentId` (kanban_start_task may have rerouted it) gets
+// marked received and its task's question settled; the rest were claimed by another watcher or
+// moved to another session and are left out. Returns the claimed replies, oldest first.
+export async function claimReplies(
+  db: Firestore,
+  agentId: string,
+  ids: readonly string[]
+): Promise<Comment[]> {
   return db.runTransaction(async (tx) => {
     const snaps = await tx.getAll(...ids.map((id) => db.collection(C.comments).doc(id)))
     const claimed = snaps
-      .filter((s) => s.exists && s.get('deliveredAt') === null && s.get('author') === 'james')
+      .filter(
+        (s) =>
+          s.exists &&
+          s.get('deliveredAt') === null &&
+          s.get('author') === 'james' &&
+          s.get('agentId') === agentId
+      )
       .map((s) => ({ ...(s.data() as Omit<Comment, 'id'>), id: s.id }))
       .sort((a, b) => a.createdAt - b.createdAt)
     const taskIds = [...new Set(claimed.map((c) => c.taskId))]

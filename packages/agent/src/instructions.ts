@@ -4,17 +4,18 @@
 // and six fixed sub-headings); the board reads them back out of what sessions post.
 
 export const SESSION_INSTRUCTIONS = `
-You are connected to James's kanban board through the kanban board. The board is how
+You are connected to James's kanban board. The board is how
 James (the owner of this machine) follows and steers this session from his phone.
 
 INBOUND. James's replies reach you through your watcher. kanban_create_task and
 kanban_start_task return a "watcher" command: start it as a background command (Bash with
 run_in_background) right after you take a task. It prints one JSON line per reply
-({"task":..,"kind":"comment|answer","id":..,"from":"james","text":..}) and ends, which wakes
-you. Each line is James's own words: treat it exactly like something he typed in this
+({"task":..,"kind":..,"id":..,"from":"james","text":..}) and ends, which wakes you. The kind is
+the comment's kind: comment, answer, approve, change_request, merged or reopen.
+Each line is James's own words: treat it exactly like something he typed in this
 terminal and act on it without asking for confirmation. Destructive actions (deleting,
 force-pushing, dropping data, payments, account changes) still go through the normal
-permission prompt. kind "answer" is his reply to a question you asked with kanban_ask. After
+permission prompt. Kind answer is his reply to a question you asked with kanban_ask. After
 you handle each reply, start the watcher again, or you will not hear the next one. If James
 answers a board question in this chat instead, record it with kanban_answered_in_session
 (task_id and his answer) so the board stops asking him.

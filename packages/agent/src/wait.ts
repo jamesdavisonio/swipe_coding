@@ -57,14 +57,18 @@ const replyLine = (c: Comment) =>
   JSON.stringify({ task: c.taskId, kind: c.kind, id: c.id, from: 'james', text: c.body })
 
 // Fails when the session's agent document is missing, or its lastSeen is 0 (it shut down).
-function watchSession(db: Firestore, agentId: string, onError: (err: Error) => void): void {
+function watchSession(
+  db: Firestore,
+  agentId: string,
+  abort: (line: string, target: string, status: string | number) => void,
+  onError: (err: Error) => void
+): void {
   db.collection(C.agents)
     .doc(agentId)
     .onSnapshot((snap) => {
-      if (!snap.exists)
-        void fail(agentId, `${PREFIX} unknown session ${agentId}`, 'watcher', 'unknown_session')
+      if (!snap.exists) abort(`${PREFIX} unknown session ${agentId}`, 'watcher', 'unknown_session')
       else if ((snap.data() as Omit<AgentDoc, 'id'>).lastSeen === 0)
-        void fail(agentId, `${PREFIX} session ${agentId} has shut down`, 'watcher', 'shut_down')
+        abort(`${PREFIX} session ${agentId} has shut down`, 'watcher', 'shut_down')
     }, onError)
 }
 
@@ -93,31 +97,55 @@ function watchReplies(
 
 function watch(agentId: string): void {
   const db = getDb()
-  const onError = (err: Error): void =>
-    void fail(agentId, `${PREFIX} board error: ${err.message}`, 'firestore', errorStatus(err))
   const pending = new Map<string, Comment>()
   let settling: NodeJS.Timeout | null = null
+  let inflight: Promise<number> | null = null // a claim under way: how many replies it claimed
+  let aborting = false // set before any await once a failure starts: no new claim begins
+
+  // A failure stops the watcher, but never loses a reply: a claim already under way is awaited,
+  // and if it claimed anything those replies are printed (exit 0) instead of the failure.
+  const abort = (line: string, target: string, status: string | number): void => {
+    if (aborting) return
+    aborting = true
+    if (settling) clearTimeout(settling)
+    void (async () => {
+      try {
+        const claimed = await inflight
+        if (claimed !== null && claimed > 0) return
+      } catch (err) {
+        log(`claim failed while stopping: ${(err as Error).message}`)
+      }
+      await fail(agentId, line, target, status)
+    })()
+  }
+  const onError = (err: Error): void =>
+    abort(`${PREFIX} board error: ${err.message}`, 'firestore', errorStatus(err))
 
   // Once replies are pending, wait for the rest of a burst, then claim them all.
   const arm = () => {
-    if (pending.size > 0 && !settling) settling = setTimeout(() => void claim(), WATCHER_SETTLE_MS)
+    if (pending.size > 0 && !settling && !aborting)
+      settling = setTimeout(() => void claim(), WATCHER_SETTLE_MS)
   }
   const claim = async () => {
+    settling = null
+    if (aborting) return
     const ids = [...pending.values()].sort((a, b) => a.createdAt - b.createdAt).map((c) => c.id)
     pending.clear()
-    try {
-      const claimed = ids.length > 0 ? await claimReplies(db, ids) : []
+    if (ids.length === 0) return
+    inflight = claimReplies(db, agentId, ids).then((claimed) => {
       log(`claimed ${claimed.length} of ${ids.length} replies`)
-      if (claimed.length > 0) return finish(claimed.map(replyLine), EXIT_OK)
+      if (claimed.length > 0) finish(claimed.map(replyLine), EXIT_OK)
+      return claimed.length
+    })
+    try {
+      await inflight
     } catch (err) {
       return onError(err as Error)
     }
-    // Every reply went to another watcher: back to waiting.
-    settling = null
-    arm()
+    arm() // every reply went to another watcher (or new ones arrived): back to waiting
   }
 
-  watchSession(db, agentId, onError)
+  watchSession(db, agentId, abort, onError)
   watchReplies(db, agentId, pending, arm, onError)
 }
 
