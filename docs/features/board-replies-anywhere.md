@@ -131,7 +131,7 @@ Observed today (`packages/agent/src`):
   - **Success**: if replies are pending at start, or once one arrives, it waits
     `WATCHER_SETTLE_MS`, claims every pending reply and prints one line per claimed reply, oldest
     first by `createdAt`, then exits 0. Each line is compact JSON with exactly these keys in this
-    order: `{"task":<taskId>,"kind":<"comment"|"answer">,"id":<comment id>,"from":"james","text":<body verbatim>}`.
+    order: `{"task":<taskId>,"kind":<the comment's kind: "comment", "answer", "approve", "change_request", "merged" or "reopen">,"id":<comment id>,"from":"james","text":<body verbatim>}`.
     Nothing else goes to stdout (diagnostics go to stderr). If every pending reply was claimed by
     another watcher in the meantime, it goes back to waiting instead of exiting.
   - **Claiming** a reply is one transaction: re-read the comment; if its `deliveredAt` is already
