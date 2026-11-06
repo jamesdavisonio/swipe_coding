@@ -332,7 +332,7 @@ export class Board {
     const task = await this.getTask(taskId)
     this.assertMine(task)
     const t = now()
-    const patch = { updatedAt: t, ...subtaskPatch(task, resolveStage(task, key), status, t) }
+    const patch = { updatedAt: t, ...subtaskPatch(task, resolveStage(task, key), status) }
     if (note) await this.writeAgentComment(task, note, 'info', patch)
     else await this.db.collection(C.tasks).doc(taskId).update(patch)
     return { ...task, ...(patch as Partial<Task>) }
@@ -617,13 +617,17 @@ function prPatch(task: Task, url: string): Record<string, unknown> {
   return ready ? { ...pr, stage: 'pr', needs: { kind: 'pr' } satisfies TaskNeed } : pr
 }
 
-// Moves the task past `stage`: to the next stage of its chain (done after the last), clearing
-// the need of any stage it passes on the way (its current stage through `stage`). A task already
-// beyond `stage` is left alone.
-function advancePast(task: Task, stage: Stage, t: number): Record<string, unknown> {
+// Moves the task past `stage`: to the next stage of its chain, clearing the need of any stage it
+// passes on the way (its current stage through `stage`). A task already beyond `stage` is left
+// alone. Never finishes a task: that is kanban_update_task with status "done" and a summary, the
+// only call that posts the Done message, so the stage before done (and done itself) is refused.
+function advancePast(task: Task, stage: Stage): Record<string, unknown> {
   const chain = taskStages(task)
   const next = chain.at(chain.indexOf(stage) + 1)
-  if (next === undefined || next === 'done') return donePatch(t)
+  if (next === undefined || next === 'done')
+    throw new BoardError(
+      `kanban_subtask does not finish a task: to finish task ${task.id}, call kanban_update_task with status "done" and a summary`
+    )
   if (chain.indexOf(task.stage) > chain.indexOf(stage)) return {}
   const passed = chain.slice(Math.max(0, chain.indexOf(task.stage)), chain.indexOf(stage) + 1)
   const needKind = task.needs?.kind
@@ -632,19 +636,14 @@ function advancePast(task: Task, stage: Stage, t: number): Record<string, unknow
 }
 
 // What kanban_subtask changes on the task for each Phase 1 step status.
-function subtaskPatch(
-  task: Task,
-  stage: Stage,
-  status: SubtaskStatus,
-  t: number
-): Record<string, unknown> {
+function subtaskPatch(task: Task, stage: Stage, status: SubtaskStatus): Record<string, unknown> {
   switch (status) {
     case 'awaiting_approval':
       if (stage !== 'spec') throw new BoardError('awaiting_approval only applies to the spec step')
       return { needs: { kind: 'spec' } satisfies TaskNeed }
     case 'done':
     case 'skipped':
-      return advancePast(task, stage, t)
+      return advancePast(task, stage)
     case 'in_progress': {
       const chain = taskStages(task)
       const ahead = stage !== 'done' && chain.indexOf(stage) > chain.indexOf(task.stage)
