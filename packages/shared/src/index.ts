@@ -126,6 +126,9 @@ export interface AgentDoc {
 // that the live dot may lag a closed session by up to twelve minutes.
 export const AGENT_HEARTBEAT_MS = 5 * 60 * 1000
 export const AGENT_STALE_MS = 12 * 60 * 1000
+// A watcher that sees its first reply waits this long, then claims everything pending, so
+// replies James sends together are printed together.
+export const WATCHER_SETTLE_MS = 1000
 
 export interface Task {
   id: string
