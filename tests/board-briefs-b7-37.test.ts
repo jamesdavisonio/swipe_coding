@@ -77,9 +77,11 @@ async function initializeAgent(): Promise<{ instructions?: string }> {
 }
 
 describe('B7-37 the session instructions', () => {
-  it('is a non-empty text that still explains the channel', () => {
+  // Amended 2026-11-06 with James's approval: replies now arrive through the watcher
+  // (board-replies-anywhere R1, ADR 0005), so the instructions no longer show from="james".
+  it('is a non-empty text that still explains how replies arrive', () => {
     expect(typeof SESSION_INSTRUCTIONS).toBe('string')
-    expect(SESSION_INSTRUCTIONS).toContain('from="james"')
+    expect(SESSION_INSTRUCTIONS).toContain('watcher')
     expect(SESSION_INSTRUCTIONS).toContain('kanban_ask')
   })
 
