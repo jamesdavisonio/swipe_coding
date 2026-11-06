@@ -114,8 +114,67 @@ Observed today (`packages/agent/src`):
   idle desktop-app session (seen on 6 November: a background `gcloud` command woke this idle
   session when it finished).
 
-Exact names (the watcher command's form and arguments, the new tool's name and arguments, the
-output line format) are fixed at test-draft time.
+**R1 contract details fixed at test time** (planner decisions; exact names tests may assert)
+
+- **Shared constant** (`packages/shared/src/index.ts`, exported): `WATCHER_SETTLE_MS` = 1000.
+  Once a watcher sees a first reply it waits this long, then claims and prints every reply
+  pending at that moment, so replies sent together come out together.
+- **Watcher command** — `packages/agent/src/wait.ts`, run as
+  `node "<absolute path of wait.ts, forward slashes>" --agent <agentId>`. It reaches the board
+  exactly as the agent does (`firestore.ts`: emulator when `FIRESTORE_EMULATOR_HOST` is set,
+  else the service-account key), never registers as an agent and never writes to `agents`.
+  - **Arguments**: exactly one `--agent` followed by an id of 1–64 characters from
+    `[A-Za-z0-9_-]`. Anything else: one stdout line starting `kanban watcher: invalid arguments`,
+    exit code 2, no board access.
+  - **A reply** is a comment with `agentId` equal to the given id, `author` `james` and
+    `deliveredAt` `null`.
+  - **Success**: if replies are pending at start, or once one arrives, it waits
+    `WATCHER_SETTLE_MS`, claims every pending reply and prints one line per claimed reply, oldest
+    first by `createdAt`, then exits 0. Each line is compact JSON with exactly these keys in this
+    order: `{"task":<taskId>,"kind":<"comment"|"answer">,"id":<comment id>,"from":"james","text":<body verbatim>}`.
+    Nothing else goes to stdout (diagnostics go to stderr). If every pending reply was claimed by
+    another watcher in the meantime, it goes back to waiting instead of exiting.
+  - **Claiming** a reply is one transaction: re-read the comment; if its `deliveredAt` is already
+    set, it is not this watcher's; otherwise set `deliveredAt` to now and apply today's question
+    rule (when the reply's kind is `answer` or the task's `needs.kind` is `question`, the task's
+    `needs` becomes `null`; the task's `updatedAt` is set either way). Only claimed replies are
+    printed, so across any number of watchers each reply is printed once.
+  - **Failures**: one stdout line, then exit 1, and a `logFailure` `WARNING` `api_call_failed`:
+    - board offline (no emulator, no key): `kanban watcher: board offline: <detail>`
+      (`target: 'firestore'`, `status: 'offline'`);
+    - no `agents/<id>` document: `kanban watcher: unknown session <id>` (`target: 'watcher'`,
+      `status: 'unknown_session'`);
+    - the agent document's `lastSeen` is `0` (the agent shut down), at start or at any moment
+      while waiting: `kanban watcher: session <id> has shut down` (`target: 'watcher'`,
+      `status: 'shut_down'`);
+    - a Firestore listener error or a failed claim: `kanban watcher: board error: <message>`
+      (`target: 'firestore'`, `status`: the error's code or `unknown`).
+- **Task results**: the results of `kanban_create_task` and `kanban_start_task` keep every field
+  they have today and add `watcher`: the exact watcher command string for this session's agent
+  id (the agent that answered the call).
+- **Agent delivery**: the agent sends no `notifications/claude/channel` for James's comments or
+  answers and never sets `deliveredAt` on a James comment (except through the new tool below).
+  Queued-task announcements are unchanged. `Board.startTask` still reroutes a task's undelivered
+  comments to the agent that starts it.
+- **New tool `kanban_answered_in_session`**, arguments `{ task_id: string, answer: string }`, both
+  required; `answer` is trimmed and must be 1–2000 characters (else a tool error whose text
+  starts `invalid answer`).
+  - The task must be bound to this session (else the existing "not bound to this session" tool
+    error) and must have an open question (`needs.kind` is `question`; else a tool error whose
+    text starts `no open question`).
+  - Effect, in one batch: the task's `needs` becomes `null` and `updatedAt` now; a session
+    comment (author `session`, kind `info`, `deliveredAt` set like every session comment) with
+    body `James answered in the session: <answer>`; and every James comment of kind `answer` on
+    that task whose `deliveredAt` is `null` gets `deliveredAt` now, so no watcher prints it.
+  - Result: `{ "id": <the new comment's id> }`.
+- **Instructions** (`SESSION_INSTRUCTIONS`): no longer say James's replies arrive as channel
+  events; they tell the session that the `watcher` command from `kanban_create_task` /
+  `kanban_start_task` must be started as a background command (Claude Code's
+  `run_in_background`), that each line it prints is James's own words (treated exactly like
+  something he typed), that it must be started again after each reply is handled, and that an
+  answer James gives in the session's chat to an open board question is recorded with
+  `kanban_answered_in_session`. The `kanban_ask` tool's description and result note say the
+  answer arrives through the watcher.
 
 ## Files & modules affected
 
