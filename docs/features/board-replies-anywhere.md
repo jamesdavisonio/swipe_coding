@@ -98,7 +98,7 @@ again.
 Observed today (`packages/agent/src`):
 
 - A comment is a top-level `comments/{id}` document with `taskId`, `agentId`, `author`
-  (`james` | session), `kind` (`comment` | `answer`), `body`, `createdAt`, `deliveredAt`
+  (`james` | `agent`, the session), `kind` (`comment` | `answer`), `body`, `createdAt`, `deliveredAt`
   (numeric ms or `null`), plus `workingAt` / `handledAt` the phone's ticks read
   (`packages/web/src/components/Ticks.tsx`: `deliveredAt` is the "received" tick).
 - `Board.listenForJames` streams comments where `agentId == <this agent>` and
@@ -163,7 +163,7 @@ Observed today (`packages/agent/src`):
     error) and must have an open question (`needs.kind` is `question`; else a tool error whose
     text starts `no open question`).
   - Effect, in one batch: the task's `needs` becomes `null` and `updatedAt` now; a session
-    comment (author `session`, kind `info`, `deliveredAt` set like every session comment) with
+    comment (author `agent`, kind `info`, `deliveredAt` set like every session comment) with
     body `James answered in the session: <answer>`; and every James comment of kind `answer` on
     that task whose `deliveredAt` is `null` gets `deliveredAt` now, so no watcher prints it.
   - Result: `{ "id": <the new comment's id> }`.
