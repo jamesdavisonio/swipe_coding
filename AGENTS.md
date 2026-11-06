@@ -2,7 +2,8 @@
 
 Phone-first board where James follows and steers his local Claude Code sessions. Each
 project folder is a project; each piece of work is a task with a fixed stage chain; sessions
-report in through an MCP channel server and receive James's replies as channel events.
+report in through an MCP server and receive James's replies through a background watcher
+(`packages/agent/src/wait.ts`, ADR 0005).
 
 ## Stack
 
@@ -49,7 +50,7 @@ npm run typecheck          # agent, web and the root tsconfig (tests/, packages/
 ## Gotchas
 
 - The desktop app is an MSIX package: its child processes see a virtualised `%APPDATA%`. The service-account key lives at `..\kanban-secrets\sa.json`, never in AppData.
-- Sessions must start with `claude --dangerously-load-development-channels server:kanban`; channel events are dropped silently if the Claude Team org has channels disabled.
+- James's replies reach a session only while it runs the watcher command from `kanban_create_task` / `kanban_start_task` as a background command; channel events (now only queued-task announcements) need `--dangerously-load-development-channels server:kanban` and never reach desktop-app or orchestrator-started sessions.
 - Claude Code currently spawns the agent twice per session (open issue, DESIGN.md Phase 1).
 - The Firestore emulator needs Java 21: on James's PC it is a zip install at `Documents\tools\jdk-21` (on the user PATH; older shells need it prefixed). Never run `KANBAN_TEST_LIVE=1` from an agent; use the emulator form above.
 

@@ -56,6 +56,9 @@ function firestoreFailure(
   })
 }
 
+// The longest answer kanban_answered_in_session takes.
+const ANSWER_MAX_CHARS = 2000
+
 export class BoardError extends Error {
   constructor(msg: string) {
     super(msg)
@@ -277,7 +280,7 @@ export class Board {
     const batch = this.db.batch()
     const bound = { agentId: this.id.agentId, working: true, updatedAt: t }
     batch.update(this.db.collection(C.tasks).doc(taskId), bound)
-    // Route any undelivered comments on this task to us so they flow through the listener.
+    // Route any undelivered comments on this task to us so our watcher prints them.
     const pending = await this.db
       .collection(C.comments)
       .where('taskId', '==', taskId)
@@ -343,6 +346,36 @@ export class Board {
     return this.writeAgentComment(task, body, kind)
   }
 
+  // James answered a question in the session's own chat: the question closes, the thread says so,
+  // and his waiting board answers are marked so no watcher prints them. Plain comments still wait.
+  async answeredInSession(taskId: string, answer: string): Promise<Comment> {
+    const text = typeof answer === 'string' ? answer.trim() : ''
+    if (text.length < 1 || text.length > ANSWER_MAX_CHARS)
+      throw new BoardError(`invalid answer: 1 to ${ANSWER_MAX_CHARS} characters`)
+    const task = await this.getTask(taskId)
+    this.assertMine(task)
+    if (task.needs?.kind !== 'question') throw new BoardError(`no open question on task ${taskId}`)
+    const waiting = await this.db
+      .collection(C.comments)
+      .where('taskId', '==', taskId)
+      .where('deliveredAt', '==', null)
+      .get()
+    const t = now()
+    const c = await this.writeAgentComment(
+      task,
+      `James answered in the session: ${text}`,
+      'info',
+      { needs: null },
+      (batch) => {
+        for (const d of waiting.docs)
+          if (d.get('author') === 'james' && d.get('kind') === 'answer')
+            batch.update(d.ref, { deliveredAt: t })
+      }
+    )
+    log(`answered in session on ${taskId}`)
+    return c
+  }
+
   async ask(taskId: string, question: string): Promise<Comment> {
     const task = await this.getTask(taskId)
     this.assertMine(task)
@@ -379,7 +412,8 @@ export class Board {
     task: Task,
     body: string,
     kind: SessionCommentKind,
-    taskPatch: Record<string, unknown> = {}
+    taskPatch: Record<string, unknown> = {},
+    alsoInBatch: (batch: WriteBatch) => void = () => {}
   ): Promise<Comment> {
     const t = now()
     const ref = this.db.collection(C.comments).doc()
@@ -402,54 +436,12 @@ export class Board {
       updatedAt: t,
       ...taskPatch,
     })
+    alsoInBatch(batch)
     await batch.commit()
     return { ...c, id: ref.id }
   }
 
   // ---- inbound --------------------------------------------------------------
-
-  // Streams James's undelivered comments for tasks bound to this agent. `deliver`
-  // must push the event into the session; once it resolves we mark delivery and
-  // clear the question James just answered.
-  listenForJames(deliver: (c: Comment) => Promise<void>): () => void {
-    const inflight = new Set<string>()
-    const q = this.db
-      .collection(C.comments)
-      .where('agentId', '==', this.id.agentId)
-      .where('deliveredAt', '==', null)
-      .orderBy('createdAt', 'asc')
-    const onChanges = async (snap: QuerySnapshot) => {
-      for (const change of snap.docChanges()) {
-        if (change.type === 'removed') continue
-        const c: Comment = { ...(change.doc.data() as Omit<Comment, 'id'>), id: change.doc.id }
-        if (c.author !== 'james' || inflight.has(c.id)) continue
-        inflight.add(c.id)
-        try {
-          await deliver(c)
-          await this.markDelivered(c)
-          log(`delivered ${c.id} (${c.kind}) task=${c.taskId}`)
-        } catch (err) {
-          log(`delivery of ${c.id} failed: ${(err as Error).message}`)
-          void logFailure({
-            severity: 'WARNING',
-            event_type: 'api_call_failed',
-            message: (err as Error).message,
-            context: { target: 'channel', status: 'failed', task_id: c.taskId },
-          })
-        } finally {
-          inflight.delete(c.id)
-        }
-      }
-    }
-    return q.onSnapshot(
-      (snap) => {
-        onChanges(snap).catch((err: Error) =>
-          firestoreFailure('WARNING', `comment batch failed`, err)
-        )
-      },
-      (err) => firestoreFailure('ERROR', 'comment listener error', err)
-    )
-  }
 
   // Streams tasks James queues from the board for this project (including ones queued
   // before this session started) so an idle session can pick them up. Each task is
@@ -486,19 +478,6 @@ export class Board {
     )
   }
 
-  private async markDelivered(c: Comment): Promise<void> {
-    const t = now()
-    const taskRef = this.db.collection(C.tasks).doc(c.taskId)
-    await this.db.runTransaction(async (tx) => {
-      const task = asTask(await tx.get(taskRef))
-      tx.update(this.db.collection(C.comments).doc(c.id), { deliveredAt: t })
-      if (!task) return
-      const patch: Record<string, unknown> = { updatedAt: t }
-      if (c.kind === 'answer' || task.needs?.kind === 'question') patch.needs = null
-      tx.update(taskRef, patch)
-    })
-  }
-
   private assertMine(task: Task) {
     if (task.agentId !== this.id.agentId) {
       throw new BoardError(
@@ -506,6 +485,54 @@ export class Board {
       )
     }
   }
+}
+
+// A reply clears the task's question when it answers it, or arrives while the task asks one.
+function clearsQuestion(c: Comment, task: Task): boolean {
+  return c.kind === 'answer' || task.needs?.kind === 'question'
+}
+
+// A watcher's claim on James's waiting replies, in one transaction: each reply whose deliveredAt
+// is still unset and that still belongs to `agentId` (kanban_start_task may have rerouted it) gets
+// marked received and its task's question settled; the rest were claimed by another watcher or
+// moved to another session and are left out. Returns the claimed replies, oldest first.
+export async function claimReplies(
+  db: Firestore,
+  agentId: string,
+  ids: readonly string[]
+): Promise<Comment[]> {
+  return db.runTransaction(async (tx) => {
+    const snaps = await tx.getAll(...ids.map((id) => db.collection(C.comments).doc(id)))
+    const claimed = snaps
+      .filter(
+        (s) =>
+          s.exists &&
+          s.get('deliveredAt') === null &&
+          s.get('author') === 'james' &&
+          s.get('agentId') === agentId
+      )
+      .map((s) => ({ ...(s.data() as Omit<Comment, 'id'>), id: s.id }))
+      .sort((a, b) => a.createdAt - b.createdAt)
+    const taskIds = [...new Set(claimed.map((c) => c.taskId))]
+    const tasks = new Map<string, Task | null>()
+    if (taskIds.length > 0) {
+      const taskSnaps = await tx.getAll(...taskIds.map((id) => db.collection(C.tasks).doc(id)))
+      for (const s of taskSnaps) tasks.set(s.id, asTask(s))
+    }
+    const t = now()
+    const settled = new Set<string>()
+    for (const c of claimed) {
+      tx.update(db.collection(C.comments).doc(c.id), { deliveredAt: t })
+      const task = tasks.get(c.taskId)
+      if (task && clearsQuestion(c, task)) settled.add(c.taskId)
+    }
+    for (const [id, task] of tasks) {
+      if (!task) continue
+      const patch = settled.has(id) ? { updatedAt: t, needs: null } : { updatedAt: t }
+      tx.update(db.collection(C.tasks).doc(id), patch)
+    }
+    return claimed
+  })
 }
 
 // Shared by Board.shutdown and the SessionEnd hook. The agent goes offline and its tasks stop

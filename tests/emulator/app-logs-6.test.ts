@@ -4,8 +4,9 @@
 // against the emulator (`npm run test:rules`):
 // - a tool call that throws something other than BoardError (kanban_get_task with a task id that
 //   is not a document path) → ERROR feature_error, context.feature = the tool name;
-// - a channel delivery that fails (a comment for this session whose task id is not a document
-//   path, so marking it delivered throws) → WARNING api_call_failed, target channel, the task id.
+// (A failed channel delivery was the second site until 2026-11-06: replies now reach the session
+// through the watcher, whose failures board-replies-anywhere R1-7 covers; case removed with
+// James's approval.)
 // A BoardError (a task that does not exist) and ordinary progress are not stored. The stored
 // fields of logFailure itself (caller's request id, caps) are checked in-process at the end.
 import { readFileSync } from 'node:fs'
@@ -15,7 +16,6 @@ import {
   AGENT_LOG,
   RETENTION,
   STORED_KEYS,
-  adminDb,
   agentLogs,
   clearLogs,
   useAgent,
@@ -68,43 +68,6 @@ describe('L1-6 the agent stores its failures', () => {
     const lines = readFileSync(AGENT_LOG, 'utf8').split('\n')
     expect(lines.some((l) => l.includes(`[${agent().pid}]`) && l.includes('kanban_get_task'))).toBe(
       true
-    )
-  })
-
-  it('a failed delivery: WARNING api_call_failed, target channel, with the task id', async () => {
-    await clearLogs()
-    const { agentId, projectId } = await whoami()
-    const db = await adminDb()
-    const now = Date.now()
-    await db.collection('comments').add({
-      taskId: 'a/b',
-      projectId,
-      agentId,
-      author: 'james',
-      kind: 'comment',
-      body: 'Can you look at this?',
-      createdAt: now,
-      deliveredAt: null,
-      workingAt: null,
-      handledAt: null,
-    })
-    const e = await waitForLog(
-      (d) => d.event_type === 'api_call_failed' && d.context?.target === 'channel',
-      'api_call_failed for the channel delivery'
-    )
-    expect(e).toEqual(
-      expect.objectContaining({
-        severity: 'WARNING',
-        source: 'server',
-        session_id: agentId,
-        context: expect.objectContaining({
-          target: 'channel',
-          status: 'failed',
-          task_id: 'a/b',
-          agent_id: agentId,
-          project_id: projectId,
-        }),
-      })
     )
   })
 

@@ -2,9 +2,10 @@
 //
 // Always:   initialize advertises claude/channel + instructions; tools/list is complete.
 // Emulator: (FIRESTORE_EMULATOR_HOST set) create a task, write a james comment with the
-//           Admin SDK, expect a notifications/claude/channel within 5 s and deliveredAt
-//           set; then kanban_ask → task needs a question → answer → needs cleared.
-import { spawn } from 'node:child_process'
+//           Admin SDK, run the watcher command the task result gives (ADR 0005): it prints
+//           the reply and marks it delivered, and no channel event carries it; then
+//           kanban_ask → task needs a question → answer through the watcher → needs cleared.
+import { exec, spawn } from 'node:child_process'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { ServiceAccount } from 'firebase-admin/app'
@@ -34,6 +35,7 @@ interface TaskBrief {
   stage: string
   needs: { kind: string; question?: string } | null
   mine?: boolean
+  watcher?: string
 }
 interface Whoami {
   cwd: string
@@ -125,7 +127,28 @@ const EXPECTED_TOOLS = [
   'kanban_ask',
   'kanban_todo_for_james',
   'kanban_whoami',
+  'kanban_answered_in_session',
 ]
+
+// Runs the watcher command exactly as given (through the shell, like a session would) and
+// returns the reply lines it printed; it must exit 0 within 15 s.
+function runWatcher(command: string): Promise<{ id: string; kind: string; text: string }[]> {
+  return new Promise((resolve, reject) => {
+    exec(command, { env, timeout: 15_000 }, (err, stdout, stderr) => {
+      if (err) reject(new Error(`watcher failed: ${err.message}\n${stderr.slice(-1000)}`))
+      else
+        resolve(
+          stdout
+            .trim()
+            .split('\n')
+            .filter(Boolean)
+            .map((l) => JSON.parse(l) as { id: string; kind: string; text: string })
+        )
+    })
+  })
+}
+const jamesChannel = (m: RpcMessage) =>
+  m.method === 'notifications/claude/channel' && m.params?.meta?.from === 'james'
 
 try {
   const initId = send('initialize', {
@@ -139,7 +162,7 @@ try {
     'initialize advertises claude/channel'
   )
   assert(init.result?.capabilities?.tools, 'initialize advertises tools')
-  assert(/from="james"/.test(init.result?.instructions ?? ''), 'instructions mention from="james"')
+  assert(/watcher/.test(init.result?.instructions ?? ''), 'instructions explain the watcher')
   assert(/kanban_ask/.test(init.result?.instructions ?? ''), 'instructions describe the workflow')
   send('notifications/initialized', {}, true)
 
@@ -211,22 +234,18 @@ try {
       createdAt: t0,
       deliveredAt: null,
     })
-    const ev = await waitFor(
-      (m) => m.method === 'notifications/claude/channel' && m.params?.meta?.id === cRef.id,
-      'channel notification'
-    )
+    assert(typeof task.watcher === 'string', `create_task gives the watcher command`)
+    assert((await cRef.get()).get('deliveredAt') == null, 'reply waits undelivered for a watcher')
+    const lines = await runWatcher(task.watcher!)
     assert(
-      ev.params?.content === 'Looks good, carry on.',
-      `channel event delivered in ${Date.now() - t0} ms`
+      lines.length === 1 &&
+        lines[0].id === cRef.id &&
+        lines[0].kind === 'comment' &&
+        lines[0].text === 'Looks good, carry on.',
+      `watcher printed the reply in ${Date.now() - t0} ms`
     )
-    const meta = ev.params?.meta
-    assert(
-      meta?.from === 'james' && meta.task === task.id && meta.kind === 'comment',
-      `meta ${JSON.stringify(meta)}`
-    )
-    for (let i = 0; i < 40 && (await cRef.get()).get('deliveredAt') == null; i++)
-      await new Promise((r) => setTimeout(r, 100))
-    assert((await cRef.get()).get('deliveredAt') != null, 'deliveredAt set after delivery')
+    assert((await cRef.get()).get('deliveredAt') != null, 'deliveredAt set once printed')
+    assert(!inbox.some(jamesChannel), 'no channel event carries the reply')
 
     await call('kanban_subtask', { task_id: task.id, key: 'spec', status: 'awaiting_approval' })
     let snap = await db.collection('tasks').doc(task.id).get()
@@ -253,16 +272,14 @@ try {
       createdAt: Date.now(),
       deliveredAt: null,
     })
-    await waitFor(
-      (m) => m.method === 'notifications/claude/channel' && m.params?.meta?.id === aRef.id,
-      'answer notification'
+    const answered = await runWatcher(task.watcher!)
+    assert(
+      answered.length === 1 && answered[0].id === aRef.id && answered[0].kind === 'answer',
+      'watcher printed the answer'
     )
-    for (let i = 0; i < 40; i++) {
-      snap = await db.collection('tasks').doc(task.id).get()
-      if (snap.get('needs') === null) break
-      await new Promise((r) => setTimeout(r, 100))
-    }
+    snap = await db.collection('tasks').doc(task.id).get()
     assert(snap.get('needs') === null, 'answer → needs cleared')
+    assert(!inbox.some(jamesChannel), 'no channel event carries the answer')
 
     await call('kanban_subtask', { task_id: task.id, key: 'spec', status: 'done' })
     snap = await db.collection('tasks').doc(task.id).get()

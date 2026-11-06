@@ -5,13 +5,14 @@
 //   claude --dangerously-load-development-channels server:kanban
 //
 // Outbound: the kanban_* tools write to Firestore (projects/tasks/comments/todos).
-// Inbound : James's comments on tasks bound to this agent arrive via onSnapshot
-//           and are pushed into the session as <channel source="kanban" from="james">.
+// Inbound : James's replies reach the session through its watcher (wait.ts, started as a
+//           background command); only queued-task announcements are pushed as channel events.
 //
 // stdout is the MCP transport. Never console.log here — use log().
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import { join } from 'node:path'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -24,7 +25,6 @@ import {
   LOGS_READ_MAX_MINUTES,
   LOG_SEVERITIES,
   STAGES,
-  type Comment,
   type Stage,
   type Task,
   type TaskType,
@@ -38,7 +38,7 @@ import {
   type UpdateStatus,
 } from './board.ts'
 import { InvalidLogArgError, errorStatus, logFailure, readLogs } from './app-log.ts'
-import { BoardOfflineError, boardStatus, log } from './firestore.ts'
+import { BoardOfflineError, boardStatus, log, pkgDir } from './firestore.ts'
 import { SESSION_INSTRUCTIONS } from './instructions.ts'
 
 const tools: Tool[] = [
@@ -142,11 +142,24 @@ const tools: Tool[] = [
   {
     name: 'kanban_ask',
     description:
-      'Ask James a question on a task. The task shows as needing him; his answer arrives as a <channel kind="answer"> event.',
+      'Ask James a question on a task. The task shows as needing him; his answer is printed by your watcher (the background command from kanban_create_task / kanban_start_task).',
     inputSchema: {
       type: 'object',
       properties: { task_id: { type: 'string' }, question: { type: 'string' } },
       required: ['task_id', 'question'],
+    },
+  },
+  {
+    name: 'kanban_answered_in_session',
+    description:
+      "Record that James answered a board question in this session's own chat: the question closes on the board and the thread shows his answer.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        task_id: { type: 'string' },
+        answer: { type: 'string', description: 'His answer, 1 to 2000 characters' },
+      },
+      required: ['task_id', 'answer'],
     },
   },
   {
@@ -218,12 +231,7 @@ function getBoard(): Promise<Board> {
     boardInit = (async () => {
       const b = new Board()
       await b.register()
-      const stopComments = b.listenForJames(deliverToSession)
-      const stopQueued = b.listenForQueued(announceQueued)
-      stopListening = () => {
-        stopComments()
-        stopQueued()
-      }
+      stopListening = b.listenForQueued(announceQueued)
       board = b
       return b
     })().catch((err: Error) => {
@@ -241,16 +249,6 @@ function getBoard(): Promise<Board> {
   return boardInit
 }
 
-async function deliverToSession(c: Comment): Promise<void> {
-  await mcp.notification({
-    method: 'notifications/claude/channel',
-    params: {
-      content: c.body,
-      meta: { task: c.taskId, id: c.id, from: 'james', kind: c.kind },
-    },
-  })
-}
-
 async function announceQueued(t: Task): Promise<void> {
   const desc = t.description ? `\n\n${t.description}` : ''
   await mcp.notification({
@@ -265,6 +263,14 @@ async function announceQueued(t: Task): Promise<void> {
   })
 }
 
+// The command that starts this session's watcher: absolute path, forward slashes, so it runs
+// from any folder in any shell.
+function watcherCommand(agentId: string): string {
+  const script = join(pkgDir, 'src', 'wait.ts').replaceAll('\\', '/')
+  return `node "${script}" --agent ${agentId}`
+}
+
+// A task as the session sees it. The two tools that bind a task add the session's watcher.
 function taskBrief(t: Task) {
   return {
     id: t.id,
@@ -295,6 +301,7 @@ interface ToolArgs {
   kanban_subtask: { task_id: string; key: string; status: SubtaskStatus; note?: string }
   kanban_comment: { task_id: string; body: string }
   kanban_ask: { task_id: string; question: string }
+  kanban_answered_in_session: { task_id: string; answer: string }
   kanban_todo_for_james: { body: string; link?: string; task_id?: string }
 }
 function argsOf<N extends keyof ToolArgs>(
@@ -335,15 +342,17 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
       }
       case 'kanban_create_task': {
         const a = argsOf(args, name)
-        return ok(
-          taskBrief(
-            await b.createTask({ title: a.title, type: a.type, description: a.description })
-          )
-        )
+        const task = await b.createTask({
+          title: a.title,
+          type: a.type,
+          description: a.description,
+        })
+        return ok({ ...taskBrief(task), watcher: watcherCommand(b.id.agentId) })
       }
       case 'kanban_start_task': {
         const a = argsOf(args, name)
-        return ok(taskBrief(await b.startTask(a.task_id)))
+        const task = await b.startTask(a.task_id)
+        return ok({ ...taskBrief(task), watcher: watcherCommand(b.id.agentId) })
       }
       case 'kanban_update_task':
         return ok(taskBrief(await b.updateTask(argsOf(args, name))))
@@ -359,8 +368,12 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         const a = argsOf(args, name)
         return ok({
           id: (await b.ask(a.task_id, a.question)).id,
-          note: 'James will see this on his phone; his answer arrives as a <channel kind="answer"> event.',
+          note: 'James will see this on his phone; his answer is printed by your watcher.',
         })
+      }
+      case 'kanban_answered_in_session': {
+        const a = argsOf(args, name)
+        return ok({ id: (await b.answeredInSession(a.task_id, a.answer)).id })
       }
       case 'kanban_todo_for_james': {
         const a = argsOf(args, name)

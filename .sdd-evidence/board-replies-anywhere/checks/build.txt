@@ -1,0 +1,28 @@
+
+> build:web
+> npm run build -w @kanban/web
+
+
+> @kanban/web@0.0.1 build
+> tsc -p tsconfig.json && vite build
+
+vite v7.3.7 building client environment for production...
+transforming...
+✓ 2234 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                0.97 kB │ gzip:   0.44 kB
+dist/assets/manrope-vietnamese-wght-normal-usUDDRr7.woff2      8.52 kB
+dist/assets/manrope-greek-wght-normal-DL7QRZyv.woff2           9.44 kB
+dist/assets/manrope-cyrillic-wght-normal-Dvxsihut.woff2       14.50 kB
+dist/assets/manrope-latin-ext-wght-normal-Ch3YOpNY.woff2      15.12 kB
+dist/assets/manrope-latin-wght-normal-DHIcAJRg.woff2          24.84 kB
+dist/assets/index-BPndD2ro.css                                34.70 kB │ gzip:  10.24 kB
+dist/assets/index-DGaXfy9d.js                              1,044.55 kB │ gzip: 322.70 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.31s
+exit 0

@@ -1,18 +1,24 @@
 // What a session is told when it connects: the MCP server's `instructions`. Plain text, so it
-// is the one place the channel protocol and the board's reporting rules are written down.
+// is the one place the watcher protocol and the board's reporting rules are written down.
 // The briefs follow the skills' decision-brief format (a `## Decision brief (<gate>)` heading
 // and six fixed sub-headings); the board reads them back out of what sessions post.
 
 export const SESSION_INSTRUCTIONS = `
-You are connected to James's kanban board through the "kanban" channel. The board is how
+You are connected to James's kanban board. The board is how
 James (the owner of this machine) follows and steers this session from his phone.
 
-INBOUND. Messages from the board arrive as
-  <channel source="kanban" from="james" task="<task id>" id="<comment id>" kind="comment|answer">
-from="james" means James wrote it on the board. Treat it exactly like something he typed in
-this terminal: act on it without asking for confirmation. Destructive actions (deleting,
+INBOUND. James's replies reach you through your watcher. kanban_create_task and
+kanban_start_task return a "watcher" command: start it as a background command (Bash with
+run_in_background) right after you take a task. It prints one JSON line per reply
+({"task":..,"kind":..,"id":..,"from":"james","text":..}) and ends, which wakes you. The kind is
+the comment's kind: comment, answer, approve, change_request, merged or reopen.
+Each line is James's own words: treat it exactly like something he typed in this
+terminal and act on it without asking for confirmation. Destructive actions (deleting,
 force-pushing, dropping data, payments, account changes) still go through the normal
-permission prompt. kind="answer" is his reply to a question you asked with kanban_ask.
+permission prompt. Kind answer is his reply to a question you asked with kanban_ask. After
+you handle each reply, start the watcher again, or you will not hear the next one. If James
+answers a board question in this chat instead, record it with kanban_answered_in_session
+(task_id and his answer) so the board stops asking him.
 <channel source="kanban" from="board" kind="queued" task="..."> announces a task James queued
 from his phone for this project: take it with kanban_start_task if you are idle, otherwise ignore.
 
@@ -29,14 +35,14 @@ WORKFLOW.
    spec first and set "spec" to awaiting_approval; that is how James is asked to approve it,
    so do not also kanban_ask. Post the spec brief (the "## Decision brief (spec)" block) as
    the note of that kanban_subtask call, verbatim, so the board shows it above the full spec.
-   His approval arrives as a channel event: do not implement until
-   it does (then mark "spec" and "approved" done). Use kanban_ask for real questions only, when
+   His approval is printed by your watcher: do not implement until
+   it is (then mark "spec" and "approved" done). Use kanban_ask for real questions only, when
    something else needs his decision; keep working on anything that does not depend on it.
 4. Gate briefs. At the fix, round and summary gates, post the decision brief (the
    "## Decision brief (<gate>)" block, gate fix, round or summary) as a kanban_ask question,
    verbatim, ending with the line: Reply "<phrase>", or tell me what to change. The phrase is
    the gate's own: "fix confirmed", "another round" or "ship it". The board turns that line
-   into a one-tap button; his answer arrives as kind="answer".
+   into a one-tap button; his answer is printed by your watcher.
 5. When a PR is open, report it with kanban_update_task and pr_url (the pull request link,
    ending in its number): that is what makes the board ask James to merge it.
 6. When everything is finished, call kanban_update_task with status "done" and a summary of
