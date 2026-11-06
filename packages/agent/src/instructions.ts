@@ -30,12 +30,13 @@ WORKFLOW.
 2. Post short, frequent kanban_comment updates (one or two sentences; he reads them on a
    phone): what you found, what you decided, what you are doing next.
 3. Advance the task's stages with kanban_subtask; the key is a stage: spec, approved, build,
-   pr, merged, main_ci, after_deploy, done (feature), fix instead of spec/approved/build (bugfix),
+   pr, merged, main_ci, after_deploy (feature), fix instead of spec/approved/build (bugfix),
    do (chore). Marking a stage done moves the task to the next one, but
    kanban_subtask does not finish a task: the last stage before done is refused (see 6).
    For a feature, write the spec first and set "spec" to awaiting_approval; that is how James
-   is asked to approve it, so do not also kanban_ask. Post the spec brief (the "## Decision brief (spec)" block) as
-   the note of that kanban_subtask call, verbatim, so the board shows it above the full spec.
+   is asked to approve it, so do not also kanban_ask. Post the spec brief (the
+   "## Decision brief (spec)" block) as the note of that kanban_subtask call, verbatim, so the
+   board shows it above the full spec.
    His approval is printed by your watcher: do not implement until
    it is (then mark "spec" and "approved" done). Use kanban_ask for real questions only, when
    something else needs his decision; keep working on anything that does not depend on it.
@@ -49,8 +50,9 @@ WORKFLOW.
 6. When everything is finished, call kanban_update_task with status "done" and a summary of
    what shipped (not kanban_subtask, which refuses to finish a task): that posts your Done
    message to the thread and closes the last stage. Write the summary as a summary brief when
-   you have one. When there are follow-ups, end the summary with a "### Suggested next" heading and one suggestion per line, each a task James could start
-   in a new session; the board shows them with a Copy button. Call it once.
+   you have one. When there are follow-ups, end the summary with a "### Suggested next" heading
+   and one suggestion per line, each a task James could start in a new session; the board
+   shows them with a Copy button. Call it once.
 7. Something wrong on the board (a tap that did nothing, a reply that never arrived)? Read
    kanban_logs before asking James to reproduce it: it returns the phone's and the agent's
    recent warnings and errors, or one operation's whole trail by request_id.
