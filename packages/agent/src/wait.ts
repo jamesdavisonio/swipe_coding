@@ -7,6 +7,7 @@
 // line and exit 1. Bad arguments are one line and exit 2, before the board is touched.
 // Diagnostics go to stderr through log(); stdout carries only these lines.
 
+import type { Firestore } from 'firebase-admin/firestore'
 import { COLLECTIONS as C, WATCHER_SETTLE_MS, type AgentDoc, type Comment } from '@kanban/shared'
 import { errorStatus, logFailure } from './app-log.ts'
 import { claimReplies } from './board.ts'
@@ -55,45 +56,27 @@ function parseAgentId(argv: string[]): string | null {
 const replyLine = (c: Comment) =>
   JSON.stringify({ task: c.taskId, kind: c.kind, id: c.id, from: 'james', text: c.body })
 
-function watch(agentId: string): void {
-  const db = getDb()
-  const boardError = (err: Error): void =>
-    void fail(agentId, `${PREFIX} board error: ${err.message}`, 'firestore', errorStatus(err))
-  const shutDown = (): void =>
-    void fail(agentId, `${PREFIX} session ${agentId} has shut down`, 'watcher', 'shut_down')
-
-  const pending = new Map<string, Comment>()
-  let settling: NodeJS.Timeout | null = null
-
-  const claim = async () => {
-    const ids = [...pending.values()].sort((a, b) => a.createdAt - b.createdAt).map((c) => c.id)
-    pending.clear()
-    try {
-      const claimed = ids.length > 0 ? await claimReplies(db, ids) : []
-      log(`claimed ${claimed.length} of ${ids.length} replies`)
-      if (claimed.length > 0) return finish(claimed.map(replyLine), EXIT_OK)
-    } catch (err) {
-      return boardError(err as Error)
-    }
-    // Every reply went to another watcher: back to waiting.
-    settling = null
-    if (pending.size > 0) settling = setTimeout(() => void claim(), WATCHER_SETTLE_MS)
-  }
-
+// Fails when the session's agent document is missing, or its lastSeen is 0 (it shut down).
+function watchSession(db: Firestore, agentId: string, onError: (err: Error) => void): void {
   db.collection(C.agents)
     .doc(agentId)
     .onSnapshot((snap) => {
       if (!snap.exists)
-        return void fail(
-          agentId,
-          `${PREFIX} unknown session ${agentId}`,
-          'watcher',
-          'unknown_session'
-        )
-      if ((snap.data() as Omit<AgentDoc, 'id'>).lastSeen === 0) shutDown()
-    }, boardError)
+        void fail(agentId, `${PREFIX} unknown session ${agentId}`, 'watcher', 'unknown_session')
+      else if ((snap.data() as Omit<AgentDoc, 'id'>).lastSeen === 0)
+        void fail(agentId, `${PREFIX} session ${agentId} has shut down`, 'watcher', 'shut_down')
+    }, onError)
+}
 
-  // The existing composite index serves this query; the author is checked here.
+// Calls `onChange` with the replies waiting for the agent after every change. The existing
+// composite index serves the query; the author is checked here.
+function watchReplies(
+  db: Firestore,
+  agentId: string,
+  pending: Map<string, Comment>,
+  onChange: () => void,
+  onError: (err: Error) => void
+): void {
   db.collection(C.comments)
     .where('agentId', '==', agentId)
     .where('deliveredAt', '==', null)
@@ -104,9 +87,38 @@ function watch(agentId: string): void {
         if (change.type === 'removed') pending.delete(c.id)
         else if (c.author === 'james') pending.set(c.id, c)
       }
-      if (pending.size > 0 && !settling)
-        settling = setTimeout(() => void claim(), WATCHER_SETTLE_MS)
-    }, boardError)
+      onChange()
+    }, onError)
+}
+
+function watch(agentId: string): void {
+  const db = getDb()
+  const onError = (err: Error): void =>
+    void fail(agentId, `${PREFIX} board error: ${err.message}`, 'firestore', errorStatus(err))
+  const pending = new Map<string, Comment>()
+  let settling: NodeJS.Timeout | null = null
+
+  // Once replies are pending, wait for the rest of a burst, then claim them all.
+  const arm = () => {
+    if (pending.size > 0 && !settling) settling = setTimeout(() => void claim(), WATCHER_SETTLE_MS)
+  }
+  const claim = async () => {
+    const ids = [...pending.values()].sort((a, b) => a.createdAt - b.createdAt).map((c) => c.id)
+    pending.clear()
+    try {
+      const claimed = ids.length > 0 ? await claimReplies(db, ids) : []
+      log(`claimed ${claimed.length} of ${ids.length} replies`)
+      if (claimed.length > 0) return finish(claimed.map(replyLine), EXIT_OK)
+    } catch (err) {
+      return onError(err as Error)
+    }
+    // Every reply went to another watcher: back to waiting.
+    settling = null
+    arm()
+  }
+
+  watchSession(db, agentId, onError)
+  watchReplies(db, agentId, pending, arm, onError)
 }
 
 const agentId = parseAgentId(process.argv.slice(2))
