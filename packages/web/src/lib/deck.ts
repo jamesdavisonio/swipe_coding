@@ -27,14 +27,16 @@ export type CardKind =
   | 'todos'
   | 'summary'
   | 'next'
+// Most important first (James, 2026-11-07): decisions, then merges, then hand work, then finished
+// work, then every suggestion.
 export const KIND_ORDER: readonly CardKind[] = [
   'ci_failed',
-  'merge',
   'spec',
   'fix',
   'round',
   'summary_gate',
   'question',
+  'merge',
   'after_deploy',
   'todos',
   'summary',
@@ -388,16 +390,9 @@ function todoCards(input: DeckInput, base: (projectId: string) => CardBase): Dec
 const byKindThenAge = (a: DeckCard, b: DeckCard) =>
   KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind) || a.at - b.at
 
-// Kinds in KIND_ORDER, the oldest first inside a kind, each summary directly followed by its
-// task's next cards; next cards of a task with no summary card come last, oldest first.
+// Kinds in KIND_ORDER, the oldest first inside a kind; every next card comes last.
 function ordered(cards: readonly DeckCard[]): DeckCard[] {
-  const next = cards.filter((c) => c.kind === 'next')
-  const rest = cards.filter((c) => c.kind !== 'next').sort(byKindThenAge)
-  const summarised = new Set(rest.filter((c) => c.kind === 'summary').map((c) => c.taskId))
-  const result = rest.flatMap((c) =>
-    c.kind === 'summary' ? [c, ...next.filter((n) => n.taskId === c.taskId)] : [c]
-  )
-  return [...result, ...next.filter((n) => !summarised.has(n.taskId)).sort(byKindThenAge)]
+  return [...cards].sort(byKindThenAge)
 }
 
 // Cards passed on this phone go after all the others, in the order they were passed, marked.

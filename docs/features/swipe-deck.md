@@ -77,9 +77,11 @@ decision. A speaker button reads the card aloud. Threads stays available at `/th
     one recommended. A brief whose closing line is `Reply "<phrase>", or tell me what to
 change.` offers that phrase as the single action. A question with neither has no right-swipe
     action (the microphone is its answer).
-46. Order: `ci_failed`, `merge`, `spec`, `fix`, `round`, `summary_gate`, `question`,
-    `after_deploy`, `todos`, `summary`, `next`; inside a kind, the oldest first. A summary's
-    `next` cards follow it. Cards James passed on this phone go after every card he has not
+46. Order (changed 2026-11-07, James: most important first, suggestions always last):
+    decisions `ci_failed`, `spec`, `fix`, `round`, `summary_gate`, `question`; then `merge`;
+    then hand work `after_deploy`, `todos`; then finished work `summary`; then every `next`
+    card. Inside a kind, the oldest first; `next` cards no longer follow their own summary but
+    all come after every summary. Cards James passed on this phone go after every card he has not
     passed, in the order he passed them, and are marked passed. Choosing a project puts all its
     cards first, keeping their order, then the rest in their order.
 47. A spec card is marked revised when the task's spec version is above 1. The overview counts
@@ -163,6 +165,12 @@ change.` offers that phrase as the single action. A question with neither has no
     the card. The left stamp on a next card reads "Skip".
 63. The session instructions tell sessions to write each Suggested next line as
     `<what to do> — <why it matters and what it would change>`.
+
+### D7 — Deploys reach the phone at once (tweak deck-order, confirmed 2026-11-07)
+
+64. Every Hosting response outside `/assets/` (the page itself and every app route, which all
+    serve `index.html`) carries `Cache-Control: no-cache`, so a deploy reaches the phone on the
+    next load. Files under `/assets/` keep `public, max-age=31536000, immutable`.
 
 ### D5 — Keeping Threads
 

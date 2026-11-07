@@ -1,5 +1,5 @@
-// swipe-deck 46: deck order by kind, oldest first inside a kind; a summary's next cards follow it;
-// passed cards go last in the order passed and are marked passed; a chosen project goes first.
+// swipe-deck 46: deck order by kind, oldest first inside a kind; every next card comes last, after
+// every summary; passed cards go last in the order passed and are marked passed; a chosen project goes first.
 import { describe, expect, it } from 'vitest'
 import { KIND_ORDER, buildDeck, projectFirst } from '../packages/web/src/lib/deck.ts'
 import { HOUR, MINUTE, NOW, PROJECTS, makeTask, makeTodo } from './fixtures/web-threads-b2.tsx'
@@ -68,19 +68,19 @@ const ids = (cards: { id: string }[]) => cards.map((c) => c.id)
 
 const BASE = [
   'ci_failed:ci',
-  'merge:mg',
   'spec:sp-old',
   'spec:sp-new',
   'fix:fx',
   'round:rd',
   'summary_gate:sg',
   'question:q',
+  'merge:mg',
   'after_deploy:ad',
   'todos:p-kanban',
   'summary:dm',
+  'summary:dn',
   'next:dm:0',
   'next:dm:1',
-  'summary:dn',
   'next:dn:0',
   'next:dn:1',
 ]
@@ -89,12 +89,12 @@ describe('swipe-deck 46: order', () => {
   it('exports the kind order', () => {
     expect(KIND_ORDER).toEqual([
       'ci_failed',
-      'merge',
       'spec',
       'fix',
       'round',
       'summary_gate',
       'question',
+      'merge',
       'after_deploy',
       'todos',
       'summary',
@@ -102,7 +102,7 @@ describe('swipe-deck 46: order', () => {
     ])
   })
 
-  it('orders by kind, oldest first inside a kind, each summary directly followed by its next cards', () => {
+  it('orders by kind, oldest first inside a kind, every next card after every summary', () => {
     expect(ids(build())).toEqual(BASE)
   })
 
@@ -131,11 +131,11 @@ describe('swipe-deck 46: projectFirst', () => {
       'next:dn:0',
       'next:dn:1',
       'ci_failed:ci',
-      'merge:mg',
       'spec:sp-new',
       'fix:fx',
       'round:rd',
       'summary_gate:sg',
+      'merge:mg',
       'after_deploy:ad',
       'todos:p-kanban',
       'summary:dm',
