@@ -17,7 +17,6 @@ import { activeNeed } from '../../lib/threads.ts'
 import { track } from '../../lib/use-thread-actions.ts'
 import type { Ghost } from './CardStage.tsx'
 import { buzz, HAPTIC } from './motion.ts'
-import { canPass } from './stamps.ts'
 import type { DeckModel } from './use-deck.ts'
 import type { Drag } from './use-swipe.ts'
 
@@ -116,13 +115,18 @@ function agree(ctx: Ctx, card: DeckCard, from: Drag | null) {
   if (write) commit(ctx, card, write, { to: 'right', from })
 }
 
-// Left: the card goes behind the others (a summary cannot be put off); a suggested-next card asks
-// first whether to skip it for now or for good.
+// Left: the card goes behind the others; a done card is dismissed (marked read, as a right drag
+// does); a suggested-next card asks first whether to skip it for now or for good.
 function later(ctx: Ctx, card: DeckCard, from: Drag | null) {
-  if (!canPass(card))
-    return refuse(ctx.ui, "Nothing to dismiss here. Drag right once you've read it.")
+  if (card.kind === 'summary') return dismiss(ctx, card, from)
   if (card.kind === 'next') return ctx.ui.openSheet('skip', card)
   pass(ctx, card, from, `Later. ${card.session} keeps waiting.`)
+}
+
+// A done card dragged left: the same write as agreeing to it, flying out to the left.
+function dismiss(ctx: Ctx, card: DeckCard, from: Drag | null) {
+  const write = writeOf(card, ctx.deck.taskOf(card.taskId), ctx.deck.todos)
+  if (write) commit(ctx, card, write, { to: 'left', from })
 }
 
 // The card flies left and is passed on this phone: it comes back after the others.

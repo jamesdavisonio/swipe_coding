@@ -99,7 +99,7 @@ change.` offers that phrase as the single action. A question with neither has no
     after_deploy ticks every remaining step; todos mark every open to-do of that project done;
     summary marks the task read; next queues a new task in that project titled with the suggestion's "what" part (61).
     While dragging, the stamp shows the action's name. Dragging left, or the left
-    arrow, passes the card. A summary card cannot be passed: it springs back. A `next` card
+    arrow, passes the card. A summary card dragged left (or the left arrow, or Later) is dismissed: it does exactly what dragging it right does (marks the task read and leaves), with the left stamp "Dismiss" (changed 2026-11-07, tweak dismiss-done). A `next` card
     dragged left opens the skip sheet of criterion 62 instead (changed 2026-11-07, fix
     next-card-context).
 50. A card with choices opens a sheet of them, recommended first; tapping one answers with it,
