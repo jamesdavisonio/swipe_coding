@@ -1,0 +1,40 @@
+ ✓ tests/swipe-deck-55.test.tsx (3 tests) 518ms
+   ✓ swipe-deck 55 listen > reads where it came from, the headline, the example and the parts  309ms
+ ✓ tests/web-threads-b2-29.test.tsx (7 tests) 462ms
+ ✓ tests/web-threads-b1-2.test.ts (8 tests) 6ms
+ ✓ tests/swipe-deck-52.test.tsx (3 tests) 146ms
+ ✓ tests/board-briefs-b7-35.test.tsx (3 tests) 389ms
+2026-11-07T08:23:22.167Z [46072] firestore mode=offline the test runner never uses the live board; run through npm run test:rules (emulator)
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+ ✓ tests/web-threads-b1-1.test.ts (6 tests) 6ms
+ ✓ tests/fix-comments-index.test.ts (6 tests) 5ms
+ ✓ tests/web-threads-b1-4.test.ts (3 tests) 7ms
+ ✓ tests/swipe-deck-42.test.ts (8 tests) 16ms
+ ✓ tests/swipe-deck-48.test.tsx (7 tests) 625ms
+ ✓ tests/swipe-deck-46.test.ts (6 tests) 16ms
+ ✓ tests/swipe-deck-59.test.ts (10 tests) 5ms
+ ✓ tests/web-threads-b1-3.test.ts (6 tests) 5ms
+ ✓ tests/swipe-deck-45.test.ts (8 tests) 11ms
+ ✓ tests/swipe-deck-43.test.ts (7 tests) 16ms
+ ✓ tests/swipe-deck-56.test.ts (2 tests) 4ms
+ ✓ tests/sample.test.ts (1 test) 3ms
+ ✓ tests/fix-last-stage-done.test.ts (1 test) 3ms
+ ✓ tests/swipe-deck-44.test.ts (5 tests) 7ms
+2026-11-07T08:23:23.428Z [432] firestore mode=offline the test runner never uses the live board; run through npm run test:rules (emulator)
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+2026-11-07T08:23:24.016Z [35520] firestore mode=emulator 127.0.0.1:1 project=demo-kanban
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+2026-11-07T08:23:24.607Z [22896] firestore mode=service_account project=not-a-real-project via C:\Users\Intel\AppData\Local\Temp\tests-never-live-A4IEE4\sa.json
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+ ✓ tests/fix-tests-never-live.test.ts (6 tests) 6488ms
+   ✓ the board connection never uses a key under the test runner > a key named by KANBAN_SA is refused, unread, and the board stays offline  1889ms
+   ✓ the board connection never uses a key under the test runner > a key at a default location (%APPDATA%\kanban\sa.json) is refused, unread  2172ms
+   ✓ the board connection never uses a key under the test runner > VITEST alone, as in the runner main process, is enough  1244ms
+   ✓ the board connection never uses a key under the test runner > the emulator still works under the test runner  584ms
+   ✓ the board connection never uses a key under the test runner > outside the test runner the same key is used as before (sessions unaffected)  597ms
+
+ Test Files  71 passed (71)
+      Tests  706 passed (706)
+   Start at  09:22:59
+   Duration  25.35s (transform 4.32s, setup 0ms, collect 89.92s, tests 112.31s, environment 101.90s, prepare 16.57s)
+

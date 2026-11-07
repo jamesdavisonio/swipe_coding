@@ -1,0 +1,20 @@
+ok - no channel event carries the answer
+ok - subtask spec done → stage approved
+ok - subtask approved done → stage build
+  [agent] 2026-11-07T08:11:47.977Z [31908] asked on MHAfEr63ajYorCAAWTUP: Which option?
+  [agent] 2026-11-07T08:11:48.006Z [31908] updated task MHAfEr63ajYorCAAWTUP: updatedAt,needs
+ok - update_task in_progress after ask → needs null
+  [agent] 2026-11-07T08:11:48.086Z [31908] todo for james: Merge the PR
+ok - todo_for_james created
+  [agent] 2026-11-07T08:11:48.118Z [31908] updated task MHAfEr63ajYorCAAWTUP: updatedAt,summary,pr,stage,needs,doneAt,agentId,working,unread
+ok - update_task done moves stage to done
+ok - stored task is done, unbound, doneAt stamped, pr recorded
+cleaned up test data
+
+all good
++  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
