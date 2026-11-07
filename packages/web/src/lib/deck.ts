@@ -426,3 +426,9 @@ export function deckOverview(cards: readonly DeckCard[]): DeckOverview {
   })
   return { total: cards.length, byKind: kindsOf(cards), byProject }
 }
+
+// Red-checkpoint stub (fix next-card-context).
+export const SUGGESTION_SEPARATOR = ' — '
+export function splitSuggestion(line: string): { what: string; why: string | null } {
+  return { what: line, why: null }
+}
