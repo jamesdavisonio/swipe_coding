@@ -191,6 +191,20 @@ change.` offers that phrase as the single action. A question with neither has no
     session can do — live checks, sign-ins and anything else James does by hand go to
     `kanban_todo_for_james` (or the project's owner to-do list), never under Suggested next.
 
+### D9 — Chat questions reach the board (spec confirmed 2026-11-07, after the Workshop session asked only in its chat)
+
+69. The session instructions say: whenever you end a turn waiting for James's answer or
+    decision, also post that question on the board with `kanban_ask`, giving the choices as
+    `options` with the recommended one first; if you have no board task yet, create one first
+    (`kanban_create_task`); and when James answers in the chat instead, record it with
+    `kanban_answered_in_session`.
+70. `kanban_ask` accepts an optional `options: string[]` (2 to 6 labels, each 1 to 200
+    characters after trimming). The task's need becomes
+    `{ kind: 'question', question, options: [{ key: 'a', label }, { key: 'b', label }, ...] }`
+    in the given order, so the deck offers them as choices with the first recommended. Without
+    `options` the need is exactly as before. A wrong count or an empty or too-long label is
+    refused with a message and nothing is written. The tool still counts as one of the 11.
+
 ### D5 — Keeping Threads
 
 60. The commit before this work is tagged `threads-v1`, and no Threads screen or data function
