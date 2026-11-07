@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 // swipe-deck 49: dragging right past the threshold or ArrowRight does the card's action; the
-// stamp names it; dragging left or ArrowLeft passes; a summary springs back; a next card opens the skip sheet.
+// stamp names it; dragging left or ArrowLeft passes; a summary is dismissed (markRead, stamp "Dismiss");
+// a next card opens the skip sheet.
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import Deck from '../packages/web/src/pages/Deck.tsx'
 import {
   HOUR,
@@ -189,18 +190,39 @@ describe('swipe-deck 49 left passes', () => {
     expect(shown()).toContain('Newer spec')
   })
 
-  it('a summary cannot be passed: it springs back and stays on top, not passed', () => {
+  it('while dragging left a summary stamps Dismiss', () => {
     setBoard({ tasks: [summaryTask(), nextTask()] })
-    const view = renderAt('/', <Deck />)
-    swipe(card(), -300, 0, true)
-    expect(screen.getByTestId('deck-stamp-later').textContent).toContain('Nothing to dismiss')
-    swipe(card(), -300, 0)
-    press('ArrowLeft')
-    expect(shown()).toContain('Done: Order the replies')
-    expect(actions.markRead).not.toHaveBeenCalled()
-    view.unmount()
     renderAt('/', <Deck />)
     expect(shown()).toContain('Done: Order the replies')
+    swipe(card(), -300, 0, true)
+    expect(screen.getByTestId('deck-stamp-later').textContent).toContain('Dismiss')
+    expect(screen.getByTestId('deck-stamp-later').textContent).not.toContain('Nothing to dismiss')
+  })
+
+  it.each([
+    ['a left drag', () => swipe(card(), -300)],
+    ['ArrowLeft', () => press('ArrowLeft')],
+    ['Later', () => fireEvent.click(screen.getByRole('button', { name: 'Later' }))],
+  ])(
+    '%s on a summary dismisses it like a right drag: markRead once, nothing else',
+    async (_n, go) => {
+      setBoard({ tasks: [summaryTask(), nextTask()] })
+      renderAt('/', <Deck />)
+      expect(shown()).toContain('Done: Order the replies')
+      go()
+      await vi.waitFor(() => expect(actions.markRead).toHaveBeenCalledTimes(1))
+      expect(actions.markRead).toHaveBeenCalledWith(id('sum1'))
+      expect(actions.queueSuggestion).not.toHaveBeenCalled()
+      expect(actions.approveSpec).not.toHaveBeenCalled()
+    }
+  )
+
+  it('a right drag on a summary marks it read once, the same call as a left drag', async () => {
+    setBoard({ tasks: [summaryTask(), nextTask()] })
+    renderAt('/', <Deck />)
+    swipe(card(), 300)
+    await vi.waitFor(() => expect(actions.markRead).toHaveBeenCalledTimes(1))
+    expect(actions.markRead).toHaveBeenCalledWith(id('sum1'))
   })
 
   it('a next card dragged left says Skip', () => {
