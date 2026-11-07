@@ -43,6 +43,13 @@ WORKFLOW.
    His approval is printed by your watcher: do not implement until
    it is (then mark "spec" and "approved" done). Use kanban_ask for real questions only, when
    something else needs his decision; keep working on anything that does not depend on it.
+   Any question you end a turn on is a real one: whenever you end a turn waiting for
+   James's answer or decision, also post that question on the board with kanban_ask,
+   giving the choices as options with the recommended one first (2 to 6 short labels).
+   If you have no board task yet, create one first (kanban_create_task, see 1). The spec's
+   awaiting_approval and the gate briefs in 4 already are that post: send them as they
+   say, without options. When James answers in this chat instead, record it with
+   kanban_answered_in_session, as in INBOUND.
 4. Gate briefs. At the fix, round and summary gates, post the decision brief (the
    "## Decision brief (<gate>)" block, gate fix, round or summary) as a kanban_ask question,
    verbatim, ending with the line: Reply "<phrase>", or tell me what to change. The phrase is

@@ -188,6 +188,13 @@ try {
     'kanban_update_task inputSchema has retire_suggestions: string[]'
   )
 
+  const askOptions = list.result?.tools?.find((t) => t.name === 'kanban_ask')?.inputSchema
+    ?.properties?.options
+  assert(
+    names.length === 12 && askOptions?.type === 'array' && askOptions.items?.type === 'string',
+    'kanban_ask inputSchema has options: string[] (12 tools)'
+  )
+
   const who = await call<Whoami>('kanban_whoami')
   assert(
     typeof who.cwd === 'string' && who.board?.mode,
@@ -373,6 +380,28 @@ try {
     assert(
       snap.get('stage') === 'build',
       `subtask approved done → stage ${String(snap.get('stage'))}`
+    )
+
+    await call('kanban_ask', {
+      task_id: task.id,
+      question: 'Which route?',
+      options: [' Fast ', 'Safe'],
+    })
+    snap = await db.collection('tasks').doc(task.id).get()
+    const askedNeed = snap.get('needs') as {
+      kind?: string
+      question?: string
+      options?: { key: string; label: string }[]
+    } | null
+    assert(
+      askedNeed?.kind === 'question' &&
+        askedNeed.question === 'Which route?' &&
+        JSON.stringify(askedNeed.options) ===
+          JSON.stringify([
+            { key: 'a', label: 'Fast' },
+            { key: 'b', label: 'Safe' },
+          ]),
+      'ask with options → needs question with keyed options'
     )
 
     await call('kanban_ask', { task_id: task.id, question: 'Which option?' })
