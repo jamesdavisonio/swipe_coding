@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 // swipe-deck 48: the board opens on the deck's first card; Threads moved to /threads; the other
-// routes still work; the overview links to Threads.
+// routes still work; the overview has no way to Threads (James, 2026-11-07: deeper detail is the
+// card's own "Open in Claude" link).
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import App from '../packages/web/src/App.tsx'
@@ -79,11 +80,12 @@ describe('swipe-deck 48 the deck is home', () => {
     expect(screen.queryByTestId('deck-card')).toBeNull()
   })
 
-  it('the overview links to Threads', () => {
+  it('the overview has no link to Threads', () => {
     setBoard({ tasks: [specTask()] })
     renderAt('/', <Deck />)
     press('ArrowDown')
-    expect(screen.getByRole('link', { name: 'Open threads' }).getAttribute('href')).toBe('/threads')
+    expect(screen.getByRole('dialog')).toBeTruthy()
+    expect(screen.queryByRole('link', { name: 'Open threads' })).toBeNull()
     fireEvent.keyDown(document.body, { key: 'Escape' })
   })
 })

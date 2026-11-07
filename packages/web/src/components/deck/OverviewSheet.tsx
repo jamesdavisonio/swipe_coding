@@ -1,10 +1,7 @@
 // Swipe down: what is waiting, from the top. The count, a chip per kind, a row per project
-// (tapping one puts all its cards first), who is working now, and the way to Threads.
-import { Link } from 'react-router-dom'
+// (tapping one puts all its cards first) and who is working now.
 import { cn } from '../../lib/cn.ts'
 import { deckOverview, KIND_LABEL, type DeckCard } from '../../lib/deck.ts'
-import { MessageSquare } from '../../lib/icons.ts'
-import { Button } from '../ui/button.tsx'
 import DeckSheet from './DeckSheet.tsx'
 import { kindToneClass } from './tones.ts'
 import type { WorkingSession } from './working.ts'
@@ -66,12 +63,6 @@ export default function OverviewSheet({
           {`Working now: ${working.map((w) => `${w.title} (${w.projectName})`).join(', ')}.`}
         </p>
       ) : null}
-      <Button asChild variant="outline" block className="mt-4">
-        <Link to="/threads">
-          <MessageSquare aria-hidden="true" />
-          Open threads
-        </Link>
-      </Button>
     </DeckSheet>
   )
 }
