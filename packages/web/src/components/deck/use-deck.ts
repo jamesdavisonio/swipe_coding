@@ -1,7 +1,7 @@
 // Everything the deck shows, from the board's live data and what this phone remembers: the cards
 // in order (minus the ones just acted on and the ones waiting for a revised card), the sessions
 // working now, and the lookups the sheets need. The order itself is lib/deck.ts's.
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Task } from '@kanban/shared'
 import { useAgents, useAllTasks, useOpenTodos, useProjects } from '../../data.ts'
 import { buildDeck, projectFirst } from '../../lib/deck.ts'
@@ -51,6 +51,14 @@ export function useDeck() {
       }),
     [tasks.data, todos.data, projects.data, specBodies, memory.handledNext, memory.passed, now]
   )
+
+  // Passes of cards that have left the deck are forgotten, but only from a loaded board: the empty
+  // list before the first snapshot (or after a failed read) would wipe every pass.
+  const loaded = [tasks, todos, projects].every((s) => !s.loading && s.error === null)
+  const { forgetPassedExcept } = memory
+  useEffect(() => {
+    if (loaded) forgetPassedExcept(new Set(built.map((c) => c.id)))
+  }, [loaded, built, forgetPassedExcept])
 
   const { gone, hide, unhide } = useGone(built)
   const held = new Set(waiting.waiting.map((w) => w.taskId))

@@ -31,11 +31,43 @@ export function listenScript(card: DeckCard): string {
     .join(' ')
 }
 
+// The slice of the Web Speech recognition API the deck uses. TypeScript's DOM library does not
+// ship it, so it is declared here once, on Window, as optional (most browsers lack one or both).
+export interface RecognitionTranscript {
+  transcript: string
+}
+export type RecognitionResult = ArrayLike<RecognitionTranscript> & { isFinal: boolean }
+export interface RecognitionEvent {
+  results: ArrayLike<RecognitionResult>
+}
+export interface Recognizer {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start: () => void
+  stop: () => void
+  abort: () => void
+  onresult: ((e: RecognitionEvent) => void) | null
+  onend: (() => void) | null
+  onerror: ((e: { error?: string }) => void) | null
+}
+export type RecognizerClass = new () => Recognizer
+
+declare global {
+  interface Window {
+    SpeechRecognition?: RecognizerClass
+    webkitSpeechRecognition?: RecognizerClass
+  }
+}
+
+// The browser's recognizer, standard or webkit-prefixed; null without one.
+export const recognizerClass = (): RecognizerClass | null =>
+  window.SpeechRecognition ?? window.webkitSpeechRecognition ?? null
+
 // Speech recognition (standard or webkit-prefixed) and speech synthesis, as this browser has them.
 export function speechSupport(): { recognition: boolean; synthesis: boolean } {
-  const w = window as unknown as Record<string, unknown>
   return {
-    recognition: Boolean(w.SpeechRecognition ?? w.webkitSpeechRecognition),
-    synthesis: Boolean(w.speechSynthesis) && typeof w.SpeechSynthesisUtterance === 'function',
+    recognition: recognizerClass() !== null,
+    synthesis: 'speechSynthesis' in window && typeof SpeechSynthesisUtterance === 'function',
   }
 }

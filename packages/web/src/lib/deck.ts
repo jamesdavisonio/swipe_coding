@@ -2,7 +2,7 @@
 // Pure data in, plain cards out: no React, no Firestore. Brief text comes from sessions, so every
 // brief goes through lib/brief.ts, which reads anything unexpected as "no brief".
 import type { Project, Task, TaskNeed, Todo } from '@kanban/shared'
-import { parseBrief, suggestedNext, type Brief } from './brief.ts'
+import { LIST_MARKER, parseBrief, suggestedNext, type Brief } from './brief.ts'
 import {
   activeNeed,
   isListed,
@@ -100,6 +100,9 @@ export interface DeckInput {
 
 const ELLIPSIS = '…'
 const EXAMPLE_LEAD = 'For example,'
+// Where a part's prose breaks into sentences: after . ! or ?, and before a list item (a part's
+// lines are joined with spaces, so "- …" or "1. …" items run on in one line).
+const SENTENCE_BREAK = /(?<=[.!?])\s+|\s+(?=(?:[-*]|\d+\.)\s)/
 // A fix brief at one of these stages proposes a fix for a failed CI run.
 const CI_STAGES: readonly string[] = ['pr', 'merged', 'main_ci']
 
@@ -113,12 +116,13 @@ const capitalised = (text: string) => text.charAt(0).toUpperCase() + text.slice(
 const fitHeadline = (text: string): string =>
   text.length > HEADLINE_MAX ? `${text.slice(0, HEADLINE_MAX - 1)}${ELLIPSIS}` : text
 
-// The "For example," sentence of the brief's "What will change" part, without the lead-in and
-// starting with a capital letter; null when the part has none.
+// The "For example," sentence of the brief's "What will change" part (a list item's too, its
+// marker dropped), without the lead-in and starting with a capital letter; null when none.
 export function exampleOf(brief: Brief | null): string | null {
   if (!brief) return null
   const sentence = brief.parts.changes
-    .split(/(?<=[.!?])\s+/)
+    .split(SENTENCE_BREAK)
+    .map((s) => s.replace(LIST_MARKER, ''))
     .find((s) => s.startsWith(EXAMPLE_LEAD))
   const example = sentence?.slice(EXAMPLE_LEAD.length).trim()
   return example ? capitalised(example) : null

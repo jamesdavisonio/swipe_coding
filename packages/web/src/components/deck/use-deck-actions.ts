@@ -1,7 +1,7 @@
 // What each move does to the top card. Every write goes through `track` (as Threads' taps do),
 // so a failed one is logged under the tap's request id; the card leaves at once and comes back
 // if the write fails.
-import type { Task, Todo } from '@kanban/shared'
+import type { NeedKind, Task, Todo } from '@kanban/shared'
 import {
   answerQuestion,
   approveSpec,
@@ -13,6 +13,7 @@ import {
   tickRemainingSteps,
 } from '../../data.ts'
 import { stampText, type DeckCard, type DeckChoice } from '../../lib/deck.ts'
+import { activeNeed } from '../../lib/threads.ts'
 import { track } from '../../lib/use-thread-actions.ts'
 import type { Ghost } from './CardStage.tsx'
 import { buzz, HAPTIC } from './motion.ts'
@@ -38,6 +39,8 @@ interface Ctx {
 }
 
 const FAILED = "Couldn't send that. The card is back."
+// The needs a note answers, so its own write leaves the task waiting on nothing (data.ts sendNote).
+const NOTE_CLEARS_NEED: readonly NeedKind[] = ['spec', 'question', 'pr']
 
 // The write a card's right swipe makes; null for the moves that open a sheet first.
 function writeOf(card: DeckCard, task: Task | null, todos: readonly Todo[]): Write | null {
@@ -158,9 +161,15 @@ function note(ctx: Ctx, card: DeckCard, text: string) {
   if (!task) return
   buzz(HAPTIC.commit)
   ui.fly(card, 'up', null)
-  deck.waiting.add(task.id, card.session)
+  // A note that clears the need can be told from the session's revision right away; one that
+  // leaves it (a comment) only once its own write is through (see use-waiting.ts).
+  const clears = NOTE_CLEARS_NEED.some((kind) => kind === activeNeed(task)?.kind)
+  deck.waiting.add(task.id, card.session, clears ? task.updatedAt : null)
   void track('voice_note', task.id, () => sendNote(task, text)).then((ok) => {
-    if (ok) return
+    if (ok) {
+      if (!clears) deck.waiting.settle(task.id)
+      return
+    }
     deck.waiting.remove(task.id)
     ui.toast(FAILED)
   })

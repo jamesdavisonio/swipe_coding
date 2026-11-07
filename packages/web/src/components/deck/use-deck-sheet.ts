@@ -18,9 +18,15 @@ export function useDeckSheet(cards: readonly DeckCard[]) {
   const stale =
     sheet !== null && ((sheet.cardId !== null && !card) || (sheet.kind === 'listen' && !speaking))
 
+  // Closing by itself stops what the sheet was doing too: the reading, the microphone.
+  const { stop: stopReading } = listen
+  const { reset: resetVoice } = voice
   useEffect(() => {
-    if (stale) setSheet(null)
-  }, [stale])
+    if (!stale) return
+    stopReading()
+    resetVoice()
+    setSheet(null)
+  }, [stale, stopReading, resetVoice])
 
   const open = (kind: SheetKind, of: DeckCard | null) => {
     if (kind !== 'listen') listen.stop()

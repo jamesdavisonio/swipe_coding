@@ -4,7 +4,7 @@ import type { WorkingSession } from './working.ts'
 export default function EmptyDeck({ working }: { working: readonly WorkingSession[] }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-center gap-3.5 px-1 py-2">
-      <h1 className="text-3xl leading-tight font-extrabold tracking-tight">Nothing needs you.</h1>
+      <h2 className="text-3xl leading-tight font-extrabold tracking-tight">Nothing needs you.</h2>
       {working.length > 0 ? (
         <>
           <p className="text-muted-foreground">

@@ -43,7 +43,7 @@ const RULE = /^---+\s*$/
 const REPLY_LINE = /^\s*Reply ["“]([^"”]+)["”], or tell me what to change\.\s*$/
 const YES_LINE = /^Yes:\s*(\S.*?)\s*$/
 const SUGGESTED_HEADING = /^###\s+Suggested next\s*$/i
-const LIST_MARKER = /^(?:[-*]\s+|\d+\.\s+)/
+export const LIST_MARKER = /^(?:[-*]\s+|\d+\.\s+)/
 
 const linesOf = (text: string): string[] => text.split(/\r?\n/)
 

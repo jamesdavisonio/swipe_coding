@@ -42,6 +42,7 @@ export default function HoldButton({
       }}
       onPointerUp={stop}
       onPointerCancel={stop}
+      onBlur={stop}
       onContextMenu={(e) => e.preventDefault()}
       onKeyDown={(e) => {
         if (!HOLD_KEYS.includes(e.key) || e.repeat) return

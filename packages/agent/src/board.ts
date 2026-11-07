@@ -204,19 +204,31 @@ export class Board {
     return this.db.collection(C.agents).doc(this.id.agentId)
   }
 
-  // The link's new value when it differs from the one on the agent document, else undefined.
-  private remoteUrlChange(): { remoteUrl: string | null } | undefined {
+  // Claims a change of the link: its new value when it differs from the one written (or being
+  // written), else undefined. The value is recorded before the write, so an overlapping call or
+  // heartbeat sees no change and writes nothing; release() hands it back after a failed write,
+  // so the next call or heartbeat tries again.
+  private claimRemoteUrl(): { remoteUrl: string | null; release: () => void } | undefined {
     const remoteUrl = currentRemoteUrl()
-    return remoteUrl === this.remoteUrl ? undefined : { remoteUrl }
+    const previous = this.remoteUrl
+    if (remoteUrl === previous) return undefined
+    this.remoteUrl = remoteUrl
+    const release = () => {
+      if (this.remoteUrl === remoteUrl) this.remoteUrl = previous
+    }
+    return { remoteUrl, release }
   }
 
   // One heartbeat: lastSeen, plus remoteUrl in the same write when the link changed.
   private async beat(): Promise<void> {
-    const change = this.remoteUrlChange()
+    const claim = this.claimRemoteUrl()
     try {
-      await this.agentRef().update({ lastSeen: now(), ...change })
-      if (change) this.remoteUrl = change.remoteUrl
+      await this.agentRef().update({
+        lastSeen: now(),
+        ...(claim ? { remoteUrl: claim.remoteUrl } : {}),
+      })
     } catch (err) {
+      claim?.release()
       firestoreFailure('WARNING', 'heartbeat failed', err as Error)
     }
   }
@@ -225,12 +237,12 @@ export class Board {
   // null too, when Remote Control goes off). Called on every kanban tool call; a failed write is
   // logged and retried on the next call or heartbeat, never failing the tool call.
   async refreshRemoteUrl(): Promise<void> {
-    const change = this.remoteUrlChange()
-    if (!change) return
+    const claim = this.claimRemoteUrl()
+    if (!claim) return
     try {
-      await this.agentRef().update(change)
-      this.remoteUrl = change.remoteUrl
+      await this.agentRef().update({ remoteUrl: claim.remoteUrl })
     } catch (err) {
+      claim.release()
       firestoreFailure('WARNING', 'remoteUrl refresh failed', err as Error)
     }
   }

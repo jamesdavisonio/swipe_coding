@@ -2,37 +2,12 @@
 // as they come (interim results), stopped and restarted by James. A refused microphone falls back
 // to the text box, like a browser without recognition.
 import { useCallback, useEffect, useRef, useState } from 'react'
-
-// The slice of the Web Speech API the deck uses (TypeScript's DOM library does not ship it).
-interface Transcript {
-  transcript: string
-}
-type RecognitionResult = ArrayLike<Transcript> & { isFinal: boolean }
-interface RecognitionEvent {
-  results: ArrayLike<RecognitionResult>
-}
-interface Recognizer {
-  continuous: boolean
-  interimResults: boolean
-  lang: string
-  start: () => void
-  stop: () => void
-  abort: () => void
-  onresult: ((e: RecognitionEvent) => void) | null
-  onend: (() => void) | null
-  onerror: ((e: { error?: string }) => void) | null
-}
-type RecognizerClass = new () => Recognizer
+import { recognizerClass, type RecognitionEvent, type Recognizer } from '../../lib/speech.ts'
 
 // Notes go to sessions in English.
 const RECOGNITION_LANG = 'en-GB'
 // Errors that mean the microphone will not work here: type instead.
 const NO_MICROPHONE = ['not-allowed', 'service-not-allowed', 'audio-capture']
-
-function recognizerClass(): RecognizerClass | null {
-  const w = window as unknown as Record<string, RecognizerClass | undefined>
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null
-}
 
 // Everything heard in this run: the final words, then the words still being guessed.
 function heard(e: RecognitionEvent): string {
