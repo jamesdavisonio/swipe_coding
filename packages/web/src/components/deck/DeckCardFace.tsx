@@ -55,11 +55,11 @@ function Stamps({ card, progress, top }: { card: DeckCard; progress: number; top
   )
 }
 
-// What the card is about under its headline: the example, the choices, or the steps.
+// What the card is about under its headline: the choices or the steps. The example stays in the
+// details sheet (first thing there), so the card itself says only what yes does.
 function CardBody({ card }: { card: DeckCard }) {
   return (
     <>
-      {card.example ? <p className="text-lg leading-snug text-pretty">{card.example}</p> : null}
       {card.choices.length > 0 ? (
         <ul className="grid gap-2">
           {card.choices.map((choice) => (
