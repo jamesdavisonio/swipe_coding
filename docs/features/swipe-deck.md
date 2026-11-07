@@ -89,8 +89,9 @@ change.` offers that phrase as the single action. A question with neither has no
 
 48. Given the board opens at `/`, the deck shows the first card: type, time since it asked,
     session and project, headline. `/threads` shows the Threads home exactly as before, and
-    `/t/:taskId`, `/projects`, `/p/:projectId` and `/new` still work. The overview links to
-    Threads.
+    `/t/:taskId`, `/projects`, `/p/:projectId` and `/new` still work. The overview has no link
+    to Threads (changed 2026-11-07 at James's request: deeper detail is each card's "Open in
+    Claude" link; Threads is still reachable at `/threads`).
 49. Dragging a card right past the threshold, or pressing the right arrow, does its action:
     spec approves; fix, round, summary_gate and a phrase-only question answer with the phrase;
     after_deploy ticks every remaining step; todos mark every open to-do of that project done;
