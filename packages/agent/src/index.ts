@@ -151,7 +151,16 @@ const tools: Tool[] = [
       'Ask James a question on a task. The task shows as needing him; his answer is printed by your watcher (the background command from kanban_create_task / kanban_start_task).',
     inputSchema: {
       type: 'object',
-      properties: { task_id: { type: 'string' }, question: { type: 'string' } },
+      properties: {
+        task_id: { type: 'string' },
+        question: { type: 'string' },
+        options: {
+          type: 'array',
+          items: { type: 'string' },
+          description:
+            'The choices, the recommended one first: 2 to 6 labels, each 1 to 200 characters',
+        },
+      },
       required: ['task_id', 'question'],
     },
   },
@@ -310,7 +319,7 @@ interface ToolArgs {
   }
   kanban_subtask: { task_id: string; key: string; status: SubtaskStatus; note?: string }
   kanban_comment: { task_id: string; body: string }
-  kanban_ask: { task_id: string; question: string }
+  kanban_ask: { task_id: string; question: string; options?: string[] }
   kanban_answered_in_session: { task_id: string; answer: string }
   kanban_todo_for_james: { body: string; link?: string; task_id?: string }
 }
@@ -384,7 +393,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
       case 'kanban_ask': {
         const a = argsOf(args, name)
         return ok({
-          id: (await b.ask(a.task_id, a.question)).id,
+          id: (await b.ask(a.task_id, a.question, a.options)).id,
           note: 'James will see this on his phone; his answer is printed by your watcher.',
         })
       }

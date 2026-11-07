@@ -96,6 +96,14 @@ export interface Retirement {
 // The longest answer kanban_answered_in_session takes.
 const ANSWER_MAX_CHARS = 2000
 
+// kanban_ask's choices: 2 to 6 labels, each 1 to 200 characters once trimmed, keyed a, b, c, ...
+// in the order given (the deck recommends the first).
+const AskOptions = z
+  .array(z.string().trim().min(1).max(200))
+  .min(2)
+  .max(6)
+  .transform((labels) => labels.map((label, i) => ({ key: String.fromCharCode(97 + i), label })))
+
 export class BoardError extends Error {
   constructor(msg: string) {
     super(msg)
@@ -530,11 +538,16 @@ export class Board {
     return c
   }
 
-  // Red-checkpoint stub: options are accepted and not yet stored.
-  async ask(taskId: string, question: string, _options?: string[]): Promise<Comment> {
+  // Asks James on a task. Options are validated before anything is written; the deck offers them.
+  async ask(taskId: string, question: string, options?: string[]): Promise<Comment> {
+    const choices = options === undefined ? undefined : AskOptions.safeParse(options)
+    if (choices && !choices.success)
+      throw new BoardError('invalid options: 2 to 6 labels, each 1 to 200 characters')
     const task = await this.getTask(taskId)
     this.assertMine(task)
-    const needs: TaskNeed = { kind: 'question', question }
+    const needs: TaskNeed = choices
+      ? { kind: 'question', question, options: choices.data }
+      : { kind: 'question', question }
     const c = await this.writeAgentComment(task, question, 'question', { needs })
     log(`asked on ${taskId}: ${question.slice(0, 80)}`)
     return c
