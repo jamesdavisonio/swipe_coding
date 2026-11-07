@@ -530,7 +530,8 @@ export class Board {
     return c
   }
 
-  async ask(taskId: string, question: string): Promise<Comment> {
+  // Red-checkpoint stub: options are accepted and not yet stored.
+  async ask(taskId: string, question: string, _options?: string[]): Promise<Comment> {
     const task = await this.getTask(taskId)
     this.assertMine(task)
     const needs: TaskNeed = { kind: 'question', question }
