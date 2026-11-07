@@ -119,6 +119,7 @@ export interface AgentDoc {
   claudeSessionId: string | null // filled by the SessionStart hook when known
   startedAt: number
   lastSeen: number // heartbeat; online = now - lastSeen < AGENT_STALE_MS
+  remoteUrl?: string | null // the session's Claude-app link, when Remote Control is on
 }
 // One heartbeat write per agent every five minutes keeps a fleet of always-on agents well
 // inside Firestore's free daily write quota (30 s beats drained it on 2026-11-04). Stale is

@@ -37,6 +37,18 @@ const PAIRS = [
   { fg: '--me-foreground', bg: '--me', kind: 'normal', where: 'primary button / my message' },
   { fg: '--ring', bg: '--background', kind: 'ui', where: 'focus ring on page' },
   { fg: '--ring', bg: '--card', kind: 'ui', where: 'focus ring on card' },
+  // Swipe deck: every card tone carries its own text, the stamps sit on a card-coloured label,
+  // and the hold button's countdown (22px bold) sits on the important fill as it grows.
+  ...['decision', 'round', 'important', 'alert', 'todo', 'summary', 'next'].map((tone) => ({
+    fg: `--tone-${tone}-foreground`,
+    bg: `--tone-${tone}`,
+    kind: 'normal',
+    where: `deck ${tone} card text`,
+  })),
+  { fg: '--ok', bg: '--card', kind: 'normal', where: 'deck yes stamp' },
+  { fg: '--stamp-important', bg: '--card', kind: 'normal', where: 'deck yes stamp (important)' },
+  { fg: '--rec', bg: '--card', kind: 'normal', where: 'deck recording timer' },
+  { fg: '--foreground', bg: '--tone-important', kind: 'large', where: 'deck hold countdown' },
 ]
 
 const src = readFileSync(TOKENS, 'utf8')

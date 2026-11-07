@@ -27,6 +27,22 @@
   --color-ok-soft: hsl(var(--ok-soft));
   --color-me: hsl(var(--me));
   --color-me-foreground: hsl(var(--me-foreground));
+  --color-tone-decision: hsl(var(--tone-decision));
+  --color-tone-decision-foreground: hsl(var(--tone-decision-foreground));
+  --color-tone-round: hsl(var(--tone-round));
+  --color-tone-round-foreground: hsl(var(--tone-round-foreground));
+  --color-tone-important: hsl(var(--tone-important));
+  --color-tone-important-foreground: hsl(var(--tone-important-foreground));
+  --color-tone-alert: hsl(var(--tone-alert));
+  --color-tone-alert-foreground: hsl(var(--tone-alert-foreground));
+  --color-tone-todo: hsl(var(--tone-todo));
+  --color-tone-todo-foreground: hsl(var(--tone-todo-foreground));
+  --color-tone-summary: hsl(var(--tone-summary));
+  --color-tone-summary-foreground: hsl(var(--tone-summary-foreground));
+  --color-tone-next: hsl(var(--tone-next));
+  --color-tone-next-foreground: hsl(var(--tone-next-foreground));
+  --color-stamp-important: hsl(var(--stamp-important));
+  --color-rec: hsl(var(--rec));
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
@@ -38,13 +54,20 @@
   --text-lg: var(--text-lg);
   --text-xl: var(--text-xl);
   --text-2xl: var(--text-2xl);
+  --text-3xl: var(--text-3xl);
+  --text-deck-headline: var(--text-deck-headline);
+  --text-deck-stamp: var(--text-deck-stamp);
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
+  --radius-deck-card: var(--radius-deck-card);
+  --radius-deck-sheet: var(--radius-deck-sheet);
 
   --ease-out: var(--ease-out);
+  --ease-spring: var(--ease-spring);
+  --ease-in: var(--ease-in);
 }
 
 @layer base {
@@ -149,6 +172,99 @@
   }
   [data-slot='typing-dot']:nth-child(3) {
     animation-delay: calc(var(--motion-typing) / 3);
+  }
+}
+
+/* The swipe deck (components/deck). A new top card rises from where the card behind sat; an
+   acted-on card flies off from where the finger left it (CardStage sets the --fly-* variables);
+   the deck's sheets slide in from the bottom or the top and, when dragged shut, leave from where
+   the finger let go (--drag-y). Durations are tokens, so reduced motion makes them instant. */
+@keyframes deck-enter {
+  from {
+    transform: scale(0.94) translateY(1rem);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes deck-fly {
+  from {
+    transform: translate(var(--fly-from-x, 0), var(--fly-from-y, 0)) rotate(var(--fly-from-r, 0deg));
+  }
+  to {
+    transform: translate(var(--fly-to-x, 0), var(--fly-to-y, 0)) rotate(var(--fly-to-r, 0deg))
+      scale(var(--fly-to-s, 1));
+    opacity: var(--fly-to-o, 1);
+  }
+}
+@keyframes deck-sheet-from-top {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes deck-sheet-to-top {
+  from {
+    transform: translateY(var(--drag-y, 0));
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+@keyframes deck-sheet-to-bottom {
+  from {
+    transform: translateY(var(--drag-y, 0));
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes deck-wave {
+  50% {
+    height: 2.5rem;
+  }
+}
+[data-slot='deck-card'][data-enter='true'] {
+  animation: deck-enter var(--motion-med) var(--ease-out);
+}
+[data-slot='deck-ghost'] {
+  animation: deck-fly var(--motion-slow) var(--ease-in) forwards;
+}
+[data-slot='deck-sheet'][data-side='bottom'][data-state='open'] {
+  animation: sheet-up var(--motion-slow) var(--ease-out);
+}
+[data-slot='deck-sheet'][data-side='bottom'][data-state='closed'] {
+  animation: deck-sheet-to-bottom var(--motion-med) ease-in;
+}
+[data-slot='deck-sheet'][data-side='top'][data-state='open'] {
+  animation: deck-sheet-from-top var(--motion-slow) var(--ease-out);
+}
+[data-slot='deck-sheet'][data-side='top'][data-state='closed'] {
+  animation: deck-sheet-to-top var(--motion-med) ease-in;
+}
+[data-slot='deck-backdrop'][data-state='open'] {
+  animation: fade-in var(--motion-med) ease-out;
+}
+[data-slot='deck-backdrop'][data-state='closed'] {
+  animation: fade-out var(--motion-med) ease-in;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-slot='rec-bar'] {
+    animation: deck-wave var(--motion-wave) ease-in-out infinite;
+  }
+  [data-slot='rec-bar']:nth-child(2n) {
+    animation-delay: calc(var(--motion-wave) / 6);
+  }
+  [data-slot='rec-bar']:nth-child(3n) {
+    animation-delay: calc(var(--motion-wave) / 3);
+  }
+  [data-slot='rec-bar']:nth-child(5n) {
+    animation-delay: calc(var(--motion-wave) / 2);
+  }
+  [data-slot='waiting-dot'] {
+    animation: typing-blink var(--motion-typing) infinite;
   }
 }
 

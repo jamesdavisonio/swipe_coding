@@ -38,11 +38,33 @@
   /* --- colour: focus --- */
   --ring: 222 76% 50%;
 
+  /* --- colour: swipe-deck card tones (docs/features/swipe-deck-prototype.html). The whole card
+     is tinted by its kind; important (merge) is the strongest. Text on a tone is its
+     -foreground, never dimmed with opacity. --- */
+  --tone-decision: 217 71% 91%; /* #D6E3F8 spec, fix, question */
+  --tone-decision-foreground: 217 62% 15%; /* #0F2240 */
+  --tone-round: 259 64% 91%; /* #E3DAF7 another round, ship it */
+  --tone-round-foreground: 263 56% 16%; /* #23123F */
+  --tone-important: 31 88% 60%; /* #F39A3D merge */
+  --tone-important-foreground: 27 100% 8%; /* #2A1300 */
+  --tone-alert: 7 66% 87%; /* #F4CFCA CI failed */
+  --tone-alert-foreground: 5 69% 14%; /* #3D0F0B */
+  --tone-todo: 51 78% 83%; /* #F5EBB0 after deploy, to-dos */
+  --tone-todo-foreground: 49 100% 9%; /* #2D2500 */
+  --tone-summary: 60 7% 88%; /* #E3E3DF done */
+  --tone-summary-foreground: 60 7% 13%; /* #24241F */
+  --tone-next: 138 38% 88%; /* #D5ECDC suggested next */
+  --tone-next-foreground: 139 53% 11%; /* #0D2A16 */
+  --stamp-important: 3 71% 41%; /* #B3261E the yes stamp on an important card */
+  --rec: 8 72% 44%; /* #C2341F recording: the voice note's wave and timer */
+
   /* --- radius (prototype: pill 8, button 12, tile 14, chip 18, sheet 20) --- */
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 0.875rem;
   --radius-xl: 1.25rem;
+  --radius-deck-card: 1.75rem; /* 28: the swipe deck's full-screen card */
+  --radius-deck-sheet: 1.625rem; /* 26: the deck's top and bottom sheets */
 
   /* --- type --- */
   --font-sans: 'Manrope Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -54,6 +76,9 @@
   --text-lg: 1.0625rem; /* 17 */
   --text-xl: 1.25rem; /* 20 */
   --text-2xl: 1.625rem; /* 26 — screen titles */
+  --text-3xl: 2.5rem; /* 40 — the deck's "Nothing needs you." and the overview's total */
+  --text-deck-headline: clamp(1.6875rem, 7.6vw, 2.25rem); /* 27–36 — a deck card's headline */
+  --text-deck-stamp: 1.75rem; /* 28 — the stamp while a card is dragged */
 
   /* --- layout --- */
   --content-max: 35rem; /* 560px: phone-first column, centred on wider screens */
@@ -64,7 +89,10 @@
   --motion-med: 200ms;
   --motion-slow: 320ms;
   --motion-typing: 1200ms; /* one blink cycle of the typing dots */
+  --motion-wave: 900ms; /* one cycle of the voice note's recording wave */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.2, 0.9, 0.3, 1.2); /* a deck card springing back */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1); /* a deck card flying off */
 
   /* --- z-index --- */
   --z-base: 0;
@@ -101,6 +129,23 @@
   --me-foreground: 240 5% 7%;
 
   --ring: 223 100% 75%;
+
+  --tone-decision: 218 45% 19%; /* #1B2B47 */
+  --tone-decision-foreground: 218 75% 92%; /* #DCE7FA */
+  --tone-round: 255 34% 20%; /* #2B2245 */
+  --tone-round-foreground: 259 78% 93%; /* #E8DFFB */
+  --tone-important: 28 84% 44%; /* #D06A12 still the loudest card, with dark ink for AA */
+  --tone-important-foreground: 23 100% 5%; /* #1A0A00 */
+  --tone-alert: 6 43% 19%; /* #47201C */
+  --tone-alert-foreground: 7 71% 91%; /* #F8DAD6 */
+  --tone-todo: 49 47% 15%; /* #3A3315 */
+  --tone-todo-foreground: 51 78% 83%; /* #F5EBB0 */
+  --tone-summary: 225 5% 16%; /* #26272A */
+  --tone-summary-foreground: 60 7% 88%; /* #E3E3DF */
+  --tone-next: 139 40% 14%; /* #16331F */
+  --tone-next-foreground: 138 44% 88%; /* #D3EEDB */
+  --stamp-important: 7 100% 74%; /* #FF8A7A */
+  --rec: 6 100% 68%; /* #FF6B5A */
 }
 
 @media (prefers-reduced-motion: reduce) {

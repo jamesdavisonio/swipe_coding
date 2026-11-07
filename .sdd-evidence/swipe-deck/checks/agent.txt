@@ -1,0 +1,15 @@
+> @kanban/agent@0.0.1 test
+> node test/protocol.ts
+
+  [agent] 2026-11-07T08:09:02.568Z [43636] firestore mode=offline init failed: Unexpected token '/', "// Drives "... is not valid JSON
+  [agent] 2026-11-07T08:09:02.573Z [43636] mcp connected cwd=C:\Users\Intel\Documents\code\kanban-deck board=offline
+ok - initialize advertises claude/channel
+ok - initialize advertises tools
+ok - instructions explain the watcher
+ok - instructions describe the workflow
+ok - all 11 tools listed
+ok - whoami works (board offline)
+ok - board tools report offline cleanly
+skipped Firestore checks (no emulator)
+
+all good

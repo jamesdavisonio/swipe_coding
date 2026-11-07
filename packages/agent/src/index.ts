@@ -317,10 +317,14 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
     if (name === 'kanban_whoami') {
       const status = boardStatus()
       const b = status.mode === 'offline' ? null : await getBoard().catch(() => null)
+      if (b) void b.refreshRemoteUrl()
       return ok({ ...(b?.id ?? { cwd: process.cwd(), pid: process.pid }), board: status })
     }
     if (name === 'kanban_logs') return ok(await readLogs(args ?? {}))
     const b = await getBoard()
+    // Remote Control can go on or off at any moment; each tool call keeps the board's "Open in
+    // Claude" link current. It never rejects (a failed write is logged inside) and never waits.
+    void b.refreshRemoteUrl()
     switch (name) {
       case 'kanban_list_tasks': {
         const a = argsOf(args, name)

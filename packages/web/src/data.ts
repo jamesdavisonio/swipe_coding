@@ -42,7 +42,7 @@ import {
 import { jamesComment, replyKind } from './lib/messages.ts'
 import { MAX_REOPEN_NOTE_CHARS, REOPEN_PREFIX, stageBeforeDone } from './lib/reopen.ts'
 import { newRequestId } from './lib/request-id.ts'
-import { specVersion } from './lib/threads.ts'
+import { prName, specVersion } from './lib/threads.ts'
 
 export interface Live<T> {
   data: T
@@ -250,13 +250,25 @@ export async function createTask(projectId: string, input: NewTaskInput): Promis
 
 // A decision James makes: read the task inside a transaction and write only when `plan` accepts
 // its current state, so a double tap (or a stale screen) is a no-op. The plan names what changes
-// on the task, the one history line, and James's message; all of it lands in this transaction.
-// The history goes through appendLog; whatever it pushes past LOG_CAP is moved to
-// tasks/{id}/log_archive in the same write, one document per entry.
+// on the task, its history (one line by James, or several lines with their authors), and James's
+// message; all of it lands in this transaction. The history goes through appendLog; whatever it
+// pushes past LOG_CAP is moved to tasks/{id}/log_archive in the same write, one document per entry.
 interface Transition {
   patch: Partial<Task>
-  history: string
+  history: string | readonly Omit<LogEntry, 'at'>[]
   comment: { kind: CommentKind; body: string }
+}
+
+// The transition's history lines, stamped `at`, appended to `log`.
+function withHistory(log: readonly LogEntry[], history: Transition['history'], at: number) {
+  const lines = typeof history === 'string' ? [{ who: 'james' as const, text: history }] : history
+  return lines.reduce(
+    (acc, line) => {
+      const next = appendLog(acc.log, { at, who: line.who, text: line.text })
+      return { log: next.log, archived: [...acc.archived, ...next.archived] }
+    },
+    { log: [...log], archived: [] as LogEntry[] }
+  )
 }
 async function transitionTask(
   taskId: string,
@@ -271,8 +283,11 @@ async function transitionTask(
     const t = now()
     const next = plan(current, t)
     if (!next) return
-    const entry: LogEntry = { at: t, who: 'james', text: next.history }
-    const { log: kept, archived } = appendLog(Array.isArray(current.log) ? current.log : [], entry)
+    const { log: kept, archived } = withHistory(
+      Array.isArray(current.log) ? current.log : [],
+      next.history,
+      t
+    )
     const archive = collection(db, COLLECTIONS.tasks, taskId, LOG_ARCHIVE)
     for (const old of archived) tx.set(doc(archive), { at: old.at, who: old.who, text: old.text })
     tx.update(taskRef, { ...next.patch, log: kept, updatedAt: t, lastCommentAt: t })
@@ -362,7 +377,7 @@ export async function markMerged(task: Task) {
     cur.stage === 'pr'
       ? {
           patch: { stage: 'merged', needs: null },
-          history: cur.pr ? `Merged PR #${cur.pr.number}` : 'Merged the PR',
+          history: `Merged ${prName(cur)}`,
           comment: { kind: 'merged', body: 'Merged it.' },
         }
       : null
@@ -392,6 +407,18 @@ export async function reopenTask(task: Task, note: string) {
   })
 }
 
+// What closes an after-deploy task once every step is ticked: the ticks, stage done, doneAt, need
+// and working cleared, a system "Done" history line and James's closing message.
+const closedAfterDeploy = (afterDone: boolean[], at: number) => ({
+  afterDone,
+  stage: 'done' as const,
+  doneAt: at,
+  needs: null,
+  working: false,
+})
+const DONE_LINE = { who: 'system', text: 'Done' } as const
+const AFTER_DEPLOY_DONE = 'After-deploy steps done.'
+
 // Ticks (or unticks) one after-deploy step. A batch built from the task as the screen has it, so
 // a tick made offline is queued and shows at once. History goes in with arrayUnion (the next
 // transactional writer enforces LOG_CAP). The tick that leaves every step done also closes the
@@ -420,21 +447,14 @@ export async function tickStep(task: Task, index: number) {
   const taskRef = doc(db, COLLECTIONS.tasks, task.id)
   if (afterDone.every(Boolean)) {
     const commentRef = doc(collection(db, COLLECTIONS.comments))
-    const closed: LogEntry = { at: t, who: 'system', text: 'Done' }
+    const closed: LogEntry = { at: t, ...DONE_LINE }
     batch.update(taskRef, {
-      afterDone,
+      ...closedAfterDeploy(afterDone, t),
       log: arrayUnion(step, closed),
-      stage: 'done',
-      doneAt: t,
-      needs: null,
-      working: false,
       updatedAt: t,
       lastCommentAt: t,
     })
-    batch.set(
-      commentRef,
-      jamesComment(task, 'comment', 'After-deploy steps done.', t, commentRef.id)
-    )
+    batch.set(commentRef, jamesComment(task, 'comment', AFTER_DEPLOY_DONE, t, commentRef.id))
   } else {
     batch.update(taskRef, { afterDone, log: arrayUnion(step), updatedAt: t })
   }
@@ -473,3 +493,92 @@ export async function addTodo(projectId: string, body: string) {
 }
 
 export { forJamesTaskId }
+
+// ---- swipe deck ------------------------------------------------------------------
+
+// The held merge button: asks the session to merge, only while the task waits on its PR at stage
+// pr. The need is cleared and the stage stays pr until the session reports the merge.
+export async function requestMerge(task: Task) {
+  await transitionTask(task.id, (cur) => {
+    if (cur.stage !== 'pr' || cur.needs?.kind !== 'pr') return null
+    const pr = prName(cur)
+    return {
+      patch: { needs: null },
+      history: `Asked to merge ${pr}`,
+      comment: { kind: 'comment', body: `Merge ${pr} into main.` },
+    }
+  })
+}
+
+// A note on a PR James was asked to merge: changes first. The need is cleared (the session
+// reports the PR again when it is ready), only while the task still waits on it.
+async function notePr(task: Task, note: string) {
+  await transitionTask(task.id, (cur) =>
+    cur.needs?.kind === 'pr'
+      ? {
+          patch: { needs: null },
+          history: `Asked for changes to ${prName(cur)}: ${note}`,
+          comment: { kind: 'comment', body: note },
+        }
+      : null
+  )
+}
+
+// A voice or typed note from the deck, by what the task waits on: a change request for a spec,
+// the answer to a question, changes to a PR; otherwise a plain comment (each note its own).
+// Trimmed; a blank note writes nothing.
+export async function sendNote(task: Task, text: string) {
+  const note = cleanText(text)
+  if (note === '') return
+  switch (task.needs?.kind) {
+    case 'spec':
+      return requestChange(task, note)
+    case 'question':
+      return answerQuestion(task, { label: note })
+    case 'pr':
+      return notePr(task, note)
+    default:
+      return sendReply(task, { id: newCommentId(), body: note })
+  }
+}
+
+// "All done" on an after-deploy card: ticks every step still unticked and closes the task as the
+// last tickStep does. Only while the task (read fresh) still waits on its after-deploy steps.
+export async function tickRemainingSteps(task: Task) {
+  await transitionTask(task.id, (cur, at) => {
+    const steps = Array.isArray(cur.afterDeploy) ? cur.afterDeploy : []
+    if (cur.stage !== 'after_deploy' || cur.needs?.kind !== 'after_deploy') return null
+    const ticked = steps
+      .filter((_, i) => cur.afterDone?.[i] !== true)
+      .map((step) => ({ who: 'james' as const, text: `Step done: ${step}` }))
+    return {
+      patch: closedAfterDeploy(
+        steps.map(() => true),
+        at
+      ),
+      history: [...ticked, DONE_LINE],
+      comment: { kind: 'comment', body: AFTER_DEPLOY_DONE },
+    }
+  })
+}
+
+// "All done" on a to-do card: every given open to-do done, in one batch.
+export async function markTodosDone(todos: readonly Todo[]) {
+  const open = todos.filter((todo) => !todo.done)
+  if (open.length === 0) return
+  const t = now()
+  const batch = writeBatch(db)
+  for (const todo of open) {
+    batch.update(doc(db, COLLECTIONS.todos, todo.id), { done: true, doneAt: t })
+  }
+  await batch.commit()
+}
+
+// "Start it" on a suggestion: queues it as a feature in the project; a note is its description.
+export const queueSuggestion = (projectId: string, suggestion: string, note?: string) =>
+  createTask(projectId, {
+    type: 'feature',
+    title: suggestion,
+    description: note ?? '',
+    afterDeploy: [],
+  })

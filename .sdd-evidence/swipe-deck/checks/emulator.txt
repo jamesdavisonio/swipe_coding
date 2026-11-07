@@ -1,0 +1,25 @@
+
+ ✓ tests/emulator/app-logs-8.test.ts (2 tests) 159ms
+stderr | tests/emulator/agent-heartbeat.test.ts
+2026-11-07T08:11:31.868Z [42724] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/agent-heartbeat.test.ts > agent heartbeat > writes at most 12 heartbeats an hour and is online at every minute of it
+2026-11-07T08:11:31.931Z [42724] registered agent=FDHvBf7qDIbfHouoIANA project=heartbeat-1794039091931-4f41e7e9 cwd=/tmp/heartbeat-1794039091931
+
+stderr | tests/emulator/agent-heartbeat.test.ts > agent heartbeat > writes at most 12 heartbeats an hour and is online at every minute of it
+2026-11-07T08:11:32.049Z [42724] agent FDHvBf7qDIbfHouoIANA shut down; 0 task(s) orphaned
+
+ ✓ tests/emulator/agent-heartbeat.test.ts (1 test) 121ms
+ ✓ tests/emulator/web-threads-b6-25.test.ts (3 tests) 517ms
+
+ Test Files  44 passed (44)
+      Tests  308 passed (308)
+   Start at  09:09:21
+   Duration  132.87s (transform 599ms, setup 0ms, collect 19.91s, tests 99.90s, environment 650ms, prepare 4.25s)
+
++  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
