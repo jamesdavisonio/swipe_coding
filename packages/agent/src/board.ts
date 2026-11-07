@@ -135,6 +135,17 @@ export class Board {
   // The remoteUrl last written to the agent document, so only a change is written.
   private remoteUrl: string | null = null
 
+  // Red-checkpoint stubs (retire-suggestions).
+  openSuggestions(_task: Task): { id: string; text: string }[] {
+    return []
+  }
+
+  retireSuggestions(
+    _ids: string[]
+  ): Promise<{ retired: string[]; refused: { id: string; reason: string }[] }> {
+    return Promise.resolve({ retired: [], refused: [] })
+  }
+
   constructor(cwd = process.cwd()) {
     this.db = getDb()
     const hostname = osHostname()
@@ -349,6 +360,7 @@ export class Board {
     summary?: string
     pr_url?: string
     title?: string
+    retire_suggestions?: string[]
   }): Promise<Task> {
     const task = await this.getTask(input.task_id)
     this.assertMine(task)

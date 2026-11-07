@@ -154,6 +154,7 @@ export interface Task {
   working: boolean // the session is on it right now
   lastCommentAt: number | null
   log: LogEntry[] // decision history, append-only, capped at LOG_CAP (see appendLog)
+  retiredNext?: number[] // Suggested next indices a later session retired as done
 }
 
 export interface Comment {
@@ -369,4 +370,9 @@ export function boundedLogFields(
     ts,
     request_id: typeof rid === 'string' ? rid : null,
   }
+}
+
+// Red-checkpoint stub (retire-suggestions): moves here from the web's lib/brief.ts.
+export function suggestedNext(_text: string): string[] {
+  return []
 }

@@ -22,7 +22,10 @@ interface RpcMessage {
   result?: {
     capabilities?: { experimental?: Record<string, unknown>; tools?: unknown }
     instructions?: string
-    tools?: { name: string }[]
+    tools?: {
+      name: string
+      inputSchema?: { properties?: Record<string, { type?: string; items?: { type?: string } }> }
+    }[]
     isError?: boolean
     content?: { type: string; text: string }[]
   }
@@ -36,6 +39,9 @@ interface TaskBrief {
   needs: { kind: string; question?: string } | null
   mine?: boolean
   watcher?: string
+  suggestions?: { id: string; text: string }[]
+  retired?: string[]
+  refused?: { id: string; reason: string }[]
 }
 interface Whoami {
   cwd: string
@@ -175,6 +181,13 @@ try {
     `all ${EXPECTED_TOOLS.length} tools listed${missing.length ? ` (missing ${missing.join(', ')})` : ''}`
   )
 
+  const retireProp = list.result?.tools?.find((t) => t.name === 'kanban_update_task')?.inputSchema
+    ?.properties?.retire_suggestions
+  assert(
+    retireProp?.type === 'array' && retireProp.items?.type === 'string',
+    'kanban_update_task inputSchema has retire_suggestions: string[]'
+  )
+
   const who = await call<Whoami>('kanban_whoami')
   assert(
     typeof who.cwd === 'string' && who.board?.mode,
@@ -221,6 +234,74 @@ try {
       listed.some((t) => t.id === task.id) && listed[0]?.type === 'for_james',
       'list_tasks shows it, For James pinned first'
     )
+
+    // Retiring suggestions (swipe-deck 65, 66): two finished tasks with a Suggested next list.
+    const seedDone = async (retiredNext: number[]) => {
+      const seeded = await call<TaskBrief>('kanban_create_task', {
+        title: 'Protocol retire seed',
+        type: 'chore',
+      })
+      await db
+        .collection('tasks')
+        .doc(seeded.id)
+        .update({
+          stage: 'done',
+          needs: null,
+          agentId: null,
+          doneAt: Date.now() - 60_000,
+          summary: 'Done.\n\n### Suggested next\nAlpha - a\nBeta - b\nGamma - c',
+          retiredNext,
+        })
+      return seeded.id
+    }
+    const partial = await seedDone([1])
+    const allRetired = await seedDone([0, 1, 2])
+    const withSuggestions = await call<TaskBrief[]>('kanban_list_tasks')
+    const byId = (id: string) => withSuggestions.find((t) => t.id === id)
+    assert(
+      JSON.stringify(byId(partial)?.suggestions) ===
+        JSON.stringify([
+          { id: `${partial}:0`, text: 'Alpha - a' },
+          { id: `${partial}:2`, text: 'Gamma - c' },
+        ]),
+      'list_tasks: a done task lists its open suggestions, retired index left out'
+    )
+    assert(
+      byId(allRetired) !== undefined && !('suggestions' in byId(allRetired)!),
+      'list_tasks: an all-retired done task has no suggestions field'
+    )
+    assert(
+      byId(task.id) !== undefined && !('suggestions' in byId(task.id)!),
+      'list_tasks: an open task has no suggestions field'
+    )
+
+    const retire = await call<TaskBrief>('kanban_update_task', {
+      task_id: task.id,
+      retire_suggestions: [`${partial}:0`, 'junk'],
+    })
+    assert(
+      retire.id === task.id &&
+        JSON.stringify(retire.retired) === JSON.stringify([`${partial}:0`]) &&
+        retire.refused?.length === 1 &&
+        retire.refused[0].id === 'junk' &&
+        retire.refused[0].reason.length > 0,
+      'update_task retire_suggestions replies with the brief, retired and refused'
+    )
+    const plain = await call<TaskBrief>('kanban_update_task', {
+      task_id: task.id,
+      title: 'Protocol test task',
+    })
+    assert(
+      plain.id === task.id && !('retired' in plain) && !('refused' in plain),
+      'update_task without retire_suggestions has no retired or refused'
+    )
+    for (const id of [partial, allRetired]) {
+      const cleanup = db.batch()
+      for (const d of (await db.collection('comments').where('taskId', '==', id).get()).docs)
+        cleanup.delete(d.ref)
+      cleanup.delete(db.collection('tasks').doc(id))
+      await cleanup.commit()
+    }
 
     const t0 = Date.now()
     const cRef = db.collection('comments').doc()
