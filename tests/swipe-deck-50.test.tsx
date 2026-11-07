@@ -2,7 +2,7 @@
 // swipe-deck 50: a card with choices opens a sheet of them; an important card opens a sheet whose
 // button must be held for 3 seconds; nothing is typed anywhere.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, screen, within } from '@testing-library/react'
 import Deck from '../packages/web/src/pages/Deck.tsx'
 import { HOLD_MS } from '../packages/web/src/components/deck/HoldButton.tsx'
 import {
@@ -56,7 +56,7 @@ describe('swipe-deck 50 choices sheet', () => {
     renderAt('/', <Deck />)
     press('ArrowRight')
     fireEvent.click(within(sheet()).getByRole('button', { name: /Sans/ }))
-    await waitFor(() =>
+    await vi.waitFor(() =>
       expect(actions.answerQuestion).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'choice1' }),
         expect.objectContaining({ label: 'Sans' })
