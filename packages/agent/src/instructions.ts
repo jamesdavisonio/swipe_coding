@@ -63,16 +63,23 @@ WORKFLOW.
 6. When everything is finished, call kanban_update_task with status "done" and a summary of
    what shipped (not kanban_subtask, which refuses to finish a task): that posts your Done
    message to the thread and closes the last stage. Write the summary as a summary brief when
-   you have one. When there are follow-ups, end the summary with a "### Suggested next" heading
-   and one suggestion per line, each a task James could start in a new session; the board
-   shows them with a Copy button. Write each line as
+   you have one. Before finishing, retire the open suggestions in the project that this work
+   has done: kanban_list_tasks shows them on finished tasks as suggestions ({ id, text });
+   pass their ids in retire_suggestions of kanban_update_task (the finishing call or an
+   earlier one), and the board stops offering them. The reply lists the ids retired and the
+   ids refused, each with its reason. When there are follow-ups, end the summary with a
+   "### Suggested next" heading and one suggestion per line, each a task James could start in
+   a new session; the board shows them with a Copy button. Suggested next lists only work a
+   session can do: live checks, sign-ins and anything else James does by hand go to
+   kanban_todo_for_james (see 8), never under Suggested next. Write each line as
    "<what to do> — <why it matters and what it would change>", an em dash with a space on
    each side: the first part (under 60 characters) becomes the task's title, the second tells
-   James why. Call it once.
+   James why. Finish with status "done" once.
 7. Something wrong on the board (a tap that did nothing, a reply that never arrived)? Read
    kanban_logs before asking James to reproduce it: it returns the phone's and the agent's
    recent warnings and errors, or one operation's whole trail by request_id.
-8. Anything James must do by hand afterwards (sign in somewhere, rotate a key, test on his
-   phone) goes to kanban_todo_for_james, one item per call. Merging is not one of them: the
-   board asks him to merge from the PR you report.
+8. Anything James must do by hand afterwards (sign in somewhere, rotate a key, run a live
+   check, test on his phone) goes to kanban_todo_for_james, one item per call, or to the
+   project's owner to-do list when it keeps one; never under Suggested next (see 6). Merging
+   is not one of them: the board asks him to merge from the PR you report.
 `.trim()

@@ -8,6 +8,7 @@ import {
   type QuerySnapshot,
   type WriteBatch,
 } from 'firebase-admin/firestore'
+import { z } from 'zod'
 import {
   AGENT_HEARTBEAT_MS,
   COLLECTIONS as C,
@@ -17,8 +18,10 @@ import {
   isAgentOnline,
   isDone,
   isQueued,
+  isTaskVisible,
   projectIdFor,
   projectNameFor,
+  suggestedNext,
   taskPhase,
   taskStages,
   type AgentDoc,
@@ -68,6 +71,28 @@ function currentRemoteUrl(): string | null {
   })
 }
 
+// A suggestion's id: `<taskId>:<index>`, the line's position in the task's Suggested next list.
+const SuggestionId = z
+  .string()
+  .regex(/^[A-Za-z0-9_-]+:(0|[1-9]\d*)$/)
+  .transform((id) => {
+    const at = id.lastIndexOf(':')
+    return { id, taskId: id.slice(0, at), index: Number(id.slice(at + 1)) }
+  })
+// At most 50 at once: each id is a read, and one batch holds a write per source task.
+const SuggestionIds = z.array(z.string()).max(50)
+type SuggestionRef = z.infer<typeof SuggestionId>
+
+export interface Suggestion {
+  id: string
+  text: string
+}
+// What retiring suggestions did: the ids retired, and each refused id with its reason.
+export interface Retirement {
+  retired: string[]
+  refused: { id: string; reason: string }[]
+}
+
 // The longest answer kanban_answered_in_session takes.
 const ANSWER_MAX_CHARS = 2000
 
@@ -110,6 +135,12 @@ const NEED_OF_STAGE: Partial<Record<Stage, NeedKind>> = {
 
 function now() {
   return Date.now()
+}
+
+// The task's Suggested next lines. The summary is a session's text, so a stored value that is not
+// a string has none.
+function suggestionLines(task: Task): string[] {
+  return typeof task.summary === 'string' ? suggestedNext(task.summary) : []
 }
 
 function asTask(snap: DocumentSnapshot): Task | null {
@@ -276,6 +307,17 @@ export class Board {
     return task
   }
 
+  // The open suggestions of a finished task still on the board (within DONE_VISIBLE_MS): its
+  // Suggested next lines minus the retired ones, ids keeping each line's position. None for an
+  // unfinished task.
+  openSuggestions(task: Task): Suggestion[] {
+    if (!isDone(task) || !isTaskVisible(task)) return []
+    const retired = new Set(Array.isArray(task.retiredNext) ? task.retiredNext : [])
+    return suggestionLines(task)
+      .map((text, index) => ({ id: `${task.id}:${index}`, text }))
+      .filter((_, index) => !retired.has(index))
+  }
+
   async getComments(taskId: string, limit = 30): Promise<Comment[]> {
     const snap = await this.db
       .collection(C.comments)
@@ -349,11 +391,17 @@ export class Board {
     summary?: string
     pr_url?: string
     title?: string
-  }): Promise<Task> {
+    retire_suggestions?: string[]
+  }): Promise<Task & { retirement?: Retirement }> {
     const task = await this.getTask(input.task_id)
     this.assertMine(task)
     if (input.status && !UPDATE_STATUSES.includes(input.status))
       throw new BoardError(`status must be one of ${UPDATE_STATUSES.join(', ')}`)
+    // Before the task's own patch, so the suggestions retired are those of other finished tasks.
+    const retirement =
+      input.retire_suggestions === undefined
+        ? undefined
+        : await this.retireSuggestions(input.retire_suggestions)
     const t = now()
     const patch: Record<string, unknown> = { updatedAt: t }
     if (input.summary !== undefined) patch.summary = input.summary
@@ -368,7 +416,64 @@ export class Board {
       await this.db.collection(C.tasks).doc(task.id).update(patch)
     }
     log(`updated task ${task.id}: ${Object.keys(patch).join(',')}`)
-    return { ...task, ...(patch as Partial<Task>) }
+    return { ...task, ...(patch as Partial<Task>), ...(retirement ? { retirement } : {}) }
+  }
+
+  // Marks suggestions as done by later work: each `<taskId>:<index>` of a finished task in this
+  // project with a line at that index joins the task's retiredNext, one write per source task.
+  // Every other id is refused with its reason and nothing is written for it.
+  async retireSuggestions(ids: string[]): Promise<Retirement> {
+    const list = SuggestionIds.safeParse(ids)
+    if (!list.success) throw new BoardError('retire_suggestions must be an array of strings')
+    const refused: Retirement['refused'] = []
+    const bySource = new Map<string, SuggestionRef[]>()
+    for (const id of new Set(list.data)) {
+      const ref = SuggestionId.safeParse(id)
+      if (!ref.success) {
+        refused.push({ id, reason: 'not a suggestion id: expected <taskId>:<index>' })
+        continue
+      }
+      bySource.set(ref.data.taskId, [...(bySource.get(ref.data.taskId) ?? []), ref.data])
+    }
+    const retired: string[] = []
+    const refs = [...bySource.keys()].map((id) => this.db.collection(C.tasks).doc(id))
+    const snaps = refs.length > 0 ? await this.db.getAll(...refs) : []
+    const batch = this.db.batch()
+    for (const snap of snaps) {
+      const wanted = bySource.get(snap.id) ?? []
+      const task = this.retirableSource(snap)
+      if (typeof task === 'string') {
+        for (const { id } of wanted) refused.push({ id, reason: task })
+        continue
+      }
+      const count = suggestionLines(task).length
+      const indices: number[] = []
+      for (const { id, index } of wanted) {
+        if (index < count) {
+          retired.push(id)
+          indices.push(index)
+        } else {
+          refused.push({
+            id,
+            reason: `task ${task.id} has ${count} suggestion(s), none at ${index}`,
+          })
+        }
+      }
+      if (indices.length > 0)
+        batch.update(snap.ref, { retiredNext: FieldValue.arrayUnion(...indices) })
+    }
+    if (retired.length > 0) await batch.commit()
+    log(`retired ${retired.length} suggestion(s), refused ${refused.length}`)
+    return { retired, refused }
+  }
+
+  // The task whose suggestions may be retired, or why they may not.
+  private retirableSource(snap: DocumentSnapshot): Task | string {
+    const task = asTask(snap)
+    if (!task) return `no task ${snap.id}`
+    if (task.projectId !== this.id.projectId) return `task ${snap.id} belongs to another project`
+    if (!isDone(task)) return `task ${snap.id} is not finished`
+    return task
   }
 
   // Phase 1 step API: `key` is a stage name (or a retired step key) of the task's own chain.

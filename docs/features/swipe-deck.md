@@ -172,6 +172,25 @@ change.` offers that phrase as the single action. A question with neither has no
     serve `index.html`) carries `Cache-Control: no-cache`, so a deploy reaches the phone on the
     next load. Files under `/assets/` keep `public, max-age=31536000, immutable`.
 
+### D8 — Retiring suggestions (spec confirmed 2026-11-07, from the data-trackers orchestrator's findings)
+
+65. `kanban_list_tasks` lists, on each finished task within the 7-day window, its open
+    suggestions: `suggestions: [{ id, text }]`, where `id` is `<taskId>:<index>` (the line's
+    position in its `### Suggested next` list, from 0) and `text` is the line. Retired lines are
+    left out; a task with none open has no `suggestions` field. Unfinished tasks never have one.
+66. `kanban_update_task` accepts `retire_suggestions: string[]` (those ids). For each id of a
+    finished task in this session's project with a suggestion at that index, the index is added
+    to that task's `retiredNext` (numbers, no duplicates; retiring twice changes nothing), in one
+    write per source task. Ids that are malformed, of another project, of an unfinished task or
+    beyond its list are refused and nothing is written for them. The reply lists `retired` and
+    `refused` (each refused id with its reason). Retiring works on any task the session may
+    update, finished or not, and needs no other field.
+67. The deck shows no `next` card for a retired index, on every device.
+68. The session instructions say: before finishing, retire (with `retire_suggestions`) the open
+    suggestions in the project that this work has done; and Suggested next lists only work a
+    session can do — live checks, sign-ins and anything else James does by hand go to
+    `kanban_todo_for_james` (or the project's owner to-do list), never under Suggested next.
+
 ### D5 — Keeping Threads
 
 60. The commit before this work is tagged `threads-v1`, and no Threads screen or data function

@@ -45,7 +45,7 @@ const tools: Tool[] = [
   {
     name: 'kanban_list_tasks',
     description:
-      'List tasks in this project, open ones first (the pinned "For James" task comes first).',
+      'List tasks in this project, open ones first (the pinned "For James" task comes first). A finished task lists its open Suggested next lines as suggestions ({ id, text }).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -94,7 +94,7 @@ const tools: Tool[] = [
   {
     name: 'kanban_update_task',
     description:
-      'Update summary, PR link, title or status of a task bound to this session. status "done" finishes and releases the task; status "in_progress" clears whatever it was waiting on from James.',
+      'Update summary, PR link, title or status of a task bound to this session. status "done" finishes and releases the task; status "in_progress" clears whatever it was waiting on from James. retire_suggestions retires the suggestions this work has done; the reply then lists retired and refused ids.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -103,6 +103,12 @@ const tools: Tool[] = [
         summary: { type: 'string', description: 'Running or final summary, a few sentences' },
         pr_url: { type: 'string', description: 'Pull request URL ending in its number' },
         title: { type: 'string' },
+        retire_suggestions: {
+          type: 'array',
+          items: { type: 'string' },
+          description:
+            'Ids of open suggestions (from kanban_list_tasks, "<taskId>:<index>") that this work has done',
+        },
       },
       required: ['task_id'],
     },
@@ -270,8 +276,10 @@ function watcherCommand(agentId: string): string {
   return `node "${script}" --agent ${agentId}`
 }
 
-// A task as the session sees it. The two tools that bind a task add the session's watcher.
+// A task as the session sees it. The two tools that bind a task add the session's watcher; a
+// finished task with open suggestions lists them.
 function taskBrief(t: Task) {
+  const suggestions = board?.openSuggestions(t) ?? []
   return {
     id: t.id,
     type: t.type,
@@ -280,6 +288,7 @@ function taskBrief(t: Task) {
     needs: t.needs,
     pr: t.pr ?? undefined,
     mine: t.agentId === board?.id.agentId || undefined,
+    ...(suggestions.length > 0 ? { suggestions } : {}),
   }
 }
 
@@ -297,6 +306,7 @@ interface ToolArgs {
     summary?: string
     pr_url?: string
     title?: string
+    retire_suggestions?: string[]
   }
   kanban_subtask: { task_id: string; key: string; status: SubtaskStatus; note?: string }
   kanban_comment: { task_id: string; body: string }
@@ -358,8 +368,11 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         const task = await b.startTask(a.task_id)
         return ok({ ...taskBrief(task), watcher: watcherCommand(b.id.agentId) })
       }
-      case 'kanban_update_task':
-        return ok(taskBrief(await b.updateTask(argsOf(args, name))))
+      case 'kanban_update_task': {
+        // retirement is there only when retire_suggestions was given: its retired and refused ids.
+        const { retirement, ...task } = await b.updateTask(argsOf(args, name))
+        return ok({ ...taskBrief(task), ...retirement })
+      }
       case 'kanban_subtask': {
         const a = argsOf(args, name)
         return ok(taskBrief(await b.setSubtask(a.task_id, a.key, a.status, a.note)))
