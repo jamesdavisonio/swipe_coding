@@ -74,7 +74,7 @@ WORKFLOW.
    kanban_todo_for_james (see 8), never under Suggested next. Write each line as
    "<what to do> — <why it matters and what it would change>", an em dash with a space on
    each side: the first part (under 60 characters) becomes the task's title, the second tells
-   James why. Call it once.
+   James why. Finish with status "done" once.
 7. Something wrong on the board (a tap that did nothing, a reply that never arrived)? Read
    kanban_logs before asking James to reproduce it: it returns the phone's and the agent's
    recent warnings and errors, or one operation's whole trail by request_id.

@@ -74,12 +74,13 @@ function currentRemoteUrl(): string | null {
 // A suggestion's id: `<taskId>:<index>`, the line's position in the task's Suggested next list.
 const SuggestionId = z
   .string()
-  .regex(/^[A-Za-z0-9_-]+:\d+$/)
+  .regex(/^[A-Za-z0-9_-]+:(0|[1-9]\d*)$/)
   .transform((id) => {
     const at = id.lastIndexOf(':')
     return { id, taskId: id.slice(0, at), index: Number(id.slice(at + 1)) }
   })
-const SuggestionIds = z.array(z.string())
+// At most 50 at once: each id is a read, and one batch holds a write per source task.
+const SuggestionIds = z.array(z.string()).max(50)
 type SuggestionRef = z.infer<typeof SuggestionId>
 
 export interface Suggestion {
@@ -311,7 +312,7 @@ export class Board {
   // unfinished task.
   openSuggestions(task: Task): Suggestion[] {
     if (!isDone(task) || !isTaskVisible(task)) return []
-    const retired = new Set(task.retiredNext ?? [])
+    const retired = new Set(Array.isArray(task.retiredNext) ? task.retiredNext : [])
     return suggestionLines(task)
       .map((text, index) => ({ id: `${task.id}:${index}`, text }))
       .filter((_, index) => !retired.has(index))
