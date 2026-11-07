@@ -13,10 +13,11 @@ const ITEMS: { id: NavId; label: string; to: string; Icon: LucideIcon }[] = [
   { id: 'new', label: 'New task', to: '/new', Icon: Plus },
 ]
 
-// Which item the current path belongs to: a thread is part of Threads, a project part of
-// Projects. Anything else (the catch-all redirect, say) marks nothing.
+// Which item the current path belongs to: a thread is part of Threads (at /threads since the
+// deck became home), a project part of Projects. Anything else (the catch-all redirect, say)
+// marks nothing.
 function currentItem(pathname: string): NavId | null {
-  if (pathname === '/' || pathname.startsWith('/t/')) return 'threads'
+  if (pathname === '/' || pathname === '/threads' || pathname.startsWith('/t/')) return 'threads'
   if (pathname === '/projects' || pathname.startsWith('/p/')) return 'projects'
   if (pathname === '/new') return 'new'
   return null
