@@ -98,7 +98,8 @@ change.` offers that phrase as the single action. A question with neither has no
     summary marks the task read; next queues a new task in that project with the suggestion as
     its title. While dragging, the stamp shows the action's name. Dragging left, or the left
     arrow, passes the card. A summary card cannot be passed: it springs back. A `next` card
-    dragged left is dropped from this phone.
+    dragged left opens the skip sheet of criterion 62 instead (changed 2026-11-07, fix
+    next-card-context).
 50. A card with choices opens a sheet of them, recommended first; tapping one answers with it,
     and closing the sheet leaves the card. An important card opens a sheet whose button must be
     held for 3 seconds; letting go early sends nothing and says to keep holding; the full hold
@@ -143,6 +144,25 @@ change.` offers that phrase as the single action. A question with neither has no
     card; when James writes "Merge PR #<n> into main.", merge it with gh and mark the PR stage
     done; watch CI on the PR and on main after the merge, and when it fails post a fix brief
     with kanban_ask proposing the fix, ending with the "fix confirmed" reply line.
+
+### D6 — Suggested next with context (fix next-card-context, confirmed 2026-11-07)
+
+61. Given a Suggested next line written as `<what to do> — <why>` (an em dash with a space on
+    each side), the next card's headline is the "what" part (cut to 60 characters as in 43), its
+    `why` is the "why" part, and starting it queues a task titled with the "what" part whose
+    description holds the why and which session suggested it. A line without the separator is
+    all "what", with `why` null. Swiping up on a next card shows, in order: "Suggested by" with
+    the finished session's title, its project and how long ago it finished; "Why" when there
+    is one; "What that session finished" with that session's summary (its brief's parts when
+    it is a brief, else its text without the Suggested next part) and a link to its pull
+    request when it has one; and "If you agree": "Queues a task in <project>. The next session
+    there writes a spec, and nothing is built until you confirm it."
+62. Dragging a next card left (or the left arrow, or Later) opens a sheet with two answers:
+    "Skip for now", which passes the card like any passed card (it comes back after the others),
+    and "Never show again", which drops it from this phone for good. Closing the sheet leaves
+    the card. The left stamp on a next card reads "Skip".
+63. The session instructions tell sessions to write each Suggested next line as
+    `<what to do> — <why it matters and what it would change>`.
 
 ### D5 — Keeping Threads
 
