@@ -2,7 +2,16 @@
 // suggestions that end a finished summary. Pure text in, plain data out: no React, no Firestore.
 // The text comes from a session, so every reader here is defensive: anything that is not exactly
 // the expected shape reads as "no brief", and the caller renders the text as it is.
-import type { Comment } from '@kanban/shared'
+import {
+  LIST_MARKER,
+  MARKDOWN_HEADING as ANY_HEADING,
+  SUGGESTED_NEXT_HEADING as SUGGESTED_HEADING,
+  suggestedNext,
+  type Comment,
+} from '@kanban/shared'
+
+// The Suggested next reader lives in @kanban/shared (the agent reads the same lists).
+export { LIST_MARKER, suggestedNext }
 
 export type Gate = 'spec' | 'fix' | 'round' | 'summary'
 export type PartKey = 'origin' | 'why' | 'changes' | 'assumptions' | 'out' | 'agreeing'
@@ -38,12 +47,9 @@ export const BRIEF_SECTIONS: readonly { key: PartKey; heading: string }[] = [
 
 const BRIEF_HEADING = /^##\s+Decision brief \((spec|fix|round|summary)\)\s*$/
 const SUB_HEADING = /^###\s+(.+?)\s*$/
-const ANY_HEADING = /^#{1,6}\s/
 const RULE = /^---+\s*$/
 const REPLY_LINE = /^\s*Reply ["“]([^"”]+)["”], or tell me what to change\.\s*$/
 const YES_LINE = /^Yes:\s*(\S.*?)\s*$/
-const SUGGESTED_HEADING = /^###\s+Suggested next\s*$/i
-export const LIST_MARKER = /^(?:[-*]\s+|\d+\.\s+)/
 
 const linesOf = (text: string): string[] => text.split(/\r?\n/)
 
@@ -137,21 +143,6 @@ export function parseBrief(text: string): Brief | null {
 // that offer the phrase as a button instead.
 export const withoutReplyLine = (text: string): string =>
   block(linesOf(text).filter((line) => !REPLY_LINE.test(line)))
-
-// The suggestions under a `### Suggested next` heading: one per line until the next heading or
-// the end, list markers and blanks dropped.
-export function suggestedNext(text: string): string[] {
-  const lines = linesOf(text)
-  const from = lines.findIndex((line) => SUGGESTED_HEADING.test(line.trim()))
-  if (from < 0) return []
-  const items: string[] = []
-  for (const line of lines.slice(from + 1)) {
-    if (ANY_HEADING.test(line.trim())) break
-    const item = line.trim().replace(LIST_MARKER, '').trim()
-    if (item !== '') items.push(item)
-  }
-  return items
-}
 
 // The text with its `### Suggested next` part taken out (heading and lines), for a screen that
 // shows the suggestions as a list of their own.

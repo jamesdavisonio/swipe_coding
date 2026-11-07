@@ -342,12 +342,14 @@ export function suggestedTask(card: Pick<DeckCard, 'suggestion' | 'why' | 'sessi
   }
 }
 
-// One card per Suggested next line of a finished task, except those handled on this phone.
+// One card per Suggested next line of a finished task, except those a later session retired
+// (on every device) and those handled on this phone.
 function nextCards(base: CardBase, task: Task, handled: Set<string>): DeckCard[] {
   const lines = typeof task.summary === 'string' ? suggestedNext(task.summary) : []
+  const retired = new Set(Array.isArray(task.retiredNext) ? task.retiredNext : [])
   return lines
-    .map((suggestion, index) => ({ suggestion, id: `next:${task.id}:${index}` }))
-    .filter(({ id }) => !handled.has(id))
+    .map((suggestion, index) => ({ suggestion, index, id: `next:${task.id}:${index}` }))
+    .filter(({ index, id }) => !retired.has(index) && !handled.has(id))
     .map(({ suggestion, id }) => {
       const { what, why } = splitSuggestion(suggestion)
       return taskCard(base, task, {
