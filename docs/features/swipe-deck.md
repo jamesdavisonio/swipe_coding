@@ -95,8 +95,8 @@ change.` offers that phrase as the single action. A question with neither has no
 49. Dragging a card right past the threshold, or pressing the right arrow, does its action:
     spec approves; fix, round, summary_gate and a phrase-only question answer with the phrase;
     after_deploy ticks every remaining step; todos mark every open to-do of that project done;
-    summary marks the task read; next queues a new task in that project with the suggestion as
-    its title. While dragging, the stamp shows the action's name. Dragging left, or the left
+    summary marks the task read; next queues a new task in that project titled with the suggestion's "what" part (61).
+    While dragging, the stamp shows the action's name. Dragging left, or the left
     arrow, passes the card. A summary card cannot be passed: it springs back. A `next` card
     dragged left opens the skip sheet of criterion 62 instead (changed 2026-11-07, fix
     next-card-context).

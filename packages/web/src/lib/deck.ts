@@ -316,6 +316,10 @@ function summaryCard(base: CardBase, task: Task): DeckCard {
 // A Suggested next line `<what> — <why>`, split at the first separator, both parts trimmed. A line
 // without the separator (or with nothing after it) is all "what", with no why.
 export function splitSuggestion(line: string): { what: string; why: string | null } {
+  // Lines arrive trimmed, so "Add X — " reaches here as "Add X —": the separator with nothing after.
+  const bare = SUGGESTION_SEPARATOR.trimEnd()
+  const trimmed = line.trimEnd()
+  if (trimmed.endsWith(bare)) return { what: trimmed.slice(0, -bare.length).trim(), why: null }
   const at = line.indexOf(SUGGESTION_SEPARATOR)
   if (at < 0) return { what: line.trim(), why: null }
   const why = line.slice(at + SUGGESTION_SEPARATOR.length).trim()
