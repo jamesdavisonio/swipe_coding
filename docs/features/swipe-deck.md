@@ -203,7 +203,7 @@ change.` offers that phrase as the single action. A question with neither has no
     `{ kind: 'question', question, options: [{ key: 'a', label }, { key: 'b', label }, ...] }`
     in the given order, so the deck offers them as choices with the first recommended. Without
     `options` the need is exactly as before. A wrong count or an empty or too-long label is
-    refused with a message and nothing is written. The tool still counts as one of the 11.
+    refused with a message and nothing is written. No tool is added: the agent keeps its 12 tools.
 
 ### D5 — Keeping Threads
 

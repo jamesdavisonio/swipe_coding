@@ -191,8 +191,8 @@ try {
   const askOptions = list.result?.tools?.find((t) => t.name === 'kanban_ask')?.inputSchema
     ?.properties?.options
   assert(
-    names.length === 11 && askOptions?.type === 'array' && askOptions.items?.type === 'string',
-    'kanban_ask inputSchema has options: string[] (11 tools)'
+    names.length === 12 && askOptions?.type === 'array' && askOptions.items?.type === 'string',
+    'kanban_ask inputSchema has options: string[] (12 tools)'
   )
 
   const who = await call<Whoami>('kanban_whoami')
