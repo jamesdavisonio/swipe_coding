@@ -19,7 +19,7 @@ export const yesNote = (card: Pick<DeckCard, 'action'>): string =>
 
 export function laterNote(card: Pick<DeckCard, 'kind'>): string {
   if (card.kind === 'summary') return "Drag right once you've read it"
-  if (card.kind === 'next') return 'Dropped from this phone'
+  if (card.kind === 'next') return 'For now, or for good'
   return 'Comes back after the others'
 }
 

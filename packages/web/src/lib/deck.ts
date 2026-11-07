@@ -85,7 +85,9 @@ export interface DeckCard {
   revised: boolean
   steps: { label: string; done: boolean }[]
   todoIds: string[]
+  // A next card's whole Suggested next line, and the reason it gives (null without one).
   suggestion: string | null
+  why: string | null
   brief: Brief | null
 }
 export interface DeckInput {
@@ -99,6 +101,8 @@ export interface DeckInput {
 }
 
 const ELLIPSIS = '…'
+// Between what a Suggested next line asks for and why: an em dash with a space on each side.
+export const SUGGESTION_SEPARATOR = ' — '
 const EXAMPLE_LEAD = 'For example,'
 // Where a part's prose breaks into sentences: after . ! or ?, and before a list item (a part's
 // lines are joined with spaces, so "- …" or "1. …" items run on in one line).
@@ -141,7 +145,7 @@ const YES_STAMP: Record<Exclude<DeckAction['type'], 'phrase'>, string> = {
 }
 const NO_ACTION_STAMP = 'Use the mic'
 const LATER_STAMP: Partial<Record<CardKind, string>> = {
-  next: 'Not now',
+  next: 'Skip',
   summary: 'Nothing to dismiss',
 }
 export function stampText(card: Pick<DeckCard, 'kind' | 'action'>): {
@@ -175,6 +179,7 @@ function card(base: CardBase, fields: CardFields): DeckCard {
     steps: [],
     todoIds: [],
     suggestion: null,
+    why: null,
     passed: false,
     ...base,
     ...fields,
@@ -308,22 +313,51 @@ function summaryCard(base: CardBase, task: Task): DeckCard {
   })
 }
 
+// A Suggested next line `<what> — <why>`, split at the first separator, both parts trimmed. A line
+// without the separator (or with nothing after it) is all "what", with no why.
+export function splitSuggestion(line: string): { what: string; why: string | null } {
+  // Lines arrive trimmed, so "Add X — " reaches here as "Add X —": the separator with nothing after.
+  const bare = SUGGESTION_SEPARATOR.trimEnd()
+  const trimmed = line.trimEnd()
+  if (trimmed.endsWith(bare)) return { what: trimmed.slice(0, -bare.length).trim(), why: null }
+  const at = line.indexOf(SUGGESTION_SEPARATOR)
+  if (at < 0) return { what: line.trim(), why: null }
+  const why = line.slice(at + SUGGESTION_SEPARATOR.length).trim()
+  return { what: line.slice(0, at).trim(), why: why === '' ? null : why }
+}
+
+// What starting a next card queues: a task titled with the line's "what", its description saying
+// why (when the line gives a reason) and which session suggested it.
+export function suggestedTask(card: Pick<DeckCard, 'suggestion' | 'why' | 'session'>): {
+  title: string
+  description: string
+} | null {
+  if (!card.suggestion) return null
+  const by = `Suggested by ${card.session}`
+  return {
+    title: splitSuggestion(card.suggestion).what,
+    description: card.why ? `${card.why}\n\n${by}` : by,
+  }
+}
+
 // One card per Suggested next line of a finished task, except those handled on this phone.
 function nextCards(base: CardBase, task: Task, handled: Set<string>): DeckCard[] {
   const lines = typeof task.summary === 'string' ? suggestedNext(task.summary) : []
   return lines
     .map((suggestion, index) => ({ suggestion, id: `next:${task.id}:${index}` }))
     .filter(({ id }) => !handled.has(id))
-    .map(({ suggestion, id }) =>
-      taskCard(base, task, {
+    .map(({ suggestion, id }) => {
+      const { what, why } = splitSuggestion(suggestion)
+      return taskCard(base, task, {
         id,
         kind: 'next',
-        headline: suggestion,
+        headline: what,
         at: doneAt(task),
         action: { type: 'queue' },
         suggestion,
+        why,
       })
-    )
+    })
 }
 
 // One card per project with open to-dos, listing them oldest first.

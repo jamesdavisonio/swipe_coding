@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // swipe-deck 49: dragging right past the threshold or ArrowRight does the card's action; the
-// stamp names it; dragging left or ArrowLeft passes; a summary springs back; a next card is dropped.
+// stamp names it; dragging left or ArrowLeft passes; a summary springs back; a next card opens the skip sheet.
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import Deck from '../packages/web/src/pages/Deck.tsx'
@@ -203,21 +203,19 @@ describe('swipe-deck 49 left passes', () => {
     expect(shown()).toContain('Done: Order the replies')
   })
 
-  it('a next card dragged left says Not now', () => {
+  it('a next card dragged left says Skip', () => {
     setBoard({ tasks: [nextTask()] })
     renderAt('/', <Deck />)
     swipe(card(), -300, 0, true)
-    expect(screen.getByTestId('deck-stamp-later').textContent).toContain('Not now')
+    expect(screen.getByTestId('deck-stamp-later').textContent).toContain('Skip')
   })
 
-  it('a next card dragged left is dropped from this phone', () => {
+  it('a next card dragged left opens the skip sheet instead of being dropped', () => {
     setBoard({ tasks: [nextTask()] })
-    const view = renderAt('/', <Deck />)
-    swipe(card(), -300)
-    expect(pageText()).toContain('Nothing needs you.')
-    expect(actions.queueSuggestion).not.toHaveBeenCalled()
-    view.unmount()
     renderAt('/', <Deck />)
-    expect(pageText()).toContain('Nothing needs you.')
+    swipe(card(), -300)
+    expect(screen.getByRole('dialog', { name: 'Skip this suggestion?' })).toBeTruthy()
+    expect(pageText()).not.toContain('Nothing needs you.')
+    expect(actions.queueSuggestion).not.toHaveBeenCalled()
   })
 })

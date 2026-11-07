@@ -1,5 +1,6 @@
-// The deck's keys, on the document: ← Later, → Agree, ↑ Details, ↓ Overview, M Change it,
-// L Listen. Ignored while typing, with a modifier held, or while a modal sheet has the keys.
+// The deck's keys, on the document: ← Later (a suggested-next card asks: skip for now or for
+// good), → Agree, ↑ Details, ↓ Overview, M Change it, L Listen. Ignored while typing, with a
+// modifier held, or while a modal sheet has the keys.
 import { useEffect, useRef } from 'react'
 
 export type Move = 'later' | 'agree' | 'details' | 'overview' | 'change' | 'listen'
