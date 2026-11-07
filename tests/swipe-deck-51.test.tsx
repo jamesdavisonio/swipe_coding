@@ -110,10 +110,10 @@ describe('swipe-deck 51 overview', () => {
   it('tapping a project puts all its cards first', () => {
     board()
     renderAt('/', <Deck />)
-    expect(text(card())).toContain('Merge PR #42 into main')
-    press('ArrowDown')
-    fireEvent.click(within(sheet()).getByRole('button', { name: /website/ }))
     expect(text(card())).toContain('Mend the export')
+    press('ArrowDown')
+    fireEvent.click(within(sheet()).getByRole('button', { name: /kanban/ }))
+    expect(text(card())).toContain('Merge PR #42 into main')
   })
 })
 
