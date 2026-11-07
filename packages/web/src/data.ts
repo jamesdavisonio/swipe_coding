@@ -473,3 +473,15 @@ export async function addTodo(projectId: string, body: string) {
 }
 
 export { forJamesTaskId }
+
+// ---- swipe deck (red-checkpoint stubs) ----
+const notYet = (): Promise<never> => Promise.reject(new Error('not implemented'))
+export const requestMerge = (_task: Task): Promise<void> => notYet()
+export const sendNote = (_task: Task, _text: string): Promise<void> => notYet()
+export const tickRemainingSteps = (_task: Task): Promise<void> => notYet()
+export const markTodosDone = (_todos: readonly Todo[]): Promise<void> => notYet()
+export const queueSuggestion = (
+  _projectId: string,
+  _suggestion: string,
+  _note?: string
+): Promise<string> => notYet()

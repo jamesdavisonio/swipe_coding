@@ -121,6 +121,9 @@ export class Board {
   readonly id: BoardIdentity
   private heartbeat: NodeJS.Timeout | null = null
 
+  // Red-checkpoint stub.
+  async refreshRemoteUrl(): Promise<void> {}
+
   constructor(cwd = process.cwd()) {
     this.db = getDb()
     const hostname = osHostname()
