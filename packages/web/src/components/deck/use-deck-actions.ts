@@ -12,7 +12,7 @@ import {
   sendNote,
   tickRemainingSteps,
 } from '../../data.ts'
-import { stampText, type DeckCard, type DeckChoice } from '../../lib/deck.ts'
+import { stampText, suggestedTask, type DeckCard, type DeckChoice } from '../../lib/deck.ts'
 import { activeNeed } from '../../lib/threads.ts'
 import { track } from '../../lib/use-thread-actions.ts'
 import type { Ghost } from './CardStage.tsx'
@@ -29,7 +29,7 @@ interface Write {
 export interface DeckUi {
   fly: (card: DeckCard, to: Ghost['to'], from: Drag | null) => void
   toast: (text: string) => void
-  openSheet: (kind: 'choices' | 'hold', card: DeckCard) => void
+  openSheet: (kind: 'choices' | 'hold' | 'skip', card: DeckCard) => void
   closeSheet: () => void
 }
 
@@ -45,16 +45,20 @@ const NOTE_CLEARS_NEED: readonly NeedKind[] = ['spec', 'question', 'pr']
 // The write a card's right swipe makes; null for the moves that open a sheet first.
 function writeOf(card: DeckCard, task: Task | null, todos: readonly Todo[]): Write | null {
   const action = card.action
-  const suggestion = card.suggestion
   if (!action) return null
   if (action.type === 'todos_done') {
     const ids = new Set(card.todoIds)
     return { action: 'todos_done', run: () => markTodosDone(todos.filter((t) => ids.has(t.id))) }
   }
-  if (action.type === 'queue')
-    return suggestion
-      ? { action: 'queue_suggestion', run: () => queueSuggestion(card.projectId, suggestion) }
+  if (action.type === 'queue') {
+    const queued = suggestedTask(card)
+    return queued
+      ? {
+          action: 'queue_suggestion',
+          run: () => queueSuggestion(card.projectId, queued.title, queued.description),
+        }
       : null
+  }
   if (!task) return null
   switch (action.type) {
     case 'approve':
@@ -112,16 +116,31 @@ function agree(ctx: Ctx, card: DeckCard, from: Drag | null) {
   if (write) commit(ctx, card, write, { to: 'right', from })
 }
 
-function later({ deck, ui }: Ctx, card: DeckCard, from: Drag | null) {
-  if (!canPass(card)) return refuse(ui, "Nothing to dismiss here. Drag right once you've read it.")
+// Left: the card goes behind the others (a summary cannot be put off); a suggested-next card asks
+// first whether to skip it for now or for good.
+function later(ctx: Ctx, card: DeckCard, from: Drag | null) {
+  if (!canPass(card))
+    return refuse(ctx.ui, "Nothing to dismiss here. Drag right once you've read it.")
+  if (card.kind === 'next') return ctx.ui.openSheet('skip', card)
+  pass(ctx, card, from, `Later. ${card.session} keeps waiting.`)
+}
+
+// The card flies left and is passed on this phone: it comes back after the others.
+function pass({ deck, ui }: Ctx, card: DeckCard, from: Drag | null, toast: string) {
   ui.fly(card, 'left', from)
-  if (card.kind === 'next') {
-    deck.memory.handleNext(card.id)
-    ui.toast('Not now. Dropped from this phone.')
-    return
-  }
   deck.memory.pass(card.id)
-  ui.toast(`Later. ${card.session} keeps waiting.`)
+  ui.toast(toast)
+}
+
+// The skip sheet's answers. Neither writes to the board: "for now" passes the card like any other,
+// "never" drops it from this phone for good (as a started suggestion is).
+function skip(ctx: Ctx, card: DeckCard, forGood: boolean) {
+  const { deck, ui } = ctx
+  ui.closeSheet()
+  if (!forGood) return pass(ctx, card, null, 'Skipped. It comes back after the others.')
+  ui.fly(card, 'left', null)
+  deck.memory.handleNext(card.id)
+  ui.toast('Dropped from this phone.')
 }
 
 function choose(ctx: Ctx, card: DeckCard, choice: DeckChoice) {
@@ -146,14 +165,15 @@ function merge(ctx: Ctx, card: DeckCard) {
   )
 }
 
-// A voice note: the card goes up and away. A suggested-next card is queued with the note as its
-// description; anything else goes to the session, and the deck waits for its revised card.
+// A voice note: the card goes up and away. A suggested-next card is queued (titled with what it
+// suggests) with the note as its description; anything else goes to the session, and the deck
+// waits for its revised card.
 function note(ctx: Ctx, card: DeckCard, text: string) {
   const { deck, ui } = ctx
   ui.closeSheet()
-  const suggestion = card.suggestion
-  if (card.kind === 'next' && suggestion) {
-    const run = () => queueSuggestion(card.projectId, suggestion, text)
+  const queued = card.kind === 'next' ? suggestedTask(card) : null
+  if (queued) {
+    const run = () => queueSuggestion(card.projectId, queued.title, text)
     commit(ctx, card, { action: 'queue_suggestion', run }, { to: 'up', from: null })
     return
   }
@@ -180,6 +200,7 @@ export function useDeckActions(deck: DeckModel, ui: DeckUi) {
   return {
     agree: (card: DeckCard, from: Drag | null) => agree(ctx, card, from),
     later: (card: DeckCard, from: Drag | null) => later(ctx, card, from),
+    skip: (card: DeckCard, forGood: boolean) => skip(ctx, card, forGood),
     choose: (card: DeckCard, choice: DeckChoice) => choose(ctx, card, choice),
     merge: (card: DeckCard) => merge(ctx, card),
     note: (card: DeckCard, text: string) => note(ctx, card, text),
