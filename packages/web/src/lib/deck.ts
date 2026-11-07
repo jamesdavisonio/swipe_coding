@@ -148,7 +148,7 @@ const YES_STAMP: Record<Exclude<DeckAction['type'], 'phrase'>, string> = {
 const NO_ACTION_STAMP = 'Use the mic'
 const LATER_STAMP: Partial<Record<CardKind, string>> = {
   next: 'Skip',
-  summary: 'Nothing to dismiss',
+  summary: 'Dismiss',
 }
 export function stampText(card: Pick<DeckCard, 'kind' | 'action'>): {
   yes: string

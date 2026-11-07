@@ -18,10 +18,9 @@ export const yesNote = (card: Pick<DeckCard, 'action'>): string =>
   card.action ? YES_NOTE[card.action.type] : NO_ACTION_NOTE
 
 export function laterNote(card: Pick<DeckCard, 'kind'>): string {
-  if (card.kind === 'summary') return "Drag right once you've read it"
+  if (card.kind === 'summary') return 'Marked as read'
   if (card.kind === 'next') return 'For now, or for good'
   return 'Comes back after the others'
 }
 
 // A summary is read, not put off: a left drag springs back.
-export const canPass = (card: Pick<DeckCard, 'kind'>): boolean => card.kind !== 'summary'
