@@ -54,6 +54,10 @@ export function stepCount(task: Pick<Task, 'afterDeploy'>): number {
 // The version the spec sheet and its history lines call the spec: 1 while there is no spec.
 export const specVersion = (task: Pick<Task, 'spec'>): number => task.spec?.version ?? 1
 
+// "PR #24", or "the PR" for a task that never reported its number.
+export const prName = (task: Pick<Task, 'pr'>): string =>
+  task.pr ? `PR #${task.pr.number}` : 'the PR'
+
 // Only web links may leave the app from a Firestore-supplied URL (never javascript:, data:).
 export function webUrl(value: unknown): string | null {
   if (typeof value !== 'string') return null
@@ -65,7 +69,9 @@ export function webUrl(value: unknown): string | null {
   }
 }
 
-function visible(task: Task, now: number): boolean {
+// A task the board lists: not a project's For James task, and not done for longer than
+// DONE_VISIBLE_MS.
+export function isListed(task: Task, now: number): boolean {
   return (
     task.type !== 'for_james' &&
     isTaskVisible({ stage: task.stage, doneAt: task.doneAt ?? null }, { now })
@@ -91,7 +97,7 @@ export function threadRows(input: {
 }): ThreadRow[] {
   const { tasks, todos, filter, now = Date.now() } = input
   const rows: ThreadRow[] = tasks
-    .filter((t) => visible(t, now) && inProject(t.projectId, filter))
+    .filter((t) => isListed(t, now) && inProject(t.projectId, filter))
     .map((task) => ({
       kind: 'task',
       task,
@@ -128,7 +134,7 @@ export function needsCount(input: {
 }): number {
   const { tasks, todos, projectId, now = Date.now() } = input
   const needing = tasks.filter(
-    (t) => visible(t, now) && inProject(t.projectId, projectId) && activeNeed(t) !== null
+    (t) => isListed(t, now) && inProject(t.projectId, projectId) && activeNeed(t) !== null
   )
   const open = todos.filter((t) => !t.done && inProject(t.projectId, projectId))
   return needing.length + open.length

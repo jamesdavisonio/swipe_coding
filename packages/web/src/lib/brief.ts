@@ -15,6 +15,8 @@ export interface Brief {
   before: string
   after: string
   replyPhrase: string | null
+  // The phrase of a `Yes: <phrase>` line directly under the heading: what agreeing does.
+  yes: string | null
 }
 
 export const GATE_LABEL: Record<Gate, string> = {
@@ -39,6 +41,7 @@ const SUB_HEADING = /^###\s+(.+?)\s*$/
 const ANY_HEADING = /^#{1,6}\s/
 const RULE = /^---+\s*$/
 const REPLY_LINE = /^\s*Reply ["“]([^"”]+)["”], or tell me what to change\.\s*$/
+const YES_LINE = /^Yes:\s*(\S.*?)\s*$/
 const SUGGESTED_HEADING = /^###\s+Suggested next\s*$/i
 const LIST_MARKER = /^(?:[-*]\s+|\d+\.\s+)/
 
@@ -87,6 +90,13 @@ function subHeadingAt(lines: readonly string[], start: number): number[] | null 
   return found.length === BRIEF_SECTIONS.length ? found : null
 }
 
+// The `Yes: <phrase>` line's phrase when it is the first line with text under the heading at
+// `start` (blank lines may come between), before the first sub-heading at `firstSub`.
+function yesPhrase(lines: readonly string[], start: number, firstSub: number): string | null {
+  const first = lines.slice(start + 1, firstSub).find((line) => line.trim() !== '')
+  return first === undefined ? null : (YES_LINE.exec(first.trim())?.[1] ?? null)
+}
+
 function readBrief(lines: readonly string[], start: number, gate: Gate): Brief | null {
   const at = subHeadingAt(lines, start)
   if (!at) return null
@@ -104,6 +114,7 @@ function readBrief(lines: readonly string[], start: number, gate: Gate): Brief |
     before: block(lines.slice(0, start)),
     after: block(lines.slice(end)),
     replyPhrase: phrase ?? null,
+    yes: yesPhrase(lines, start, at[0]),
   }
 }
 

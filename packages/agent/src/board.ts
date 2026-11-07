@@ -1,5 +1,6 @@
 // All Firestore reads/writes for one agent (= one Claude Code session).
-import { hostname as osHostname } from 'node:os'
+import { homedir, hostname as osHostname } from 'node:os'
+import { join } from 'node:path'
 import {
   FieldValue,
   type DocumentSnapshot,
@@ -34,6 +35,7 @@ import {
 } from '@kanban/shared'
 import { errorStatus, logFailure, setLogIdentity } from './app-log.ts'
 import { getDb, log } from './firestore.ts'
+import { readRemoteUrl } from './remote.ts'
 
 // A Firestore-side failure of a listener or batch: the stderr / agent.log line, plus a stored
 // event (WARNING for a batch, ERROR for a dead listener).
@@ -53,6 +55,16 @@ function firestoreFailure(
       status: errorStatus(err),
       ...(taskId ? { task_id: taskId } : {}),
     },
+  })
+}
+
+// The session's Claude-app link as Claude Code's sessions file has it right now. Home and pid are
+// read at each call: the pid is CLAUDE_PID when set, else the Claude Code process that started
+// this agent.
+function currentRemoteUrl(): string | null {
+  return readRemoteUrl({
+    dir: join(homedir(), '.claude', 'sessions'),
+    pid: process.env.CLAUDE_PID || process.ppid,
   })
 }
 
@@ -120,9 +132,8 @@ export class Board {
   readonly db: Firestore
   readonly id: BoardIdentity
   private heartbeat: NodeJS.Timeout | null = null
-
-  // Red-checkpoint stub.
-  async refreshRemoteUrl(): Promise<void> {}
+  // The remoteUrl last written to the agent document, so only a change is written.
+  private remoteUrl: string | null = null
 
   constructor(cwd = process.cwd()) {
     this.db = getDb()
@@ -178,27 +189,50 @@ export class Board {
       claudeSessionId: null,
       startedAt: t,
       lastSeen: t,
+      remoteUrl: currentRemoteUrl(),
     }
-    batch.set(this.db.collection(C.agents).doc(agentId), agent)
+    batch.set(this.agentRef(), agent)
     await batch.commit()
+    this.remoteUrl = agent.remoteUrl ?? null
     setLogIdentity(agentId, projectId)
 
-    this.heartbeat = setInterval(() => {
-      this.db
-        .collection(C.agents)
-        .doc(agentId)
-        .update({ lastSeen: now() })
-        .catch((err: Error) => {
-          log(`heartbeat failed: ${err.message}`)
-          void logFailure({
-            severity: 'WARNING',
-            event_type: 'api_call_failed',
-            message: err.message,
-            context: { target: 'firestore', status: errorStatus(err) },
-          })
-        })
-    }, AGENT_HEARTBEAT_MS)
+    this.heartbeat = setInterval(() => void this.beat(), AGENT_HEARTBEAT_MS)
     log(`registered agent=${agentId} project=${projectId} cwd=${cwd}`)
+  }
+
+  private agentRef() {
+    return this.db.collection(C.agents).doc(this.id.agentId)
+  }
+
+  // The link's new value when it differs from the one on the agent document, else undefined.
+  private remoteUrlChange(): { remoteUrl: string | null } | undefined {
+    const remoteUrl = currentRemoteUrl()
+    return remoteUrl === this.remoteUrl ? undefined : { remoteUrl }
+  }
+
+  // One heartbeat: lastSeen, plus remoteUrl in the same write when the link changed.
+  private async beat(): Promise<void> {
+    const change = this.remoteUrlChange()
+    try {
+      await this.agentRef().update({ lastSeen: now(), ...change })
+      if (change) this.remoteUrl = change.remoteUrl
+    } catch (err) {
+      firestoreFailure('WARNING', 'heartbeat failed', err as Error)
+    }
+  }
+
+  // Re-reads the session's Claude-app link and writes remoteUrl only when it changed (back to
+  // null too, when Remote Control goes off). Called on every kanban tool call; a failed write is
+  // logged and retried on the next call or heartbeat, never failing the tool call.
+  async refreshRemoteUrl(): Promise<void> {
+    const change = this.remoteUrlChange()
+    if (!change) return
+    try {
+      await this.agentRef().update(change)
+      this.remoteUrl = change.remoteUrl
+    } catch (err) {
+      firestoreFailure('WARNING', 'remoteUrl refresh failed', err as Error)
+    }
   }
 
   // Mark this agent gone and its active tasks orphaned (agentId kept so a new
