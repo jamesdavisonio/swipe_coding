@@ -4,13 +4,12 @@
 import { describe, expect, it } from 'vitest'
 import { parseBrief } from '../packages/web/src/lib/brief.ts'
 import { HEADLINE_MAX, buildDeck, type DeckCard } from '../packages/web/src/lib/deck.ts'
-import { MINUTE, NOW, makeTask, makeTodo } from './fixtures/web-threads-b2.tsx'
+import { MINUTE, NOW, makeTask } from './fixtures/web-threads-b2.tsx'
 import { briefText } from './fixtures/swipe-deck-brief.ts'
 
 const deck = (over: Partial<Parameters<typeof buildDeck>[0]> = {}): DeckCard[] =>
   buildDeck({
     tasks: [],
-    todos: [],
     projects: [],
     specBodies: {},
     handledNext: [],
@@ -101,7 +100,6 @@ describe('swipe-deck 43: headlines', () => {
           summary: 'Shipped.\n\n### Suggested next\nAdd dark mode',
         }),
       ],
-      todos: [makeTodo('t1'), makeTodo('t2'), makeTodo('t3', { projectId: 'p-site' })],
       specBodies: { sp: briefText('spec') },
     })
     expect(headlineOf('spec:sp', cards)).toBe('Start building: T')
@@ -113,8 +111,6 @@ describe('swipe-deck 43: headlines', () => {
     expect(headlineOf('merge:m', cards)).toBe('Merge PR #24 into main')
     expect(headlineOf('after_deploy:a', cards)).toBe('Do the 2 after-deploy steps')
     expect(headlineOf('after_deploy:b', cards)).toBe('Do the 1 after-deploy step')
-    expect(headlineOf('todos:p-kanban', cards)).toBe('2 things only you can do')
-    expect(headlineOf('todos:p-site', cards)).toBe('1 thing only you can do')
     expect(headlineOf('summary:d', cards)).toBe('Done: Done one')
     expect(headlineOf('next:d:0', cards)).toBe('Add dark mode')
   })

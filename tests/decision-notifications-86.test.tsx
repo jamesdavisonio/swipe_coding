@@ -38,7 +38,6 @@ describe('decision-notifications 86 the task no longer waits', () => {
   it('taskFirst for a task without cards leaves the order unchanged', () => {
     const all = buildDeck({
       tasks: [specTask(), choiceTask(), answered()],
-      todos: [],
       projects: PROJECTS,
       specBodies: {},
       handledNext: [],

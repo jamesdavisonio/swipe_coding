@@ -1,6 +1,6 @@
 // swipe-deck 49, data side, in the Firestore emulator (`npm run test:rules`): the writes behind
 // the right swipe. tickRemainingSteps closes an after-deploy task as ticking the last step does;
-// markTodosDone marks the given to-dos done; queueSuggestion queues a feature task in the project
+// queueSuggestion queues a feature task in the project
 // with the suggestion as its title.
 import { describe, expect, it, vi } from 'vitest'
 import * as data from '../../packages/web/src/data.ts'
@@ -13,7 +13,7 @@ import {
   seedTask,
   useEmulator,
 } from '../fixtures/web-threads-b4-emulator.ts'
-import { makeTodo, readTodos, seedProject, seedTodo } from '../fixtures/web-threads-b5-emulator.ts'
+import { seedProject } from '../fixtures/web-threads-b5-emulator.ts'
 
 vi.mock('../../packages/web/src/firebase.ts', async () =>
   (await import('../fixtures/web-threads-b4-emulator.ts')).firebaseModule()
@@ -73,33 +73,6 @@ describe('swipe-deck 49: tickRemainingSteps in the emulator', () => {
     const task = await seedTask(adTask({ stage: 'main_ci', needs: null }))
     await data.tickRemainingSteps(task)
     await expectUntouched(task)
-  })
-})
-
-describe('swipe-deck 49: markTodosDone in the emulator', () => {
-  useEmulator()
-
-  it('marks every given to-do done with a time and leaves the others open', async () => {
-    const todos = [
-      await seedTodo(makeTodo('a')),
-      await seedTodo(makeTodo('b')),
-      await seedTodo(makeTodo('other')),
-    ]
-    const before = Date.now()
-    await data.markTodosDone(todos.slice(0, 2))
-    const stored = Object.fromEntries((await readTodos()).map((t) => [t.id, t]))
-    for (const id of ['a', 'b']) {
-      expect(stored[id].done).toBe(true)
-      expect(stored[id].doneAt).toBeGreaterThanOrEqual(before)
-    }
-    expect(stored.other.done).toBe(false)
-    expect(stored.other.doneAt).toBeNull()
-  })
-
-  it('does nothing for an empty list', async () => {
-    await seedTodo(makeTodo('a'))
-    await data.markTodosDone([])
-    expect((await readTodos())[0].done).toBe(false)
   })
 })
 

@@ -77,7 +77,6 @@ describe('swipe-deck 70: Board.ask with options', () => {
     const stored = await readStored(board(), t.id)
     const cards = buildDeck({
       tasks: [stored],
-      todos: [],
       projects: [],
       specBodies: {},
       handledNext: [],

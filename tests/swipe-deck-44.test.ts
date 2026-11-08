@@ -43,7 +43,6 @@ describe('swipe-deck 44: exampleOf', () => {
     ]
     const [card] = buildDeck({
       tasks,
-      todos: [],
       projects: [],
       specBodies: {},
       handledNext: [],

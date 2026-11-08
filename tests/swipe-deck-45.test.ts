@@ -9,7 +9,6 @@ import { briefText } from './fixtures/swipe-deck-brief.ts'
 const decide = (tasks: ReturnType<typeof makeTask>[]): DeckCard[] =>
   buildDeck({
     tasks,
-    todos: [],
     projects: [],
     specBodies: {},
     handledNext: [],

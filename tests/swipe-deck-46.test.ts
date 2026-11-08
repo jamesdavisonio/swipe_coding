@@ -2,7 +2,7 @@
 // every summary; passed cards go last in the order passed and are marked passed; a chosen project goes first.
 import { describe, expect, it } from 'vitest'
 import { KIND_ORDER, buildDeck, projectFirst } from '../packages/web/src/lib/deck.ts'
-import { HOUR, MINUTE, NOW, PROJECTS, makeTask, makeTodo } from './fixtures/web-threads-b2.tsx'
+import { HOUR, MINUTE, NOW, PROJECTS, makeTask } from './fixtures/web-threads-b2.tsx'
 import { briefText } from './fixtures/swipe-deck-brief.ts'
 
 const pr = { number: 7, url: 'https://x/pull/7' }
@@ -56,7 +56,6 @@ const tasks = () => [
 const build = (over: Partial<Parameters<typeof buildDeck>[0]> = {}) =>
   buildDeck({
     tasks: tasks(),
-    todos: [makeTodo('t1')],
     projects: PROJECTS,
     specBodies: {},
     handledNext: [],
@@ -76,7 +75,6 @@ const BASE = [
   'question:q',
   'merge:mg',
   'after_deploy:ad',
-  'todos:p-kanban',
   'summary:dm',
   'summary:dn',
   'next:dm:0',
@@ -96,7 +94,6 @@ describe('swipe-deck 46: order', () => {
       'question',
       'merge',
       'after_deploy',
-      'todos',
       'summary',
       'next',
     ])
@@ -137,7 +134,6 @@ describe('swipe-deck 46: projectFirst', () => {
       'summary_gate:sg',
       'merge:mg',
       'after_deploy:ad',
-      'todos:p-kanban',
       'summary:dm',
       'next:dm:0',
       'next:dm:1',

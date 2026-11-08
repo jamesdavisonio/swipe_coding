@@ -2,7 +2,7 @@
 // next card's headline is the cut what, its why the why, its suggestion the whole line.
 import { describe, expect, it } from 'vitest'
 import { buildDeck, splitSuggestion } from '../packages/web/src/lib/deck.ts'
-import { NOW, PROJECTS, makeTask, makeTodo } from './fixtures/web-threads-b2.tsx'
+import { NOW, PROJECTS, makeTask } from './fixtures/web-threads-b2.tsx'
 
 describe('swipe-deck 61: splitSuggestion', () => {
   it.each([
@@ -28,7 +28,6 @@ describe('swipe-deck 61: next cards', () => {
         summary: `Done.\n\n### Suggested next\nAdd dark mode — Night reading hurts\nPlain one\n${long} — why`,
       }),
     ],
-    todos: [makeTodo('t1')],
     projects: PROJECTS,
     specBodies: {},
     handledNext: [],

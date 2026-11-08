@@ -9,7 +9,6 @@ import {
   deployTask,
   KIND_LABEL_TEXT,
   installClock,
-  makeTodo,
   mergeTask,
   press,
   renderAt,
@@ -106,11 +105,5 @@ describe('swipe-deck 53 named controls', () => {
     setBoard({ tasks: [task()] })
     renderAt('/', <Deck />)
     expect(screen.getByTestId('deck-type').textContent).toBe(word)
-  })
-
-  it('writes the to-do card type as a word', () => {
-    setBoard({ todos: [makeTodo('a')] })
-    renderAt('/', <Deck />)
-    expect(screen.getByTestId('deck-type').textContent).toBe(KIND_LABEL_TEXT.todos)
   })
 })

@@ -11,7 +11,6 @@ import { briefText } from './fixtures/swipe-deck-brief.ts'
 const deckCard = (task: ReturnType<typeof specTask>, body?: string) =>
   buildDeck({
     tasks: [task],
-    todos: [],
     projects: PROJECTS,
     specBodies: body === undefined ? {} : { [task.id]: body },
     handledNext: [],
