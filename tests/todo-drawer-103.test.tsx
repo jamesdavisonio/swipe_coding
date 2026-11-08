@@ -86,7 +86,10 @@ describe('todo-drawer 103: ticking a to-do', () => {
     expect(b5Actions.toggleTodo).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'c', done: true })
     )
-    expect(isBefore(text('c'), divider(dialog))).toBe(true)
+    // Nothing is done in the section now: no Done divider, and c (oldest) leads the open rows.
+    expect(within(dialog).queryByText('Done')).toBeNull()
+    expect(isBefore(text('c'), text('a'))).toBe(true)
+    expect(isBefore(text('a'), text('b'))).toBe(true)
     expect(dialog.textContent).toContain('4 to do across 2 projects')
     expect(toDoButton('To-dos, 4 open').textContent?.trim()).toBe('4')
     expect(headerText(dialog)).toMatch(/\b3\b.*\b0 done/)
