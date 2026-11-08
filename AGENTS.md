@@ -10,7 +10,8 @@ report in through an MCP server and receive James's replies through a background
 - **Runtime:** TypeScript on Node 24 (type stripping: `.ts` imports keep the extension, no enums)
 - **Frontend:** React 19, Vite 7, Tailwind 4 — `packages/web` (PWA)
 - **Backend:** Firestore via firebase-admin from the desktop agent — `packages/agent` (MCP server + Claude Code channel). No Cloud Functions.
-- **Data:** Firestore `eur3`, project `kanban-nullnoise`; collections `projects`, `agents`, `tasks`, `comments`, `todos`, `logs`
+- **Data:** Firestore `eur3`, project `kanban-nullnoise`; collections `projects`, `agents`, `tasks`, `comments`, `todos`, `logs`, `devices`
+- **Push:** decision cards notify the phone via Firebase Cloud Messaging, sent by the agent (ADR 0006); `VITE_FIREBASE_VAPID_KEY` in `packages/web/.env`
 - **AI:** none in the app
 - **Deploy:** Firebase Hosting + Firestore rules; `npm run deploy`
 
