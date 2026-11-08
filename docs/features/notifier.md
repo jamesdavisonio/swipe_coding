@@ -1,6 +1,6 @@
 # Feature: One notifier for every session
 
-**Status:** Confirmed (James, board approve, 2026-11-08 09:08, comment za3Ckm4Qws80xc3jNagH)
+**Status:** Built (confirmed by James, board approve, 2026-11-08 09:08, comment za3Ckm4Qws80xc3jNagH)
 **Date:** 2026-11-08
 **Task class:** Medium (one new process in the agent package, the push moved out of the session
 agents; criteria 107–115, numbering continues from `todo-drawer.md`, 98–106). Supersedes the
