@@ -190,6 +190,8 @@ confirmed scope; they name the interfaces the tests call):
   - `fcmPush(): PushPort` — firebase-admin `messaging().sendEachForMulticast` with data-only
     `webpush` messages (`data: { title, body, tag, url }`); `unregistered` is true for
     `messaging/registration-token-not-registered` and `messaging/invalid-registration-token`.
+    Against the Firestore emulator (`FIRESTORE_EMULATOR_HOST` set) it sends nothing and reports
+    every token ok, so no test run reaches the real push service.
   - `new Board(cwd = process.cwd(), push: PushPort = fcmPush())`.
   - `setSubtask(task, 'spec', 'awaiting_approval', note)` and `ask(...)` send after the decision is
     written and before they resolve: devices are read from `devices`, each parsed with zod

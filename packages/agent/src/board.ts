@@ -38,6 +38,7 @@ import {
 } from '@kanban/shared'
 import { errorStatus, logFailure, setLogIdentity } from './app-log.ts'
 import { getDb, log } from './firestore.ts'
+import { fcmPush, type PushPort } from './push.ts'
 import { readRemoteUrl } from './remote.ts'
 
 // A Firestore-side failure of a listener or batch: the stderr / agent.log line, plus a stored
@@ -174,7 +175,10 @@ export class Board {
   // The remoteUrl last written to the agent document, so only a change is written.
   private remoteUrl: string | null = null
 
-  constructor(cwd = process.cwd()) {
+  readonly push: PushPort
+
+  constructor(cwd = process.cwd(), push: PushPort = fcmPush()) {
+    this.push = push
     this.db = getDb()
     const hostname = osHostname()
     this.id = {

@@ -582,3 +582,13 @@ export const queueSuggestion = (projectId: string, suggestion: string, note?: st
     description: note ?? '',
     afterDeploy: [],
   })
+
+// ---- devices (docs/features/decision-notifications.md) — red-checkpoint stubs ----------------
+
+export function saveDevice(_deviceId: string, _token: string): Promise<void> {
+  return Promise.reject(new Error('not implemented'))
+}
+
+export function removeDevice(_deviceId: string): Promise<void> {
+  return Promise.reject(new Error('not implemented'))
+}

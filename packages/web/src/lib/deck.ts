@@ -457,3 +457,8 @@ export function deckOverview(cards: readonly DeckCard[]): DeckOverview {
   })
   return { total: cards.length, byKind: kindsOf(cards), byProject }
 }
+
+// That task's cards first, then the rest, each group keeping its order. Red-checkpoint stub.
+export function taskFirst(cards: readonly DeckCard[], _taskId: string): DeckCard[] {
+  return [...cards]
+}

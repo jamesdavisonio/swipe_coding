@@ -19,6 +19,7 @@ export const COLLECTIONS = {
   tasks: 'tasks',
   comments: 'comments',
   todos: 'todos',
+  devices: 'devices',
 } as const
 
 export type Author = 'james' | 'agent'
@@ -317,6 +318,14 @@ export function initialTaskFields(input: {
 }
 
 export * from './templates.ts'
+export * from './decision.ts'
+
+// A browser registered for decision notifications (devices/{random per-browser id}).
+export interface Device {
+  token: string
+  createdAt: number
+  updatedAt: number
+}
 
 // ---- App logs (docs/features/app-logs.md) ---------------------------------------------------
 
