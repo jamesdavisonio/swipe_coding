@@ -1,6 +1,6 @@
 # Feature: To-dos in a drawer, not on the deck
 
-**Status:** Drafting
+**Status:** Confirmed (James, board approve, 2026-11-08 08:34, comment Pem79Pbnq9BnuRHKmBzo)
 **Date:** 2026-11-08
 **Task class:** Medium (the deck module: a new drawer and the removal of the to-do card kind;
 criteria 98–106, numbering continues from the voice-notes fix, 94–97). Supersedes the to-do card
