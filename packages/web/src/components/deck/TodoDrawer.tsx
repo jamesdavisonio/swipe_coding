@@ -56,12 +56,12 @@ function Section({
   section,
   expanded,
   onFold,
-  row,
+  renderRow,
 }: {
   section: TodoSection
   expanded: boolean
   onFold: () => void
-  row: (row: TodoRow) => ReactNode
+  renderRow: (row: TodoRow) => ReactNode
 }) {
   const listId = useId()
   const { open, done } = section
@@ -95,7 +95,7 @@ function Section({
         </span>
       </button>
       <ul id={listId} hidden={!expanded} className="mb-3 grid gap-0.5">
-        {open.map(row)}
+        {open.map(renderRow)}
         {done.length > 0 ? (
           <li
             key="done"
@@ -105,7 +105,7 @@ function Section({
             Done
           </li>
         ) : null}
-        {done.map(row)}
+        {done.map(renderRow)}
       </ul>
     </section>
   )
@@ -147,7 +147,7 @@ export default function TodoDrawer({
   // Each row's text button, so the to-do dialog can hand focus back to it wherever the row went.
   const textButtons = useRef(new Map<string, HTMLButtonElement>())
 
-  const row = (r: TodoRow) => {
+  const renderRow = (r: TodoRow) => {
     const { id } = r.todo
     return (
       <Row
@@ -182,7 +182,7 @@ export default function TodoDrawer({
               section={s}
               expanded={folds.expanded(s)}
               onFold={() => folds.fold(s)}
-              row={row}
+              renderRow={renderRow}
             />
           ))
         )}

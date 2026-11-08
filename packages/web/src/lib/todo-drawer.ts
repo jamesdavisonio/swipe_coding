@@ -23,14 +23,12 @@ export interface TodoSectionsInput {
 const oldestFirst = (a: TodoRow, b: TodoRow) => a.todo.createdAt - b.todo.createdAt
 const newestDoneFirst = (a: TodoRow, b: TodoRow) => (b.todo.doneAt ?? 0) - (a.todo.doneAt ?? 0)
 
-// Sections with open to-dos first, the oldest open to-do first; the rest by name.
-function sectionOrder(a: TodoSection, b: TodoSection): number {
-  const [x, y] = [a.open[0]?.todo.createdAt, b.open[0]?.todo.createdAt]
-  if (x !== undefined && y !== undefined && x !== y) return x - y
-  if (x !== undefined && y === undefined) return -1
-  if (x === undefined && y !== undefined) return 1
-  return a.projectName.localeCompare(b.projectName)
-}
+// When a section's oldest open to-do was added; a section with none open sorts after them all.
+const oldestOpen = (s: TodoSection): number => s.open[0]?.todo.createdAt ?? Infinity
+
+// Sections with open to-dos first, the oldest open to-do first; the rest (and ties) by name.
+const sectionOrder = (a: TodoSection, b: TodoSection): number =>
+  oldestOpen(a) - oldestOpen(b) || a.projectName.localeCompare(b.projectName)
 
 export function todoSections(input: TodoSectionsInput): TodoSection[] {
   const names = new Map(input.projects.map((p) => [p.id, p.name]))

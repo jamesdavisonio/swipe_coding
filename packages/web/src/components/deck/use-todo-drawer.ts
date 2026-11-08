@@ -12,7 +12,7 @@ type Shown = ReadonlyMap<string, boolean>
 // The ticks the snapshot has not caught up with yet: done as shown, per to-do id.
 function stillAhead(shown: Shown, todos: readonly Todo[]): Shown {
   const done = new Map(todos.map((t) => [t.id, t.done]))
-  return new Map([...shown].filter(([id, d]) => done.has(id) && done.get(id) !== d))
+  return new Map([...shown].filter(([id, d]) => done.get(id) === !d))
 }
 
 const withShown = (todo: Todo, done: boolean | undefined): Todo =>
