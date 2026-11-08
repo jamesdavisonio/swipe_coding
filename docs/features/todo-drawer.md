@@ -134,6 +134,8 @@ doneAt`); `useOpenTodos`, `useProjectTodos`, `toggleTodo(todo)`, `markTodosDone(
 - The tick box is a native checkbox (`<input type="checkbox">`) named "Mark done: <text>" /
   "Mark not done: <text>"; the row's text is a separate button whose name is the full text.
 - Backdrops use the existing `DeckSheet` convention (`data-testid="sheet-backdrop"`).
+- (Build, 2026-11-08) With no open to-dos the drawer's line reads "Nothing left to do" (criterion
+  100 names only the counted form).
 
 **Unresolved:** none.
 
