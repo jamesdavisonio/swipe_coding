@@ -117,6 +117,23 @@ brief>` (or `spec:none`), `question:<the question text>`; it sends when the key 
   `notifier:install` / `notifier:uninstall` = `powershell -File scripts/notifier-task.ps1 install|uninstall`
   (task name `kanban-notifier`).
 
+**Contract decisions added after the first fidelity check (2026-11-08, before the repair):**
+
+- The notifier writes `notified: <key>` whenever it handles a decision, whether or not any device
+  is registered (a device added later does not receive old decisions).
+- When a task's need stops being a decision (`pr`, `after_deploy` or none), the notifier removes
+  its `notified` field, so the same question (or a re-posted spec with no new brief) asked again
+  later notifies again. (Replaces "keeps `notified`".)
+- A lease held by this same hostname whose `pid` is no longer running counts as free (a watch-mode
+  restart on Windows kills the old process without `stop()`). The lease is claimed in a Firestore
+  transaction, so two notifiers starting together cannot both hold it.
+- `startNotifier` options gain `heartbeatMs` (default 30 000) and `retryMs` (default 5 000). A
+  `tasks` listener error stores one ERROR `api_call_failed` (`target: firestore`, `status`) and the
+  listener is re-created after `retryMs`.
+- Task changes are handled in snapshot order.
+- The CLI (`node packages/agent/src/notifier.ts`), when the lease is busy, writes
+  "another notifier is running" to stderr and exits with code 1.
+
 **Unresolved:** none.
 
 ## Files & modules affected
