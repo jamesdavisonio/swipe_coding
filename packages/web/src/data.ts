@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   collection,
+  deleteDoc,
   doc,
   onSnapshot,
   orderBy,
@@ -23,6 +24,7 @@ import {
   type AgentDoc,
   type Comment,
   type CommentKind,
+  type Device,
   type LogEntry,
   type Project,
   type Task,
@@ -583,12 +585,23 @@ export const queueSuggestion = (projectId: string, suggestion: string, note?: st
     afterDeploy: [],
   })
 
-// ---- devices (docs/features/decision-notifications.md) — red-checkpoint stubs ----------------
+// ---- devices (docs/features/decision-notifications.md) ---------------------------------------
 
-export function saveDevice(_deviceId: string, _token: string): Promise<void> {
-  return Promise.reject(new Error('not implemented'))
+// This browser's record for decision notifications, under its own fixed id: a new token replaces
+// the stored one (createdAt kept), so a browser never holds two records.
+export async function saveDevice(deviceId: string, token: string): Promise<void> {
+  const ref = doc(db, COLLECTIONS.devices, deviceId)
+  await runTransaction(db, async (tx) => {
+    const t = now()
+    const createdAt: unknown = (await tx.get(ref)).get('createdAt')
+    const device: Device = {
+      token,
+      createdAt: typeof createdAt === 'number' ? createdAt : t,
+      updatedAt: t,
+    }
+    tx.set(ref, device)
+  })
 }
 
-export function removeDevice(_deviceId: string): Promise<void> {
-  return Promise.reject(new Error('not implemented'))
-}
+export const removeDevice = (deviceId: string): Promise<void> =>
+  deleteDoc(doc(db, COLLECTIONS.devices, deviceId))

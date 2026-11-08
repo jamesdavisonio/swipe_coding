@@ -9,12 +9,17 @@ import {
   STAGES,
   isDone,
   isTaskVisible,
+  questionBrief,
   type NeedKind,
   type Task,
   type TaskNeed,
   type Todo,
 } from '@kanban/shared'
-import { briefHeadline, parseBrief } from './brief.ts'
+import { briefHeadline } from './brief.ts'
+
+// What a question is and is titled is the decision derivation in @kanban/shared (the agent's
+// notifications read the same); re-exported for the web's imports.
+export { questionBrief, questionTitle } from '@kanban/shared'
 
 const MINUTE_MS = 60_000
 const HOUR_MS = 60 * MINUTE_MS
@@ -228,10 +233,6 @@ export function questionOptions(need: TaskNeed): { key: string; label: string }[
 
 const READ_MORE: QuickReply = { kind: 'read', label: 'Read more' }
 
-// The brief a question is, when the session asked it as one (fix, round and summary briefs).
-export const questionBrief = (need: Pick<TaskNeed, 'question'>) =>
-  typeof need.question === 'string' ? parseBrief(need.question) : null
-
 // What a row says under its title: "<label> — <task title>" for a question that is a brief
 // (never its raw markdown), else the task's summary.
 export function rowPreview(task: Task): string {
@@ -239,12 +240,6 @@ export function rowPreview(task: Task): string {
   const brief = need?.kind === 'question' ? questionBrief(need) : null
   if (brief) return briefHeadline(brief, task.title)
   return typeof task.summary === 'string' ? task.summary : ''
-}
-
-// What a question's sheet is titled: the brief's headline, or the question as asked.
-export function questionTitle(task: Task, need: TaskNeed): string {
-  const brief = questionBrief(need)
-  return brief ? briefHeadline(brief, task.title) : need.question || 'Question'
 }
 
 // The one-tap answer a brief's closing Reply line offers, if it has one.

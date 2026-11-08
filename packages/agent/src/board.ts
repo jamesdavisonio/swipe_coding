@@ -38,7 +38,7 @@ import {
 } from '@kanban/shared'
 import { errorStatus, logFailure, setLogIdentity } from './app-log.ts'
 import { getDb, log } from './firestore.ts'
-import { fcmPush, type PushPort } from './push.ts'
+import { fcmPush, notifyDecision, type PushPort } from './push.ts'
 import { readRemoteUrl } from './remote.ts'
 
 // A Firestore-side failure of a listener or batch: the stderr / agent.log line, plus a stored
@@ -174,7 +174,7 @@ export class Board {
   private heartbeat: NodeJS.Timeout | null = null
   // The remoteUrl last written to the agent document, so only a change is written.
   private remoteUrl: string | null = null
-
+  // Where decision notifications go (tests pass a fake that records them).
   readonly push: PushPort
 
   constructor(cwd = process.cwd(), push: PushPort = fcmPush()) {
@@ -501,7 +501,10 @@ export class Board {
     const patch = { updatedAt: t, ...subtaskPatch(task, resolveStage(task, key), status) }
     if (note) await this.writeAgentComment(task, note, 'info', patch)
     else await this.db.collection(C.tasks).doc(taskId).update(patch)
-    return { ...task, ...(patch as Partial<Task>) }
+    const updated = { ...task, ...(patch as Partial<Task>) }
+    // A spec posted for approval is a decision: James's phone hears of it.
+    if (status === 'awaiting_approval') await notifyDecision(this.db, this.push, updated, note)
+    return updated
   }
 
   // ---- comments -------------------------------------------------------------
@@ -554,6 +557,7 @@ export class Board {
       : { kind: 'question', question }
     const c = await this.writeAgentComment(task, question, 'question', { needs })
     log(`asked on ${taskId}: ${question.slice(0, 80)}`)
+    await notifyDecision(this.db, this.push, { ...task, needs })
     return c
   }
 

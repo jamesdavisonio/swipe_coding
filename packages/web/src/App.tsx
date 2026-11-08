@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthGate } from './auth.tsx'
+import { OpenTaskMessages } from './lib/use-open-task.ts'
 import Deck from './pages/Deck.tsx'
 import NewTask from './pages/NewTask.tsx'
 import Project from './pages/Project.tsx'
@@ -11,6 +12,7 @@ export default function App() {
   return (
     <AuthGate>
       <BrowserRouter>
+        <OpenTaskMessages />
         <Routes>
           <Route path="/" element={<Deck />} />
           <Route path="/threads" element={<Threads />} />

@@ -10,12 +10,16 @@ import {
 
 const useEmulator = import.meta.env.VITE_USE_EMULATOR === 'true'
 const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID || 'demo-kanban'
+const appId = import.meta.env.VITE_FIREBASE_APP_ID || undefined
 
 export const app = initializeApp({
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || (useEmulator ? 'demo-key' : undefined),
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || `${projectId}.firebaseapp.com`,
   projectId,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || undefined,
+  appId,
+  // Cloud Messaging (decision notifications) needs the sender id, which is the project number:
+  // the second part of a web app id ("1:<project number>:web:<hash>").
+  messagingSenderId: appId?.split(':')[1],
 })
 
 export const auth = getAuth(app)
