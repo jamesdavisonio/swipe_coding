@@ -24,6 +24,11 @@ import {
   specTask,
   summaryTask,
 } from './fixtures/web-threads-b2.tsx'
+import {
+  FakeRecognition,
+  installRecognition,
+  uninstallRecognition,
+} from './fixtures/fake-recognition.ts'
 
 vi.mock('../packages/web/src/data.ts', async () =>
   (await import('./fixtures/web-threads-b2.tsx')).dataModule()
@@ -33,51 +38,23 @@ vi.mock('../packages/web/src/lib/log.ts', async () =>
 )
 vi.mock('../packages/web/src/firebase.ts', () => ({ app: {}, auth: {}, db: {} }))
 
-// A browser speech recognizer: tests call say() the way the browser delivers results.
-class FakeRecognition extends EventTarget {
-  static last: FakeRecognition | null = null
-  continuous = false
-  interimResults = false
-  lang = ''
-  onresult: ((e: unknown) => void) | null = null
-  onend: (() => void) | null = null
-  onerror: ((e: unknown) => void) | null = null
-  start = vi.fn()
-  stop = vi.fn(() => this.onend?.())
-  abort = vi.fn()
-  constructor() {
-    super()
-    FakeRecognition.last = this
-  }
-  say(transcript: string, isFinal: boolean) {
-    const results = [Object.assign([{ transcript, confidence: 1 }], { isFinal })]
-    const event = Object.assign(new Event('result'), { resultIndex: 0, results })
-    act(() => {
-      this.dispatchEvent(event)
-      this.onresult?.(event)
-    })
-  }
-}
-
 const win = window as unknown as Record<string, unknown>
 beforeEach(() => {
   localStorage.clear()
   vi.useFakeTimers()
   vi.setSystemTime(NOW)
-  FakeRecognition.last = null
-  win.SpeechRecognition = FakeRecognition
+  installRecognition()
 })
 afterEach(() => {
   cleanup()
   vi.useRealTimers()
-  delete win.SpeechRecognition
-  delete win.webkitSpeechRecognition
+  uninstallRecognition()
 })
 
 const speakNote = (words: string) => {
   fireEvent.click(screen.getByRole('button', { name: 'Change it' }))
   expect(FakeRecognition.last?.start).toHaveBeenCalled()
-  FakeRecognition.last!.say(words, true)
+  FakeRecognition.current().say(words, true)
 }
 const send = () => fireEvent.click(screen.getByRole('button', { name: 'Send' }))
 
@@ -86,9 +63,9 @@ describe('swipe-deck 54 recording', () => {
     setBoard({ tasks: [specTask()] })
     renderAt('/', <Deck />)
     fireEvent.click(screen.getByRole('button', { name: 'Change it' }))
-    FakeRecognition.last!.say('make it fas', false)
+    FakeRecognition.current().say('make it fas', false)
     expect(screen.getByRole('dialog').textContent).toContain('make it fas')
-    FakeRecognition.last!.say('make it faster', true)
+    FakeRecognition.current().say('make it faster', true)
     expect(screen.getByRole('dialog').textContent).toContain('make it faster')
     expect(actions.sendNote).not.toHaveBeenCalled()
     send()
