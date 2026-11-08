@@ -126,6 +126,15 @@ doneAt`); `useOpenTodos`, `useProjectTodos`, `toggleTodo(todo)`, `markTodosDone(
   `YES_NOTE.todos_done`, the tone entry and the "Only you can do" heading are removed from the deck;
   `markTodosDone` stays in `data.ts` only if something else still uses it.
 
+**Contract decisions added after the test draft (2026-11-08, before the fidelity check):**
+
+- `DeckInput` loses its `todos` field (the deck no longer reads to-dos); test inputs drop it.
+- `markTodosDone` is removed from `data.ts` with its emulator cases (nothing else uses it).
+- The dialog's "<time ago>" uses the board's existing `relativeTime` format (e.g. "3 d").
+- The tick box is a native checkbox (`<input type="checkbox">`) named "Mark done: <text>" /
+  "Mark not done: <text>"; the row's text is a separate button whose name is the full text.
+- Backdrops use the existing `DeckSheet` convention (`data-testid="sheet-backdrop"`).
+
 **Unresolved:** none.
 
 ## Files & modules affected
