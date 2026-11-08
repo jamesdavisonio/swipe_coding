@@ -1,0 +1,403 @@
+
+ RUN  v3.2.7 C:/Users/Intel/Documents/code/kanban-todos
+
+ ✓ tests/web-threads-b4-20.test.tsx (11 tests) 3839ms
+   ✓ B4-20 focus while a sheet is open > keeps Tab inside the spec sheet  1086ms
+   ✓ B4-20 focus while a sheet is open > keeps Shift+Tab inside the after-deploy sheet  1092ms
+   ✓ B4-20 dismissing a sheet > Escape with a change typed sends nothing  660ms
+ ✓ tests/web-threads-b3-14.test.tsx (20 tests) 4794ms
+   ✓ B3-14 composer keys > Enter inserts a newline and does not send  448ms
+   ✓ B3-14 composer keys > the Send button sends, keeping inner newlines  317ms
+   ✓ B3-14 composer keys > whitespace-only text (spaces) cannot be sent  343ms
+   ✓ B3-14 composer keys > whitespace-only text (newlines and spaces) cannot be sent  349ms
+   ✓ B3-14 sending > with a question (the write is an answer), sends the reply for that task under a fresh comment id  404ms
+   ✓ B3-14 sending > with no need (the write is a comment), sends the reply for that task under a fresh comment id  395ms
+   ✓ B3-14 sending > clears the box and shows the message at once with one tick, before the snapshot has it  439ms
+   ✓ B3-14 sending > shows the message once however many snapshots then contain it, with advancing ticks  427ms
+   ✓ B3-14 sending > the same text sent twice takes two ids and shows twice, each once after the echo  414ms
+ ✓ tests/web-threads-b5-30.test.tsx (14 tests) 5954ms
+   ✓ B5-30 Projects > reaches every control with Tab and names each one  412ms
+   ✓ B5-30 a project > on the live tab reaches every control with Tab and names each one  504ms
+   ✓ B5-30 a project > on the james tab reaches every control with Tab and names each one  657ms
+   ✓ B5-30 a project > on the done tab reaches every control with Tab and names each one  414ms
+   ✓ B5-30 a project > switches tabs with the keyboard  314ms
+   ✓ B5-30 a project > ticks a todo with Space and adds one with the keyboard alone  913ms
+   ✓ B5-30 a project > reveals older done tasks with the keyboard  512ms
+   ✓ B5-30 a project > opens a live task with the keyboard  400ms
+   ✓ B5-30 New task > reaches every control with Tab and names each one, steps field included  911ms
+   ✓ B5-30 New task > queues a task with the keyboard alone  677ms
+ ✓ tests/web-threads-b6-26.test.tsx (20 tests) 6300ms
+   ✓ B6-26 Reopen on the thread > keeps Reopen and send disabled while the trimmed note is empty  382ms
+   ✓ B6-26 Reopen on the thread > Cancel closes the sheet and writes nothing  682ms
+   ✓ B6-26 Reopen on the thread > calls reopenTask once with the task and the note, closes, and stays on the thread  848ms
+   ✓ B6-26 Reopen on the thread > is disabled while the save is pending, so a second tap writes nothing  745ms
+   ✓ B6-26 Reopen on the thread > on a refused save keeps the sheet and the note, alerts, and logs api_call_failed  763ms
+   ✓ B6-26 Reopen on the thread > logs reopen and the task_reopened milestone with the task id, under one request id  661ms
+   ✓ B6-26 Reopen from the Done tab and the History sheet > each Done card's Reopen opens the sheet for that task and saving opens its thread  702ms
+   ✓ B6-26 Reopen from the Done tab and the History sheet > the History sheet's Reopen task opens the Reopen sheet, and saving opens the thread  719ms
+ ✓ tests/web-threads-b4-16.test.tsx (15 tests) 3048ms
+   ✓ B4-16 Request a change > Changes… shows the change box with Send to session disabled until there is text  488ms
+   ✓ B4-16 Request a change > sends the text with requestChange once and closes when it resolves  436ms
+   ✓ B4-16 Request a change > Cancel goes back to the spec without writing  490ms
+   ✓ B4-16 Request a change > is disabled while the write is pending, so a second tap writes nothing  523ms
+   ✓ B4-16 Request a change > keeps the text and shows an inline error when the write fails  442ms
+ ✓ tests/web-threads-b3-28.test.tsx (5 tests) 2270ms
+   ✓ B3-28 a reply while offline > shows at once with one tick and stays while the write is queued  534ms
+   ✓ B3-28 a reply while offline > when the network returns, the snapshot carries it once and the ticks advance  385ms
+   ✓ B3-28 a reply whose write fails for good > removes the message, puts the text back and shows an inline error  394ms
+   ✓ B3-28 a reply whose write fails for good > logs api_call_failed with the Firestore code under the reply request id  454ms
+   ✓ B3-28 a reply whose write fails for good > the restored text can be sent again  502ms
+ ✓ tests/web-threads-b6-30.test.tsx (12 tests) 8888ms
+   ✓ B6-30 the History sheet from the keyboard > opens from Decision history, names every control and keeps Tab inside  723ms
+   ✓ B6-30 the History sheet from the keyboard > Close closes it and focuses Decision history again  377ms
+   ✓ B6-30 the History sheet from the keyboard > opens from a Done card's History with Enter; Escape returns focus to it  692ms
+   ✓ B6-30 the Reopen sheet from the keyboard > opens from Reopen, names every control and keeps Tab inside  737ms
+   ✓ B6-30 the Reopen sheet from the keyboard > reopens with the keyboard alone  782ms
+   ✓ B6-30 the Reopen sheet from the keyboard > Escape with a note typed writes nothing and focuses Reopen again  753ms
+   ✓ B6-30 the Reopen sheet from the keyboard > Cancel on the sheet opened from the footer writes nothing and focuses Reopen again  830ms
+   ✓ B6-30 the Reopen sheet from the keyboard > Close on the sheet opened from the footer writes nothing and focuses Reopen again  799ms
+   ✓ B6-30 the Reopen sheet from the keyboard > Cancel on the sheet opened from a Done card writes nothing and focuses the card's Reopen again  892ms
+   ✓ B6-30 the Reopen sheet from the keyboard > Close on the sheet opened from a Done card writes nothing and focuses the card's Reopen again  870ms
+   ✓ B6-30 the Reopen sheet from the keyboard > reaches every Done card control with Tab, each named, and opens Reopen with Enter  1194ms
+ ✓ tests/web-threads-b5-23.test.tsx (22 tests) 9601ms
+   ✓ B5-23 the stage preview > adds After deploy when there are steps, and drops it when the box is unticked  441ms
+   ✓ B5-23 Queue task > is disabled while the trimmed title is empty  442ms
+   ✓ B5-23 Queue task > calls createTask once with the trimmed title and description and the clean steps  2101ms
+   ✓ B5-23 Queue task > sends no steps when the box is unticked again, and the defaults when untouched  631ms
+   ✓ B5-23 Queue task > returns to Threads once the save resolves, with the new row visible  2159ms
+   ✓ B5-23 Queue task > is disabled while the save is pending, so a second tap writes nothing  341ms
+   ✓ B5-23 Queue task > on a refused save shows the alert, keeps the form, and logs api_call_failed  2320ms
+ ✓ tests/web-threads-b4-17.test.tsx (11 tests) 3180ms
+   ✓ B4-17 the question sheet shows the question > keeps Send answer disabled for whitespace-only text  468ms
+   ✓ B4-17 answering > typed text calls answerQuestion once with the label only and closes  444ms
+   ✓ B4-17 answering > disables Send answer while typed text is being saved, so a double tap writes once  911ms
+   ✓ B4-17 answering > keeps the typed text and shows an inline error when the write fails  846ms
+ ✓ tests/web-threads-b6-27.test.tsx (7 tests) 3117ms
+   ✓ B6-27 reopening brings a long-done task back > reopened from its thread, it is on Threads again  845ms
+   ✓ B6-27 reopening brings a long-done task back > reopened from the Done tab's older list, it is on Threads again  1527ms
+ ✓ tests/web-threads-b5-24.test.tsx (6 tests) 1610ms
+   ✓ B5-24 New task for a project with no live session > with no agent at all, Queue task saves and returns to Threads  448ms
+   ✓ B5-24 New task for a project with no live session > with only a stale agent, Queue task saves and returns to Threads  343ms
+   ✓ B5-24 New task for a project with no live session > with agents live only in other projects, Queue task saves and returns to Threads  598ms
+ ✓ tests/web-threads-b6-29.test.tsx (5 tests) 2321ms
+   ✓ B6-29 empty copy and a refused reopen > a refused reopen shows "Couldn't save. Try again." and keeps the note for another try  1741ms
+ ✓ tests/web-threads-b3-30.test.tsx (13 tests) 4666ms
+   ✓ B3-30 keyboard and names on the thread > reaches every control with Tab  1469ms
+   ✓ B3-30 keyboard and names on the thread > gives every button, link and textbox an accessible name  379ms
+   ✓ B3-30 keyboard and names on the thread > types and sends a reply with the keyboard alone  1113ms
+   ✓ B3-30 keyboard and names on the thread > opens the message's Read more with the keyboard  593ms
+   ✓ B3-30 keyboard and names on the thread > opens Decision history with the keyboard  307ms
+ ✓ tests/board-briefs-b7-32.test.tsx (7 tests) 1320ms
+   ✓ B7-32 Approve and Changes behave as in B4 > without a spec brief in the thread, the sheet shows the spec as before, with no toggle  401ms
+ ✓ tests/web-threads-b6-25.test.tsx (18 tests) 1367ms
+ ✓ tests/web-threads-b4-19.test.tsx (13 tests) 1123ms
+ ✓ tests/board-briefs-b7-41.test.tsx (4 tests) 732ms
+ ✓ tests/web-threads-b2-11.test.tsx (8 tests) 1840ms
+   ✓ B2-11 quick replies act without leaving Threads > Small change… opens the decision sheet in mode change for its task  487ms
+   ✓ B2-11 quick replies act without leaving Threads > Open the 2 steps opens the decision sheet in mode read for its task  799ms
+ ✓ tests/web-threads-b2-30.test.tsx (5 tests) 7718ms
+   ✓ B2-30 keyboard and names on Threads > reaches every control with Tab  3995ms
+   ✓ B2-30 keyboard and names on Threads > gives every button and link an accessible name  914ms
+   ✓ B2-30 keyboard and names on Threads > exposes aria-pressed on every chip and aria-current on the nav  490ms
+   ✓ B2-30 keyboard and names on Threads > filters by project with the keyboard  956ms
+   ✓ B2-30 keyboard and names on Threads > opens a thread with the keyboard  1346ms
+ ✓ tests/web-threads-b5-22.test.tsx (27 tests) 15267ms
+   ✓ B5-22 the project header > links back to Projects  1490ms
+   ✓ B5-22 the project header > is headed by the project name, with "<host> · session live" under it  381ms
+   ✓ B5-22 the project header > has a "+ Task" link to New task with the project preselected  550ms
+   ✓ B5-22 the tabs > labels the tabs with their counts and presses Live by default  478ms
+   ✓ B5-22 the tabs > choosing a tab presses it and sets the tab param  1393ms
+   ✓ B5-22 the tabs > opens on the tab the URL names  307ms
+   ✓ B5-22 Live > lists the tasks not done, needing James first, then most recently updated  568ms
+   ✓ B5-22 Live > shows type, stage text, title and the stepper on each card  514ms
+   ✓ B5-22 Live > notes the after-deploy steps waiting at the end, singular and plural  519ms
+   ✓ B5-22 Live > opens the thread when a card is tapped  532ms
+   ✓ B5-22 For James > a refused tick logs api_call_failed with the Firestore code  305ms
+   ✓ B5-22 For James > links an open todo out to its http(s) link in a new tab  410ms
+   ✓ B5-22 For James > has no Open link for a done todo, a todo without a link, or a non-web link  423ms
+   ✓ B5-22 For James > Add stays disabled until there is text, then calls addTodo with the project  2429ms
+   ✓ B5-22 For James > a refused add logs api_call_failed with the Firestore code  1103ms
+   ✓ B5-22 Done > lists the tasks done within 7 days, newest first, with title, summary and when  336ms
+   ✓ B5-22 Done > Show <N> older reveals the rest below, newest first, and becomes Hide <N> older  889ms
+   ✓ B5-22 Done > sorts the older ones by doneAt, newest first, whatever order they arrive in  356ms
+   ✓ B5-22 Done > lists a task done just inside DONE_VISIBLE_MS and keeps one just outside behind Show older  517ms
+   ✓ B5-22 Done > opens the thread of a done task  348ms
+ ✓ tests/web-threads-b4-30.test.tsx (13 tests) 11523ms
+   ✓ B4-30 keyboard and names in each sheet > the spec sheet: every control has a name  1395ms
+   ✓ B4-30 keyboard and names in each sheet > the question sheet: every control has a name  838ms
+   ✓ B4-30 keyboard and names in each sheet > the pr sheet: every control has a name  453ms
+   ✓ B4-30 keyboard and names in each sheet > the after_deploy sheet: every control has a name  653ms
+   ✓ B4-30 keyboard and names in each sheet > the spec sheet: Tab reaches every control  826ms
+   ✓ B4-30 keyboard and names in each sheet > the question sheet: Tab reaches every control  712ms
+   ✓ B4-30 keyboard and names in each sheet > the pr sheet: Tab reaches every control  581ms
+   ✓ B4-30 keyboard and names in each sheet > the after_deploy sheet: Tab reaches every control  595ms
+   ✓ B4-30 deciding with the keyboard alone > approves the spec with Enter  510ms
+   ✓ B4-30 deciding with the keyboard alone > writes and sends a change request from the keyboard  2827ms
+   ✓ B4-30 deciding with the keyboard alone > picks an option with Space  767ms
+   ✓ B4-30 deciding with the keyboard alone > confirms the merge with Enter  842ms
+   ✓ B4-30 deciding with the keyboard alone > ticks a step with Space  514ms
+ ✓ tests/web-threads-b3-15.test.tsx (14 tests) 2278ms
+   ✓ B3-15 header > no "session live" when only another project has an agent  389ms
+ ✓ tests/web-threads-b4-28.test.tsx (7 tests) 1011ms
+   ✓ B4-28 a tick whose write fails for good > logs api_call_failed with the Firestore code under the tick request id  358ms
+ ✓ tests/swipe-deck-51.test.tsx (20 tests) 13039ms
+   ✓ swipe-deck 51 details > ArrowUp opens the example first, then the brief parts  1994ms
+   ✓ swipe-deck 51 details > an upward swipe opens the example first, then the brief parts  1124ms
+   ✓ swipe-deck 51 details > links "Open in Claude" to the bound session when the agent has one  705ms
+   ✓ swipe-deck 51 details > has no "Open in Claude" link when remoteUrl is undefined  1061ms
+   ✓ swipe-deck 51 details > has no "Open in Claude" link when remoteUrl is null  415ms
+   ✓ swipe-deck 51 details > the Details button opens it too  973ms
+   ✓ swipe-deck 51 overview > ArrowDown opens what is waiting, by type and by project  669ms
+   ✓ swipe-deck 51 overview > a downward swipe opens what is waiting, by type and by project  751ms
+   ✓ swipe-deck 51 overview > the Overview button opens what is waiting, by type and by project  559ms
+   ✓ swipe-deck 51 overview > tapping a project puts all its cards first  699ms
+   ✓ swipe-deck 51 spec card from the thread > takes its headline from the Yes line and its example from the spec brief  426ms
+   ✓ swipe-deck 51 closing sheets > the details sheet closes with its Close button  404ms
+   ✓ swipe-deck 51 closing sheets > the overview sheet closes with its Close button  331ms
+   ✓ swipe-deck 51 closing sheets > the details sheet closes with a drag back the way it came  523ms
+   ✓ swipe-deck 51 closing sheets > the overview sheet closes with a drag back the way it came  503ms
+   ✓ swipe-deck 51 closing sheets > a details sheet scrolled down scrolls first: a downward drag leaves it open  810ms
+ ✓ tests/swipe-deck-49.test.tsx (28 tests) 11701ms
+   ✓ swipe-deck 49 right does the action > ArrowRight: spec approves  1208ms
+   ✓ swipe-deck 49 right does the action > ArrowRight: a fix answers with its phrase  434ms
+   ✓ swipe-deck 49 right does the action > ArrowRight: after_deploy ticks every remaining step  814ms
+   ✓ swipe-deck 49 right does the action > ArrowRight: a summary marks the task read  573ms
+   ✓ swipe-deck 49 right does the action > dragging right does the same as ArrowRight  630ms
+   ✓ swipe-deck 49 right does the action > a failed write is logged like a failed Threads decision and the card stays  806ms
+   ✓ swipe-deck 49 right does the action > while dragging right the merge card stamps its action  320ms
+   ✓ swipe-deck 49 left passes > ArrowLeft and a left drag send the card behind the others, writing nothing  661ms
+   ✓ swipe-deck 49 left passes > remembers a pass on this phone across a reload  302ms
+   ✓ swipe-deck 49 left passes > a left drag on a summary dismisses it like a right drag: markRead once, nothing else  681ms
+   ✓ swipe-deck 49 left passes > ArrowLeft on a summary dismisses it like a right drag: markRead once, nothing else  354ms
+   ✓ swipe-deck 49 left passes > Later on a summary dismisses it like a right drag: markRead once, nothing else  588ms
+   ✓ swipe-deck 49 left passes > a right drag on a summary marks it read once, the same call as a left drag  488ms
+   ✓ swipe-deck 49 left passes > a next card dragged left opens the skip sheet instead of being dropped  625ms
+ ✓ tests/swipe-deck-54.test.tsx (12 tests) 11572ms
+   ✓ swipe-deck 54 recording > shows interim words as they come and sends the final words with the arrow  3829ms
+   ✓ swipe-deck 54 recording > works through the webkit-prefixed recognizer, and M starts it  551ms
+   ✓ swipe-deck 54 recording > a spec note goes to sendNote for that task  1070ms
+   ✓ swipe-deck 54 recording > a question note goes to sendNote for that task  694ms
+   ✓ swipe-deck 54 recording > a merge note goes to sendNote for that task  525ms
+   ✓ swipe-deck 54 recording > a after_deploy note goes to sendNote for that task  735ms
+   ✓ swipe-deck 54 recording > a summary note goes to sendNote for that task  582ms
+   ✓ swipe-deck 54 recording > a next note queues the task with the note as its description  476ms
+   ✓ swipe-deck 54 waiting for the revised card > the card leaves and a line names the session it waits for  1051ms
+   ✓ swipe-deck 54 waiting for the revised card > the revised card replaces the line when the task waits on James again  766ms
+   ✓ swipe-deck 54 waiting for the revised card > stops waiting after ten minutes  632ms
+   ✓ swipe-deck 54 without speech recognition > Change it opens a text box with the same Send arrow  626ms
+ ✓ tests/board-briefs-b7-33.test.tsx (13 tests) 2273ms
+   ✓ B7-33 a question brief in the decision sheet > a summary brief: the sheet is titled "Summary — Export the report" and shows the brief card  365ms
+   ✓ B7-33 a question brief in the decision sheet > offers the phrase beside the free-text answer  398ms
+   ✓ B7-33 a question brief in the decision sheet > tapping the phrase answers with exactly that phrase, once, and logs gate_reply  541ms
+   ✓ B7-33 a question brief in the decision sheet > a rejected phrase answer keeps the sheet open with the save error and logs it  371ms
+ ✓ tests/web-threads-b2-7.test.tsx (5 tests) 878ms
+ ✓ tests/web-threads-b5-29.test.tsx (22 tests) 5730ms
+   ✓ B5-29 Projects > while projects are loading shows the loading status, not the empty copy  1183ms
+   ✓ B5-29 Projects > when the projects read fails, shows the error and Retry retries it  414ms
+   ✓ B5-29 Projects > when the tasks read fails, shows the error and Retry retries it  389ms
+   ✓ B5-29 a project > an empty project shows each tab’s empty copy  789ms
+ ✓ tests/swipe-deck-53.test.tsx (12 tests) 389ms
+ ✓ tests/web-threads-b4-18.test.tsx (7 tests) 2323ms
+   ✓ B4-18 the PR sheet shows the PR > is a dialog named "PR #<n> is ready to merge" showing the summary  588ms
+   ✓ B4-18 Merged it > calls markMerged once with the task and closes when it resolves  396ms
+   ✓ B4-18 Merged it > is disabled while the write is pending, so a second tap writes nothing  410ms
+   ✓ B4-18 Merged it > stays open with an inline error and logs api_call_failed when the write fails  343ms
+ ✓ tests/board-briefs-b7-34.test.tsx (3 tests) 988ms
+   ✓ B7-34 the PR sheet leads with the summary brief > shows the summary alone, with no card, when the session posted no summary brief  604ms
+ ✓ tests/web-threads-b3-13.test.tsx (19 tests) 4749ms
+   ✓ B3-13 messages > renders every message in createdAt order  1000ms
+   ✓ B3-13 messages > a system line shows its text only, with no kind label or time  451ms
+   ✓ B3-13 Read more on the latest message of the needed kind > only the latest question carries Read more when the task waits on a question  618ms
+   ✓ B3-13 Read more on the latest message of the needed kind > only the latest spec carries Read more when the task waits on the spec  350ms
+   ✓ B3-13 Read more on the latest message of the needed kind > opens the decision sheet in read mode from the message  422ms
+ ✓ tests/todo-drawer-104.test.tsx (11 tests) 9952ms
+   ✓ todo-drawer 104: the to-do dialog > shows project and time ago, the full text, and the task it came from  2634ms
+   ✓ todo-drawer 104: the to-do dialog > shows a to-do under an hour old as minutes  651ms
+   ✓ todo-drawer 104: the to-do dialog > has no From line for a to-do that came from no task  523ms
+   ✓ todo-drawer 104: the to-do dialog > links a web link in a new tab with rel noreferrer  657ms
+   ✓ todo-drawer 104: the to-do dialog > shows no link when the to-do has none  597ms
+   ✓ todo-drawer 104: the to-do dialog > never links a non-web link  795ms
+   ✓ todo-drawer 104: the to-do dialog > Mark not done toggles a done to-do back and closes the dialog, the sheet stays  809ms
+   ✓ todo-drawer 104: the to-do dialog > Mark done toggles the to-do and closes the dialog, the sheet stays  876ms
+   ✓ todo-drawer 104: the to-do dialog > its close button closes only the dialog and focus returns to the row text  792ms
+   ✓ todo-drawer 104: the to-do dialog > a tap outside it closes only the dialog and focus returns to the row text  783ms
+   ✓ todo-drawer 104: the to-do dialog > Escape closes only the dialog and focus returns to the row text  827ms
+ ✓ tests/todo-drawer-100.test.tsx (6 tests) 3458ms
+   ✓ todo-drawer 100: opening and closing the drawer > opens a dialog titled To-dos with the summary line and a Close to-dos button  788ms
+   ✓ todo-drawer 100: opening and closing the drawer > says "1 project" for one project  363ms
+   ✓ todo-drawer 100: opening and closing the drawer > moves focus into the dialog  520ms
+   ✓ todo-drawer 100: opening and closing the drawer > the Close to-dos button closes it and focus returns to the to-do button  854ms
+   ✓ todo-drawer 100: opening and closing the drawer > a tap on the backdrop closes it and focus returns to the to-do button  529ms
+   ✓ todo-drawer 100: opening and closing the drawer > Escape closes it and focus returns to the to-do button  402ms
+ ✓ tests/swipe-deck-62.test.tsx (8 tests) 4919ms
+   ✓ swipe-deck 62 skip sheet > a left drag opens it with both answers and the card still there  1783ms
+   ✓ swipe-deck 62 skip sheet > ArrowLeft opens it with both answers and the card still there  378ms
+   ✓ swipe-deck 62 skip sheet > Later opens it with both answers and the card still there  462ms
+   ✓ swipe-deck 62 skip sheet > Skip for now passes the card behind the others, remembered across a reload  551ms
+   ✓ swipe-deck 62 skip sheet > Never show again drops it from this phone for good  626ms
+   ✓ swipe-deck 62 skip sheet > writes nothing to the board whichever answer is chosen  638ms
+ ✓ tests/swipe-deck-61-details.test.tsx (9 tests) 1764ms
+   ✓ swipe-deck 61 details of a next card > says exactly what agreeing does  368ms
+ ✓ tests/web-threads-b3-29.test.tsx (10 tests) 1384ms
+   ✓ B3-29 a failed projects or agents read only degrades the header > with the projects read failing, the thread still renders without an error state  422ms
+ ✓ tests/web-threads-b5-21.test.tsx (13 tests) 352ms
+ ✓ tests/web-threads-b2-6.test.tsx (28 tests) 360ms
+ ✓ tests/todo-drawer-105.test.tsx (3 tests) 1933ms
+   ✓ todo-drawer 105: nothing of the sheet above the dialog > moves focus off the tapped row into the dialog  779ms
+   ✓ todo-drawer 105: nothing of the sheet above the dialog > keeps focus in the dialog if the row text is focused behind it  919ms
+ ✓ tests/todo-drawer-106.test.tsx (4 tests) 4832ms
+   ✓ todo-drawer 106: accessible, modal drawer and dialog > the sheet is modal and every control in it is named  2417ms
+   ✓ todo-drawer 106: accessible, modal drawer and dialog > the sheet keeps focus inside: focusing the button behind it pulls focus back in  760ms
+   ✓ todo-drawer 106: accessible, modal drawer and dialog > the to-do dialog is modal, its controls are named and it keeps focus inside  1025ms
+   ✓ todo-drawer 106: accessible, modal drawer and dialog > every row has a named text button and a named tick control  600ms
+ ✓ tests/decision-notifications-73.test.tsx (4 tests) 398ms
+ ✓ tests/todo-drawer-103.test.tsx (6 tests) 8821ms
+   ✓ todo-drawer 103: ticking a to-do > ticking an open to-do writes toggleTodo, moves the row under Done and updates the counts  2945ms
+   ✓ todo-drawer 103: ticking a to-do > moves the row at once, before the write settles  1017ms
+   ✓ todo-drawer 103: ticking a to-do > unticking a done to-do writes toggleTodo and moves the row back among the open ones  1295ms
+   ✓ todo-drawer 103: ticking a to-do > logs the tap as user_action toggle_todo on the to-do  627ms
+   ✓ todo-drawer 103: ticking a to-do > a failed write shows the row where it was and logs the failure  1296ms
+   ✓ todo-drawer 103: ticking a to-do > a failed untick puts the row back under Done  1637ms
+ ✓ tests/todo-drawer-101.test.tsx (7 tests) 6179ms
+   ✓ todo-drawer 101: the sections in the drawer > shows one header per project with to-dos, in order, named with their counts  2089ms
+   ✓ todo-drawer 101: the sections in the drawer > starts sections with open to-dos expanded and the others collapsed  1345ms
+   ✓ todo-drawer 101: the sections in the drawer > a header toggles its section  2708ms
+ ✓ tests/web-threads-b2-9.test.tsx (8 tests) 2862ms
+   ✓ B2-9 quick replies by need kind > spec: Approve spec, Small change…, Read more  1118ms
+   ✓ B2-9 quick replies by need kind > question: one "key · label" button per option, then Read more  486ms
+   ✓ B2-9 quick replies by need kind > pr: an external "Open PR #n" link, then Merged it and Read more  405ms
+ ✓ tests/swipe-deck-50.test.tsx (3 tests) 2352ms
+   ✓ swipe-deck 50 choices sheet > opens on Agree with the choices, recommended (the first) first  1157ms
+   ✓ swipe-deck 50 choices sheet > tapping a choice answers with it  681ms
+   ✓ swipe-deck 50 choices sheet > closing the sheet leaves the card and answers nothing  510ms
+ ✓ tests/decision-notifications-74.test.tsx (4 tests) 2505ms
+   ✓ decision-notifications 74 unsupported > without notifications the control is disabled and the line shows  1239ms
+   ✓ decision-notifications 74 unsupported > without a service worker the control is disabled and the line shows  505ms
+   ✓ decision-notifications 74 unsupported > without push the control is disabled and the line shows  391ms
+   ✓ decision-notifications 74 unsupported > a browser that can receive push does not show the line  366ms
+ ✓ tests/board-briefs-b7-36.test.tsx (7 tests) 2612ms
+   ✓ B7-36 the suggestions in a Done message > a plain summary: a list headed "You could start next" with a Copy button per item  1269ms
+   ✓ B7-36 the suggestions in a Done message > a summary brief: a list headed "You could start next" with a Copy button per item  437ms
+   ✓ B7-36 the suggestions in a Done message > Copy writes the item to the clipboard and shows Copied on that button  423ms
+   ✓ B7-36 the suggestions in a Done message > Copy logs copy_suggestion for the task and starts nothing  473ms
+ ✓ tests/merge-on-github-90.test.tsx (5 tests) 2652ms
+   ✓ merge-on-github 90 agreeing marks it merged > dragging right past the threshold marks the task merged straight away and the card leaves  970ms
+   ✓ merge-on-github 90 agreeing marks it merged > the Agree button marks the task merged straight away and the card leaves  806ms
+   ✓ merge-on-github 90 agreeing marks it merged > a failed write brings the card back and is logged  368ms
+ ✓ tests/merge-on-github-93.test.tsx (5 tests) 2979ms
+   ✓ merge-on-github 93 nothing asks a session to merge > ArrowRight sends no merge request and opens no hold sheet  1165ms
+   ✓ merge-on-github 93 nothing asks a session to merge > a right drag sends no merge request and opens no hold sheet  580ms
+   ✓ merge-on-github 93 nothing asks a session to merge > the Agree button sends no merge request and opens no hold sheet  415ms
+   ✓ merge-on-github 93 nothing asks a session to merge > the details sheet asks for no hold and no merge either  538ms
+ ✓ tests/todo-drawer-102.test.tsx (5 tests) 3103ms
+   ✓ todo-drawer 102: rows in the drawer > lists open rows oldest first, then the Done divider, then done rows newest first  1591ms
+   ✓ todo-drawer 102: rows in the drawer > shows done rows with a checked box and open rows with an unchecked one  574ms
+   ✓ todo-drawer 102: rows in the drawer > has no Done divider when nothing in the section is done  331ms
+   ✓ todo-drawer 102: rows in the drawer > a long text is the row button's whole accessible name  575ms
+ ✓ tests/decision-notifications-72.test.tsx (4 tests) 2601ms
+   ✓ decision-notifications 72 turning it on > asks for permission, registers the worker, stores one device record and shows on  1831ms
+   ✓ decision-notifications 72 turning it on > a failure stores nothing, leaves the control off and says to try again  651ms
+ ✓ tests/todo-drawer-99.test.tsx (5 tests) 2866ms
+   ✓ todo-drawer 99: the to-do button > is named with the open count across all projects and shows it as a badge  1316ms
+   ✓ todo-drawer 99: the to-do button > sits at the left of the dock, before the Change it button  303ms
+   ✓ todo-drawer 99: the to-do button > with none open there is no badge, the name says so, and it still opens the drawer  746ms
+   ✓ todo-drawer 99: the to-do button > with no to-dos at all the button stays  306ms
+ ✓ tests/swipe-deck-55.test.tsx (3 tests) 3089ms
+   ✓ swipe-deck 55 listen > reads where it came from, the headline, the example and the parts  1784ms
+   ✓ swipe-deck 55 listen > L reads it too  369ms
+   ✓ swipe-deck 55 listen > hides the speaker without speech synthesis, and the microphone falls back to a text box  917ms
+ ✓ tests/merge-on-github-92.test.tsx (5 tests) 2907ms
+   ✓ merge-on-github 92 a merge card without a web url > an empty url: no GitHub link, and agreeing still marks it merged  1163ms
+   ✓ merge-on-github 92 a merge card without a web url > a script url: no GitHub link, and agreeing still marks it merged  316ms
+   ✓ merge-on-github 92 a merge card without a web url > the Agree button works the same  867ms
+ ✓ tests/board-briefs-b7-31.test.tsx (30 tests) 2397ms
+   ✓ B7-31 a brief in the thread renders as a labelled card > a spec brief shows its label as a heading and the six parts in order  816ms
+   ✓ B7-31 a brief in the thread renders as a labelled card > a fix brief shows its label as a heading and the six parts in order  362ms
+   ✓ B7-31 a brief in the thread renders as a labelled card > shows the text before the brief above the card and the text after it below  399ms
+ ✓ tests/swipe-deck-48.test.tsx (7 tests) 2246ms
+   ✓ swipe-deck 48 the deck is home > shows the first card: type, time since asked, session, project and headline  835ms
+   ✓ swipe-deck 48 the deck is home > the overview has no link to Threads  509ms
+ ✓ tests/web-threads-b2-12.test.tsx (10 tests) 1798ms
+   ✓ B2-12 bottom nav > links Threads to /, Projects to /projects and New task to /new  773ms
+ ✓ tests/decision-notifications-75.test.tsx (3 tests) 1401ms
+   ✓ decision-notifications 75 turning it off > shows on when this browser is registered  870ms
+   ✓ decision-notifications 75 turning it off > a tap deletes the token, removes the record, forgets the id and shows off  522ms
+ ✓ tests/web-threads-b2-29.test.tsx (7 tests) 1461ms
+   ✓ B2-29 Threads states > while tasks are loading shows the loading status, not the empty copy  573ms
+   ✓ B2-29 Threads states > on a read error shows the error and a Retry that retries each failed source  368ms
+ ✓ tests/decision-notifications-71.test.tsx (3 tests) 1751ms
+   ✓ decision-notifications 71 the bell is off > shows the control, off and usable, in the overview  1072ms
+   ✓ decision-notifications 71 the bell is off > is off when permission was granted but this browser has no stored device  379ms
+ ✓ tests/web-threads-b2-8.test.tsx (6 tests) 1297ms
+   ✓ B2-8 For James row on Threads > shows the open count and the newest time for each project  889ms
+   ✓ B2-8 For James row on Threads > opens the project's For James tab when tapped  376ms
+ ✓ tests/web-threads-b3-2.test.tsx (4 tests) 1486ms
+   ✓ B3-2 a done task opened by id > finished 8 days ago renders its thread  759ms
+   ✓ B3-2 a done task opened by id > the same task is not listed on Threads, yet opens by id  387ms
+ ✓ tests/decision-notifications-85.test.tsx (8 tests) 1522ms
+   ✓ decision-notifications 85 the open board reacts > a kanban:open-task message puts that task first and shows it in the url  769ms
+ ✓ tests/decision-notifications-76.test.tsx (3 tests) 185ms
+ ✓ tests/decision-notifications-84.test.tsx (27 tests) 287ms
+ ✓ tests/merge-on-github-89.test.tsx (4 tests) 337ms
+ ✓ tests/todo-drawer-98.test.tsx (3 tests) 329ms
+ ✓ tests/web-threads-b2-10.test.tsx (4 tests) 97ms
+ ✓ tests/board-briefs-b7-35.test.tsx (3 tests) 275ms
+ ✓ tests/swipe-deck-57.test.ts (19 tests) 36ms
+ ✓ tests/decision-notifications-86.test.tsx (4 tests) 94ms
+2026-11-08T09:29:44.610Z [46496] firestore mode=offline the test runner never uses the live board; run through npm run test:rules (emulator)
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+ ✓ tests/app-logs-1.test.ts (6 tests) 12ms
+ ✓ tests/board-briefs-b7-37.test.ts (6 tests) 1360ms
+   ✓ B7-37 the session instructions > is what the MCP server sends: initialize returns SESSION_INSTRUCTIONS  1355ms
+ ✓ tests/app-logs-3.test.ts (3 tests) 16ms
+ ✓ tests/swipe-deck-47.test.ts (7 tests) 13ms
+ ✓ tests/app-logs-2.test.ts (2 tests) 10ms
+2026-11-08T09:29:45.472Z [32088] firestore mode=offline the test runner never uses the live board; run through npm run test:rules (emulator)
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+ ✓ tests/merge-on-github-91.test.tsx (1 test) 95ms
+ ✓ tests/swipe-deck-52.test.tsx (3 tests) 93ms
+ ✓ tests/swipe-deck-42.test.ts (7 tests) 10ms
+ ✓ tests/decision-notifications-78.test.ts (15 tests) 11ms
+ ✓ tests/web-threads-b1-contract.test.ts (15 tests) 10ms
+ ✓ tests/swipe-deck-45.test.ts (8 tests) 7ms
+ ✓ tests/swipe-deck-43.test.ts (7 tests) 7ms
+2026-11-08T09:29:46.384Z [4884] firestore mode=offline the test runner never uses the live board; run through npm run test:rules (emulator)
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+ ✓ tests/swipe-deck-46.test.ts (6 tests) 8ms
+ ✓ tests/decision-notifications-77.test.ts (11 tests) 7ms
+ ✓ tests/swipe-deck-67.test.ts (9 tests) 7ms
+ ✓ tests/decision-notifications-88.test.ts (7 tests) 5ms
+ ✓ tests/swipe-deck-44.test.ts (5 tests) 5ms
+ ✓ tests/swipe-deck-59.test.ts (10 tests) 3ms
+ ✓ tests/swipe-deck-64.test.ts (6 tests) 4ms
+ ✓ tests/web-threads-b1-4.test.ts (3 tests) 3ms
+2026-11-08T09:29:47.288Z [38144] firestore mode=emulator 127.0.0.1:1 project=demo-kanban
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+ ✓ tests/web-threads-b1-2.test.ts (8 tests) 3ms
+ ✓ tests/decision-notifications-80.test.ts (2 tests) 4ms
+ ✓ tests/web-threads-b1-3.test.ts (6 tests) 2ms
+ ✓ tests/swipe-deck-61.test.ts (10 tests) 3ms
+ ✓ tests/web-threads-b1-1.test.ts (6 tests) 3ms
+ ✓ tests/swipe-deck-56.test.ts (2 tests) 3ms
+ ✓ tests/fix-comments-index.test.ts (6 tests) 4ms
+ ✓ tests/swipe-deck-68.test.ts (2 tests) 2ms
+ ✓ tests/swipe-deck-69.test.ts (6 tests) 3ms
+ ✓ tests/fix-last-stage-done.test.ts (1 test) 2ms
+ ✓ tests/swipe-deck-63.test.ts (1 test) 2ms
+ ✓ tests/sample.test.ts (1 test) 2ms
+ ✓ tests/decision-notifications-79.test.ts (4 tests) 2ms
+2026-11-08T09:29:48.165Z [21280] firestore mode=service_account project=not-a-real-project via C:\Users\Intel\AppData\Local\Temp\tests-never-live-mUeIZA\sa.json
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+ ✓ tests/fix-tests-never-live.test.ts (6 tests) 4529ms
+   ✓ the board connection never uses a key under the test runner > a key named by KANBAN_SA is refused, unread, and the board stays offline  981ms
+   ✓ the board connection never uses a key under the test runner > a key at a default location (%APPDATA%\kanban\sa.json) is refused, unread  857ms
+   ✓ the board connection never uses a key under the test runner > VITEST alone, as in the runner main process, is enough  913ms
+   ✓ the board connection never uses a key under the test runner > the emulator still works under the test runner  902ms
+   ✓ the board connection never uses a key under the test runner > outside the test runner the same key is used as before (sessions unaffected)  874ms
+
+ Test Files  107 passed (107)
+      Tests  924 passed (924)
+   Start at  10:27:55
+   Duration  112.61s (transform 12.36s, setup 0ms, collect 268.33s, tests 255.54s, environment 94.80s, prepare 13.60s)
+
+exit 0
