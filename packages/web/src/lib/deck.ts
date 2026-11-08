@@ -12,7 +12,6 @@ import {
   type Project,
   type Task,
   type TaskNeed,
-  type Todo,
 } from '@kanban/shared'
 import { LIST_MARKER, parseBrief, suggestedNext, type Brief } from './brief.ts'
 import {
@@ -26,7 +25,8 @@ import {
 } from './threads.ts'
 
 export { HEADLINE_MAX }
-export type CardKind = DecisionKind | 'merge' | 'after_deploy' | 'todos' | 'summary' | 'next'
+// To-dos are no card: they live in the deck's to-do drawer (lib/todo-drawer.ts).
+export type CardKind = DecisionKind | 'merge' | 'after_deploy' | 'summary' | 'next'
 // Most important first (James, 2026-11-07): decisions, then merges, then hand work, then finished
 // work, then every suggestion.
 export const KIND_ORDER: readonly CardKind[] = [
@@ -38,7 +38,6 @@ export const KIND_ORDER: readonly CardKind[] = [
   'question',
   'merge',
   'after_deploy',
-  'todos',
   'summary',
   'next',
 ]
@@ -47,7 +46,6 @@ export const KIND_LABEL: Record<CardKind, string> = {
   ...DECISION_LABEL,
   merge: 'Merge',
   after_deploy: 'After deploy',
-  todos: 'To-do',
   summary: 'Done',
   next: 'Suggested next',
 }
@@ -67,7 +65,6 @@ export type DeckAction =
   | { type: 'choose' }
   | { type: 'merge' }
   | { type: 'tick_all' }
-  | { type: 'todos_done' }
   | { type: 'read' }
   | { type: 'queue' }
 export interface DeckCard {
@@ -87,7 +84,6 @@ export interface DeckCard {
   passed: boolean
   revised: boolean
   steps: { label: string; done: boolean }[]
-  todoIds: string[]
   // A next card's whole Suggested next line, and the reason it gives (null without one).
   suggestion: string | null
   why: string | null
@@ -95,7 +91,6 @@ export interface DeckCard {
 }
 export interface DeckInput {
   tasks: readonly Task[]
-  todos: readonly Todo[]
   projects: readonly Project[]
   specBodies: Readonly<Record<string, string>>
   handledNext: readonly string[]
@@ -135,7 +130,6 @@ const YES_STAMP: Record<Exclude<DeckAction['type'], 'phrase'>, string> = {
   choose: 'Choose',
   merge: 'I merged it',
   tick_all: 'All done',
-  todos_done: 'All done',
   read: 'Got it',
   queue: 'Start it',
 }
@@ -174,7 +168,6 @@ function card(base: CardBase, fields: CardFields): DeckCard {
     link: null,
     revised: false,
     steps: [],
-    todoIds: [],
     suggestion: null,
     why: null,
     passed: false,
@@ -333,29 +326,6 @@ function nextCards(base: CardBase, task: Task, handled: Set<string>): DeckCard[]
     })
 }
 
-// One card per project with open to-dos, listing them oldest first.
-function todoCards(input: DeckInput, base: (projectId: string) => CardBase): DeckCard[] {
-  const open = new Map<string, Todo[]>()
-  for (const todo of input.todos) {
-    if (!todo.done) open.set(todo.projectId, [...(open.get(todo.projectId) ?? []), todo])
-  }
-  return [...open].map(([projectId, list]) => {
-    const todos = [...list].sort((a, b) => a.createdAt - b.createdAt)
-    const b = base(projectId)
-    return card(b, {
-      id: `todos:${projectId}`,
-      kind: 'todos',
-      taskId: null,
-      session: b.projectName,
-      headline: plural(todos.length, 'thing only you can do', 'things only you can do'),
-      at: todos[0].createdAt,
-      action: { type: 'todos_done' },
-      steps: todos.map((t) => ({ label: t.body, done: false })),
-      todoIds: todos.map((t) => t.id),
-    })
-  })
-}
-
 // ---- order --------------------------------------------------------------------------
 
 const byKindThenAge = (a: DeckCard, b: DeckCard) =>
@@ -390,12 +360,9 @@ export function buildDeck(input: DeckInput): DeckCard[] {
     projectId,
     projectName: names.get(projectId) ?? projectId,
   })
-  const cards = [
-    ...todoCards(input, base),
-    ...input.tasks
-      .filter((task) => isListed(task, input.now))
-      .flatMap((task) => taskCards(task, base(task.projectId), input, handled)),
-  ]
+  const cards = input.tasks
+    .filter((task) => isListed(task, input.now))
+    .flatMap((task) => taskCards(task, base(task.projectId), input, handled))
   return passedLast(ordered(cards), input.passed)
 }
 

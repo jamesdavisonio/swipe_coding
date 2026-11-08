@@ -4,6 +4,8 @@
 **Date:** 2026-11-07
 **Task class:** Large (five behaviours, D1–D5; numbering continues from `board-briefs.md`, 1–41)
 **Prototype:** `docs/features/swipe-deck-prototype.html` (version B, as James tried it on his phone)
+**Superseded in part:** the to-do card (the `todos` kind in 42, 43, 46 and 49, and its "All done")
+by `todo-drawer.md` (2026-11-08): to-dos make no card; they live in the deck's to-do drawer.
 
 ## Decision brief (spec)
 
@@ -58,7 +60,8 @@ decision. A speaker button reads the card aloud. Threads stays available at `/th
       `main_ci`, and otherwise a `question` card;
     - `pr` → a `merge` card, which is `important`;
     - `after_deploy` → an `after_deploy` card listing the task's steps with their ticks;
-    - open to-dos → one `todos` card per project, listing that project's open to-dos;
+    - ~~open to-dos → one `todos` card per project, listing that project's open to-dos;~~
+      superseded by `todo-drawer.md` (98): open to-dos make no card;
     - a done task that is still unread and within the 7-day window → a `summary` card;
     - each `### Suggested next` line of a done task within the 7-day window, not yet handled on
       this phone → a `next` card.
@@ -67,8 +70,8 @@ decision. A speaker button reads the card aloud. Threads stays available at `/th
     heading, the card's headline is that phrase. Without it, the headline falls back by kind:
     spec "Start building: <title>", fix "Fix it: <title>", ci_failed "Fix CI: <title>", round
     "Another round: <title>", summary_gate "Ship it: <title>", question the question text,
-    merge "Merge PR #<n> into main", after_deploy "Do the <n> after-deploy step(s)", todos
-    "<n> thing(s) only you can do", summary "Done: <title>", next the suggestion. A headline
+    merge "Merge PR #<n> into main", after_deploy "Do the <n> after-deploy step(s)", ~~todos
+    "<n> thing(s) only you can do"~~ (superseded, `todo-drawer.md`), summary "Done: <title>", next the suggestion. A headline
     longer than 60 characters is cut to 59 characters plus "…". Briefs without the `Yes:`
     line parse exactly as before.
 44. Given a brief whose "What will change" part has a sentence starting "For example,", the
@@ -80,7 +83,7 @@ change.` offers that phrase as the single action. A question with neither has no
     action (the microphone is its answer).
 46. Order (changed 2026-11-07, James: most important first, suggestions always last):
     decisions `ci_failed`, `spec`, `fix`, `round`, `summary_gate`, `question`; then `merge`;
-    then hand work `after_deploy`, `todos`; then finished work `summary`; then every `next`
+    then hand work `after_deploy` (~~`todos`~~, superseded by `todo-drawer.md`); then finished work `summary`; then every `next`
     card. Inside a kind, the oldest first; `next` cards no longer follow their own summary but
     all come after every summary. Cards James passed on this phone go after every card he has not
     passed, in the order he passed them, and are marked passed. Choosing a project puts all its
@@ -97,7 +100,8 @@ change.` offers that phrase as the single action. A question with neither has no
     Claude" link; Threads is still reachable at `/threads`).
 49. Dragging a card right past the threshold, or pressing the right arrow, does its action:
     spec approves; fix, round, summary_gate and a phrase-only question answer with the phrase;
-    after_deploy ticks every remaining step; todos mark every open to-do of that project done;
+    after_deploy ticks every remaining step; ~~todos mark every open to-do of that project done~~
+    (superseded by `todo-drawer.md`: to-dos are ticked one by one in the drawer);
     summary marks the task read; next queues a new task in that project titled with the suggestion's "what" part (61).
     While dragging, the stamp shows the action's name. Dragging left, or the left
     arrow, passes the card. A summary card dragged left (or the left arrow, or Later) is dismissed: it does exactly what dragging it right does (marks the task read and leaves), with the left stamp "Dismiss" (changed 2026-11-07, tweak dismiss-done). A `next` card
@@ -222,7 +226,7 @@ PC from the phone, and syncing passed cards between devices.
 - `packages/web/src/lib/deck.ts` (new): cards, order, overview, headline, example.
 - `packages/web/src/lib/brief.ts`: the optional `Yes:` line (`Brief.yes`).
 - `packages/web/src/data.ts`: `sendNote`, `markAllTodosDone`, `queueSuggestion` (`requestMerge`
-  was removed by `merge-on-github.md`).
+  was removed by `merge-on-github.md`; `markTodosDone` by `todo-drawer.md`).
 - `packages/web/src/pages/Deck.tsx`, `packages/web/src/components/deck/*` (new); `App.tsx` routes.
 - `packages/web/src/lib/speech.ts` (new): recognition and synthesis wrappers.
 - `packages/web/src/styles/tokens.css`: card tones for light and dark.

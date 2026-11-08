@@ -107,6 +107,7 @@ export function setB5Board(
     projects: next.projects ?? B5_PROJECTS,
   })
   board.agents = live(next.agents ?? [])
+  board.allTodos = live(todos)
   allTodos = todos
   b5Actions.createTask.mockReset()
   b5Actions.createTask.mockImplementation(created)

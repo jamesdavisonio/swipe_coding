@@ -162,7 +162,7 @@ export default function DetailsSheet({
         <Facts facts={factsOf(card, task)} />
       )}
       <Lines heading="Choices" lines={card.choices.map((c) => c.label)} />
-      <Lines heading={card.kind === 'todos' ? 'Only you can do' : 'Steps'} lines={steps} />
+      <Lines heading="Steps" lines={steps} />
       <div className="mt-5 grid gap-2">
         {claude ? (
           <Button asChild variant="primary" block>

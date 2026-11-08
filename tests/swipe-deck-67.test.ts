@@ -19,7 +19,6 @@ const deck = (retiredNext?: number[]) =>
         ...(retiredNext ? { retiredNext } : {}),
       }),
     ],
-    todos: [],
     projects: PROJECTS,
     specBodies: {},
     handledNext: [],

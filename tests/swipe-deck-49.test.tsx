@@ -91,15 +91,14 @@ describe('swipe-deck 49 right does the action', () => {
     await waitFor(() => expect(actions.approveSpec).toHaveBeenCalledTimes(1))
   })
 
-  it('todos mark every open to-do of that project done', async () => {
+  it('open to-dos are no card: nothing to agree to, no write', () => {
     setBoard({
       todos: [makeTodo('a'), makeTodo('b'), makeTodo('other', { projectId: 'p-site' })],
     })
     renderAt('/', <Deck />)
+    expect(screen.queryByTestId('deck-card')).toBeNull()
     press('ArrowRight')
-    await waitFor(() => expect(actions.markTodosDone).toHaveBeenCalledTimes(1))
-    const given = actions.markTodosDone.mock.calls[0][0] as readonly { id: string }[]
-    expect(given.map((t) => t.id).sort()).toEqual(['a', 'b'])
+    expect(actions.toggleTodo).not.toHaveBeenCalled()
   })
 
   it('a failed write is logged like a failed Threads decision and the card stays', async () => {

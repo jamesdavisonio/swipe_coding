@@ -35,7 +35,6 @@ const tasks = () => [specTask(), fixTask(), choiceTask(), mergeTask()]
 const cards = () =>
   buildDeck({
     tasks: tasks(),
-    todos: [],
     projects: PROJECTS,
     specBodies: {},
     handledNext: [],

@@ -8,7 +8,6 @@ const YES_NOTE: Record<DeckAction['type'], string> = {
   choose: 'Pick one next',
   merge: "Tells the session it's merged",
   tick_all: 'Every step ticked',
-  todos_done: 'Marks them all done',
   read: 'Nothing else is sent',
   queue: 'A new task is queued',
 }

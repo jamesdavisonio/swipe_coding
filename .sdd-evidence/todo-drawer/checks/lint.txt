@@ -1,0 +1,60 @@
+
+> lint
+> eslint .
+
+
+C:\Users\Intel\Documents\code\kanban-todos\packages\agent\test\protocol.ts
+  277:60  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  281:57  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  327:36  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  363:39  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-todos\tests\app-logs-1.test.ts
+  38:36  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-todos\tests\emulator\board-replies-anywhere-r1-1.test.ts
+  25:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-todos\tests\emulator\board-replies-anywhere-r1-9.test.ts
+  43:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  44:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  65:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-todos\tests\fixtures\app-logs-emulator.ts
+  107:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  141:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  315:10  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-todos\tests\fixtures\board-replies-anywhere-emulator.ts
+  192:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-todos\tests\swipe-deck-54.test.tsx
+  80:3  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  89:5  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  91:5  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-todos\tests\swipe-deck-61.test.ts
+  37:31  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-todos\tests\swipe-deck-67.test.ts
+  32:10  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-todos\tests\todo-drawer-101.test.tsx
+  71:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-todos\tests\todo-drawer-103.test.tsx
+   48:5   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  125:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-todos\tests\todo-drawer-104.test.tsx
+  64:5  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-todos\tests\todo-drawer-105.test.tsx
+  33:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-todos\tests\todo-drawer-106.test.tsx
+  61:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+✖ 24 problems (0 errors, 24 warnings)
+
+exit 0

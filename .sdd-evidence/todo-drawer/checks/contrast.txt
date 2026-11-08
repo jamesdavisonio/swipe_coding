@@ -1,0 +1,2 @@
+✓ contrast passes WCAG AA for 60 pairs (:root + .dark).
+exit 0

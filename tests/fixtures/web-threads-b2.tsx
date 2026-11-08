@@ -79,6 +79,8 @@ export function live<T>(data: T, over: Partial<LiveStub<T>> = {}): LiveStub<T> {
 export const board = {
   tasks: live<Task[]>([]),
   todos: live<Todo[]>([]),
+  // Every to-do, done or not (useAllTodos); setBoard fills it with the to-dos it is given.
+  allTodos: live<Todo[]>([]),
   projects: live<Project[]>(PROJECTS),
   agents: live<AgentDoc[]>([]),
 }
@@ -114,7 +116,7 @@ export const actions = {
   // swipe-deck writes
   sendNote: vi.fn((_task: Task, _text: string) => Promise.resolve()),
   tickRemainingSteps: vi.fn((_task: Task) => Promise.resolve()),
-  markTodosDone: vi.fn((_todos: readonly Todo[]) => Promise.resolve()),
+  toggleTodo: vi.fn((_todo: Todo) => Promise.resolve()),
   queueSuggestion: vi.fn((_projectId: string, _suggestion: string, _note?: string) =>
     Promise.resolve('new-task')
   ),
@@ -138,6 +140,7 @@ export function setBoard(
 ) {
   board.tasks = live(next.tasks ?? [])
   board.todos = live(next.todos ?? [])
+  board.allTodos = live(next.todos ?? [])
   board.projects = live(next.projects ?? PROJECTS)
   board.agents = live<AgentDoc[]>(next.agents ?? [])
   taskComments.clear()
@@ -147,6 +150,7 @@ export function setBoard(
 export const dataModule = () => ({
   useAllTasks: () => board.tasks,
   useOpenTodos: () => board.todos,
+  useAllTodos: () => board.allTodos,
   useProjects: () => board.projects,
   useAgents: () => board.agents,
   useTaskComments: (id?: string) => commentsFor(id),
@@ -383,5 +387,4 @@ export const KIND_LABEL_TEXT = {
   after_deploy: 'After deploy',
   summary: 'Done',
   next: 'Suggested next',
-  todos: 'To-do',
 } as const

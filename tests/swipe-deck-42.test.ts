@@ -3,12 +3,11 @@
 import { describe, expect, it } from 'vitest'
 import { DONE_VISIBLE_MS } from '../packages/shared/src/index.ts'
 import { buildDeck, type DeckCard } from '../packages/web/src/lib/deck.ts'
-import { HOUR, MINUTE, NOW, PROJECTS, makeTask, makeTodo } from './fixtures/web-threads-b2.tsx'
+import { HOUR, MINUTE, NOW, PROJECTS, makeTask } from './fixtures/web-threads-b2.tsx'
 import { briefText } from './fixtures/swipe-deck-brief.ts'
 
 const input = (over: Partial<Parameters<typeof buildDeck>[0]> = {}) => ({
   tasks: [],
-  todos: [],
   projects: PROJECTS,
   specBodies: {},
   handledNext: [] as string[],
@@ -95,24 +94,6 @@ describe('swipe-deck 42: cards by need', () => {
       })
     )
     expect(idsOf(cards)).toEqual(['question:q-main', 'round:r-pr', 'summary_gate:s-main'])
-  })
-
-  it('makes one todos card per project listing its open to-dos', () => {
-    const cards = buildDeck(
-      input({
-        todos: [
-          makeTodo('a', { createdAt: NOW - 3 * HOUR }),
-          makeTodo('b', { createdAt: NOW - HOUR }),
-          makeTodo('c', { projectId: 'p-site' }),
-        ],
-      })
-    )
-    expect(idsOf(cards)).toEqual(['todos:p-kanban', 'todos:p-site'])
-    const kanban = cards.find((c) => c.id === 'todos:p-kanban')!
-    expect(kanban.taskId).toBeNull()
-    expect(kanban.todoIds.sort()).toEqual(['a', 'b'])
-    expect(kanban.steps.map((s) => s.label).sort()).toEqual(['Todo a', 'Todo b'])
-    expect(kanban.at).toBe(NOW - 3 * HOUR)
   })
 
   it('uses the project id as the name of an unknown project', () => {

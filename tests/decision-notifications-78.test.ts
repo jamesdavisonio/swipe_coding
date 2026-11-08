@@ -18,7 +18,6 @@ const asked = (stage: Stage, question: string) =>
 const deckCard = (task: ReturnType<typeof asked>) =>
   buildDeck({
     tasks: [task],
-    todos: [],
     projects: PROJECTS,
     specBodies: {},
     handledNext: [],

@@ -1,7 +1,8 @@
-// The bottom dock: only the big microphone ("Change it") shows, as on the screen James approved;
-// a swipe's stamp is the only other sign of a move. Later and Agree are still buttons for the
+// The bottom dock: the big microphone ("Change it") in the middle, as on the screen James approved,
+// and the to-do button (`start`) at its left; a swipe's stamp is the only other sign of a move. Later and Agree are still buttons for the
 // keyboard, switch access and screen readers: visually hidden until they take keyboard focus,
 // then shown beside the mic with the focus ring.
+import type { ReactNode } from 'react'
 import { srOnly } from '../../lib/a11y.ts'
 import { cn } from '../../lib/cn.ts'
 import { Check, Clock, Mic, type LucideIcon } from '../../lib/icons.ts'
@@ -35,12 +36,14 @@ function HiddenMove({
 }
 
 export default function DeckDock({
+  start,
   hasCard,
   canChange,
   onLater,
   onAgree,
   onChange,
 }: {
+  start: ReactNode
   hasCard: boolean
   canChange: boolean
   onLater: () => void
@@ -48,23 +51,26 @@ export default function DeckDock({
   onChange: () => void
 }) {
   return (
-    <div className="flex shrink-0 items-center justify-center gap-7 pt-3 pb-4">
-      <HiddenMove label="Later" Icon={Clock} disabled={!hasCard} onClick={onLater} />
-      <div className="flex flex-col items-center gap-1.5">
-        <button
-          type="button"
-          aria-label="Change it"
-          disabled={!canChange}
-          onClick={onChange}
-          className="grid size-21 place-items-center rounded-full bg-me text-me-foreground shadow-xl disabled:opacity-50"
-        >
-          <Mic aria-hidden="true" className="size-8" />
-        </button>
-        <small aria-hidden="true" className="text-xs text-muted-foreground">
-          Change it
-        </small>
+    <div className="grid shrink-0 grid-cols-[1fr_auto_1fr] items-center pt-3 pb-4">
+      <div className="justify-self-start">{start}</div>
+      <div className="flex items-center justify-center gap-7">
+        <HiddenMove label="Later" Icon={Clock} disabled={!hasCard} onClick={onLater} />
+        <div className="flex flex-col items-center gap-1.5">
+          <button
+            type="button"
+            aria-label="Change it"
+            disabled={!canChange}
+            onClick={onChange}
+            className="grid size-21 place-items-center rounded-full bg-me text-me-foreground shadow-xl disabled:opacity-50"
+          >
+            <Mic aria-hidden="true" className="size-8" />
+          </button>
+          <small aria-hidden="true" className="text-xs text-muted-foreground">
+            Change it
+          </small>
+        </div>
+        <HiddenMove label="Agree" Icon={Check} disabled={!hasCard} onClick={onAgree} />
       </div>
-      <HiddenMove label="Agree" Icon={Check} disabled={!hasCard} onClick={onAgree} />
     </div>
   )
 }
