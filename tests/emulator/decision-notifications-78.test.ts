@@ -1,6 +1,7 @@
 // decision-notifications 78 in the Firestore emulator (`npm run test:rules`): a session's
-// question (Board.ask, with or without options) sends each registered device one notification
-// titled "<kind label> · <project name>" with the deck's headline for that card.
+// question (Board.ask, with or without options) is sent by the notifier (docs/features/notifier.md)
+// to each registered device as one notification titled "<kind label> · <project name>" with the
+// deck's headline for that card.
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { Stage } from '../../packages/shared/src/index.ts'
 import { briefText } from '../fixtures/swipe-deck-brief.ts'
@@ -8,15 +9,20 @@ import {
   fakePush,
   projectName,
   seedDevices,
+  sentFor,
+  settle,
   taskAt,
   useBoard,
+  useNotifier,
+  waitForSends,
 } from '../fixtures/board-briefs-b7-emulator.ts'
 
 const push = fakePush()
-const board = useBoard('dn-78', push)
+const board = useBoard('dn-78')
+const db = useNotifier(push)
 beforeEach(async () => {
   push.reset()
-  await seedDevices(board(), ['tok-a', 'tok-b'])
+  await seedDevices(db(), ['tok-a', 'tok-b'])
 })
 
 const cases: [string, Stage, string, string, string][] = [
@@ -45,29 +51,36 @@ describe('decision-notifications 78: asking a question', () => {
     async (_n, stage, question, label, body) => {
       const t = await taskAt(board(), 'feature', { stage })
       await board().ask(t.id, question)
+      await waitForSends(push, t.id)
+      await settle(db(), push)
+      const calls = sentFor(push, t.id)
       const name = await projectName(board())
-      expect(push.calls).toHaveLength(1)
-      expect(push.calls[0].notice).toMatchObject({
+      expect(calls).toHaveLength(1)
+      expect(calls[0].notice).toMatchObject({
         title: `${label} · ${name}`,
         body,
         tag: `decision:${t.id}`,
         url: `/?task=${t.id}`,
       })
-      expect([...push.calls[0].tokens].sort()).toEqual(['tok-a', 'tok-b'])
+      expect([...calls[0].tokens].sort()).toEqual(['tok-a', 'tok-b'])
     }
   )
 
   it('notifies for a question with options, titled "Question"', async () => {
     const t = await taskAt(board(), 'feature', { stage: 'build' })
     await board().ask(t.id, 'Which font?', ['Serif', 'Sans'])
+    await waitForSends(push, t.id)
+    await settle(db(), push)
+    const calls = sentFor(push, t.id)
     const name = await projectName(board())
-    expect(push.calls).toHaveLength(1)
-    expect(push.calls[0].notice).toMatchObject({ title: `Question · ${name}`, body: 'Which font?' })
+    expect(calls).toHaveLength(1)
+    expect(calls[0].notice).toMatchObject({ title: `Question · ${name}`, body: 'Which font?' })
   })
 
   it('sends nothing when the options are refused and nothing is written', async () => {
     const t = await taskAt(board(), 'feature', { stage: 'build' })
     await expect(board().ask(t.id, 'Which?', ['only one'])).rejects.toThrow()
-    expect(push.calls).toHaveLength(0)
+    await settle(db(), push)
+    expect(sentFor(push, t.id)).toHaveLength(0)
   })
 })
