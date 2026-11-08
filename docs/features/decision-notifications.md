@@ -1,6 +1,11 @@
 # Feature: Phone notifications for decision cards
 
 **Status:** Built (confirmed by James on the board 2026-11-08 05:41)
+**Superseded in part:** the sender. Since `notifier.md` (criteria 107–115) one notifier process
+on the PC (`packages/agent/src/notifier.ts`, `npm run notifier`) sends every session's decision
+notifications; `Board.setSubtask` and `Board.ask` no longer send, and `Board` takes no push port.
+Criteria 77–83 keep their behaviour with the notifier as the sender; "only sessions started after
+the merge" and "sessions still running the old agent" no longer apply.
 **Date:** 2026-11-08
 **Task class:** Large (four behaviours, N1–N4, across web, agent, shared and hosting; numbering
 continues from `swipe-deck.md`, 42–70)
