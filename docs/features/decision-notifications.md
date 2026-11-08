@@ -162,6 +162,85 @@ and later, from another project:
 - The deck reads `?task=<taskId>` and puts that task's card first.
 - The VAPID public key comes from `VITE_FIREBASE_VAPID_KEY` in `packages/web/.env`.
 
+**Contract detail** (planner decisions recorded 2026-11-08 before the test draft, within the
+confirmed scope; they name the interfaces the tests call):
+
+- **Shared brief and decision derivation** (`@kanban/shared` exports, from new
+  `packages/shared/src/brief.ts` and `decision.ts`):
+  - `parseBrief`, `Brief`, `Gate`, `GATE_LABEL`, `BRIEF_SECTIONS` move to shared unchanged;
+    `packages/web/src/lib/brief.ts` re-exports them.
+  - `type DecisionKind = 'spec' | 'ci_failed' | 'fix' | 'round' | 'summary_gate' | 'question'`.
+  - `interface DecisionNotice { kind: DecisionKind; title: string; body: string; tag: string; url: string }`.
+  - `decisionNotice(task: Pick<Task, 'id' | 'title' | 'stage' | 'needs'>, projectName: string, specBody?: string): DecisionNotice | null`
+    — for a `spec` need: kind `spec`, body = the spec brief's `Yes:` phrase when `specBody` parses
+    as a `spec` brief, else `Start building: <task title>`; for a `question` need: the kind and
+    headline the deck gives that card (gate brief `fix` at stage `pr`/`merged`/`main_ci` →
+    `ci_failed`, else `fix`; `round`; `summary` → `summary_gate`; anything else `question`;
+    headline = the brief's `Yes:` phrase, else `<Fix CI|Fix it|Another round|Ship it>: <title>`
+    for gate kinds, else `<label> — <title>` for a well-formed brief, else the question text, else
+    `Question`). Body cut like the card: over 60 characters → first 59 and `…`. Title
+    `<KIND_LABEL[kind]> · <projectName>` (`·` is U+00B7 with one space each side). `tag`
+    `decision:<task id>`, `url` `/?task=<encodeURIComponent(task id)>`. `null` for a `pr`,
+    `after_deploy` or no need.
+  - The deck's card for the same task has `headline === decisionNotice(...).body` and
+    `KIND_LABEL[card.kind]` as the title's first part (one derivation, two readers).
+- **Agent push port** (`packages/agent/src/push.ts`):
+  - `type PushOutcome = { token: string; ok: true } | { token: string; ok: false; code: string; unregistered: boolean }`.
+  - `interface PushPort { sendDecision(notice: DecisionNotice, tokens: string[]): Promise<PushOutcome[]> }`.
+  - `fcmPush(): PushPort` — firebase-admin `messaging().sendEachForMulticast` with data-only
+    `webpush` messages (`data: { title, body, tag, url }`); `unregistered` is true for
+    `messaging/registration-token-not-registered` and `messaging/invalid-registration-token`.
+  - `new Board(cwd = process.cwd(), push: PushPort = fcmPush())`.
+  - `setSubtask(task, 'spec', 'awaiting_approval', note)` and `ask(...)` send after the decision is
+    written and before they resolve: devices are read from `devices`, each parsed with zod
+    (`token` a non-empty string); no valid device → `sendDecision` is not called. The spec body is
+    the `note`; the project name is the `projects` document's `name` (fallback: the project id).
+  - Every outcome with `unregistered: true` → that token's `devices` documents are deleted.
+  - Any failure (`sendDecision` throws, or any outcome not ok) → one WARNING `api_call_failed`
+    through `logFailure` with context `target: 'fcm'`, `status` (the error code, or the first
+    failed outcome's code), `task_id`, `device_count`, `removed` (taxonomy requires `target` and
+    `status`, which replace the table's `service` and `error_code`). The tool call still resolves
+    with its usual result.
+- **Web device records** (`packages/web/src/data.ts`): `saveDevice(deviceId: string, token: string): Promise<void>`
+  writes `devices/{deviceId}` as `{ token, createdAt, updatedAt }` (createdAt kept when the record
+  exists); `removeDevice(deviceId: string): Promise<void>` deletes it.
+- **Web push** (`packages/web/src/lib/push.ts`), using `getMessaging`, `getToken`, `deleteToken`
+  from `firebase/messaging` and the VAPID key `import.meta.env.VITE_FIREBASE_VAPID_KEY`:
+  - `DEVICE_ID_KEY = 'kanban.deviceId'` (localStorage; created on first enable).
+  - `type PushState = 'unsupported' | 'blocked' | 'off' | 'on'`;
+    `pushState(): PushState` — `unsupported` without `Notification`, `navigator.serviceWorker` or
+    `PushManager`; `blocked` when `Notification.permission === 'denied'`; `on` when permission is
+    `granted` and a device id is stored; else `off`.
+  - `enablePush(): Promise<PushState>` — `Notification.requestPermission()`; not `granted` →
+    `blocked` with nothing written; else registers `/sw.js`, gets the token with that
+    registration, `saveDevice(id, token)` → `on`. A failure → `off`, nothing stored, a WARNING
+    `feature_error` (`feature: 'notifications'`, `reason`).
+  - `disablePush(): Promise<PushState>` — `deleteToken`, `removeDevice(id)`, forgets the id → `off`.
+  - `refreshPush(): Promise<void>` — when `on`, gets the token again and `saveDevice(id, token)`
+    with the same id. The deck page calls it once when it mounts.
+  - `user_action` INFO events with `action` `notifications_on`, `notifications_off`,
+    `notifications_blocked`.
+- **Overview control** (`OverviewSheet`): a `role="switch"` button named "Notify me of decisions",
+  `aria-checked` true when on. Blocked: the line "Notifications are blocked in Chrome's site
+  settings." Unsupported: the switch is disabled and the line "Not available in this browser"
+  shows. A failed enable: the line "Couldn't turn on notifications. Try again."
+- **Service worker** (`packages/web/public/sw.js`, classic script, no imports):
+  - `push`: reads `event.data.json().data` (FCM's web payload); shows a notification only when
+    `title`, `body`, `tag` are non-empty strings, with `{ body, tag, renotify: true, data: { url } }`;
+    `url` is used only when it is a same-origin path starting with `/` (not `//`), else `/`; done
+    inside `event.waitUntil`.
+  - `notificationclick`: closes the notification; among `clients.matchAll({ type: 'window', includeUncontrolled: true })`
+    the first same-origin client is focused and sent `{ type: 'kanban:open-task', taskId }`
+    (taskId from the url's `task` parameter); with none, `clients.openWindow(url)`.
+- **Deck order**: `taskFirst(cards, taskId)` in `lib/deck.ts` puts that task's cards first, the rest
+  keeping their order. The deck applies it for the `task` query parameter of `/`; the app shell
+  listens on `navigator.serviceWorker` for `kanban:open-task` and navigates to `/?task=<id>`.
+- **Rules**: `devices/{id}` — owner may read, delete, create and update; create/update need keys
+  exactly `token`, `createdAt`, `updatedAt`, `token` a string of 1 to 4096 characters, both times
+  numbers. **Hosting**: CSP `connect-src` adds `https://fcmregistrations.googleapis.com` and
+  `https://firebaseinstallations.googleapis.com`; `/sw.js` is served with `Cache-Control: no-cache`
+  (never the immutable assets header).
+
 **Unresolved:** none.
 
 ## Files & modules affected
@@ -202,7 +281,7 @@ and later, from another project:
 | ----------------- | -------- | --------------------------------------------------------------------------- | -------- |
 | `user_action`     | INFO     | `action` (`notifications_on`, `notifications_off`, `notifications_blocked`) | internal |
 | `feature_error`   | WARNING  | `feature: notifications`, `reason` (token or registration failure)          | internal |
-| `api_call_failed` | WARNING  | `service: fcm`, `task_id`, `error_code`, `device_count`, `removed`          | internal |
+| `api_call_failed` | WARNING  | `target: fcm`, `status` (error code), `task_id`, `device_count`, `removed`  | internal |
 
 All three types exist in `logging/taxonomy.json`.
 
