@@ -128,7 +128,7 @@ describe('swipe-deck 49 right does the action', () => {
 
   it.each([
     ['spec', specTask(), 'Build it'],
-    ['merge', mergeTask(), 'Merge'],
+    ['merge', mergeTask(), 'I merged it'],
     ['choices', choiceTask(), 'Choose'],
     ['summary', summaryTask(), 'Got it'],
     ['fix', fixTask(), 'Fix confirmed'],
