@@ -1,6 +1,6 @@
 # Feature: Merge on GitHub, then tell the session
 
-**Status:** Confirmed (James, board approve, 2026-11-08 07:33, comment RMO3kbm3UaoIWHYtsQuN)
+**Status:** Built (confirmed by James, board approve, 2026-11-08 07:33, comment RMO3kbm3UaoIWHYtsQuN)
 **Date:** 2026-11-08
 **Task class:** Medium (one module, the deck; changes what the merge card does — criteria 89–93,
 numbering continues from `decision-notifications.md`; supersedes the merge half of

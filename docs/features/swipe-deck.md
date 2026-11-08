@@ -38,8 +38,9 @@ the strongest colour for important decisions. It shows the type, how long ago th
 the session (task title) and project, and one large headline saying what happens if James
 agrees. Dragging the card shows a stamp naming the decision: right is the card's action ("Build
 it", "Merge", "Choose", "Got it"), left is "Later" (the card comes back after the others). A
-card with two or more answers opens a sheet of answers when dragged right. Important decisions
-(merge) open a sheet with a button he holds for three seconds. Swiping up opens the details
+card with two or more answers opens a sheet of answers when dragged right. A merge card links to
+the pull request on GitHub, and agreeing marks it merged (`merge-on-github.md`; this replaced the
+original 3-second hold). Swiping up opens the details
 (the example first, then the brief's parts and an "Open in Claude" link to the session).
 Swiping down opens an overview of what is waiting, by type and by project; tapping a project
 puts all its cards first. A large microphone button sends a voice note that changes the
@@ -220,7 +221,8 @@ PC from the phone, and syncing passed cards between devices.
 
 - `packages/web/src/lib/deck.ts` (new): cards, order, overview, headline, example.
 - `packages/web/src/lib/brief.ts`: the optional `Yes:` line (`Brief.yes`).
-- `packages/web/src/data.ts`: `requestMerge`, `sendNote`, `markAllTodosDone`, `queueSuggestion`.
+- `packages/web/src/data.ts`: `sendNote`, `markAllTodosDone`, `queueSuggestion` (`requestMerge`
+  was removed by `merge-on-github.md`).
 - `packages/web/src/pages/Deck.tsx`, `packages/web/src/components/deck/*` (new); `App.tsx` routes.
 - `packages/web/src/lib/speech.ts` (new): recognition and synthesis wrappers.
 - `packages/web/src/styles/tokens.css`: card tones for light and dark.
@@ -234,7 +236,8 @@ PC from the phone, and syncing passed cards between devices.
   return null or "no brief" on anything unexpected.
 - **idempotency:** every decision write is a transaction that writes only while the task still
   waits on it, so a double swipe writes once.
-- **gating:** the merge needs a deliberate 3-second hold.
+- **gating:** the merge is James's own act on GitHub; the deck only records it
+  (`merge-on-github.md`, which replaced the 3-second hold).
 - **observability:** write failures log through the shared logger with existing event types.
 
 ## Instrumentation

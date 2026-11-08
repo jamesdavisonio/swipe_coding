@@ -1,0 +1,1820 @@
+i  emulators: Starting emulators: firestore
+i  emulators: Detected demo project ID "demo-kanban", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Firestore Emulator logging to firestore-debug.log
++  firestore: Firestore Emulator UI websocket is running on 9150.
+i  Running script: npx vitest run --config vitest.rules.config.ts
+
+ RUN  v3.2.7 C:/Users/Intel/Documents/code/kanban-merge
+
+stderr | tests/emulator/board-replies-anywhere-r1-6.test.ts
+2026-11-08T07:55:16.811Z [8176] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+ ✓ tests/emulator/board-replies-anywhere-r1-6.test.ts (2 tests) 15360ms
+   ✓ R1-6 two watchers, one session: each reply printed once > replies already waiting when both start  7415ms
+   ✓ R1-6 two watchers, one session: each reply printed once > replies arriving while both wait  7514ms
+stderr | tests/emulator/board-replies-anywhere-r1-7.test.ts
+2026-11-08T07:55:32.398Z [34272] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+ ✓ tests/emulator/board-replies-anywhere-r1-7.test.ts (13 tests) 12108ms
+   ✓ R1-7 a watcher that cannot deliver fails loudly at once > board offline: one line saying so, exit 1, the warning on stderr  708ms
+   ✓ R1-7 a watcher that cannot deliver fails loudly at once > unknown session (a valid 64-character id): one line, exit 1, stored warning  917ms
+   ✓ R1-7 a watcher that cannot deliver fails loudly at once > session already shut down at start: one line, exit 1, stored warning  884ms
+   ✓ R1-7 a watcher that cannot deliver fails loudly at once > the session’s agent shuts down while the watcher waits: it stops at once, stored warning  2932ms
+   ✓ R1-7 a watcher that cannot deliver fails loudly at once > invalid arguments (no arguments): one line, exit 2, before touching the board  701ms
+   ✓ R1-7 a watcher that cannot deliver fails loudly at once > invalid arguments (--agent without an id): one line, exit 2, before touching the board  703ms
+   ✓ R1-7 a watcher that cannot deliver fails loudly at once > invalid arguments (an empty id): one line, exit 2, before touching the board  700ms
+   ✓ R1-7 a watcher that cannot deliver fails loudly at once > invalid arguments (an id with a space): one line, exit 2, before touching the board  707ms
+   ✓ R1-7 a watcher that cannot deliver fails loudly at once > invalid arguments (an id with a slash): one line, exit 2, before touching the board  691ms
+   ✓ R1-7 a watcher that cannot deliver fails loudly at once > invalid arguments (a 65-character id): one line, exit 2, before touching the board  694ms
+   ✓ R1-7 a watcher that cannot deliver fails loudly at once > invalid arguments (two --agent): one line, exit 2, before touching the board  686ms
+   ✓ R1-7 a watcher that cannot deliver fails loudly at once > invalid arguments (an extra argument): one line, exit 2, before touching the board  685ms
+   ✓ R1-7 a watcher that cannot deliver fails loudly at once > invalid arguments (another flag): one line, exit 2, before touching the board  684ms
+stderr | tests/emulator/board-replies-anywhere-r1-3.test.ts
+2026-11-08T07:55:44.728Z [17060] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+ ✓ tests/emulator/board-replies-anywhere-r1-3.test.ts (3 tests) 7181ms
+   ✓ R1-3 every waiting reply, oldest first, once > replies waiting at start, across tasks: all in createdAt order; the next run has none of them  3799ms
+   ✓ R1-3 every waiting reply, oldest first, once > a burst arriving while it waits comes out together, in order  2983ms
+stderr | tests/emulator/board-replies-anywhere-r1-2.test.ts
+2026-11-08T07:55:52.144Z [42404] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+ ✓ tests/emulator/board-replies-anywhere-r1-2.test.ts (2 tests) 6545ms
+   ✓ R1-2 a waiting watcher prints a reply and exits > a comment: one exact line within a few seconds, exit 0, nobody else’s  3132ms
+   ✓ R1-2 a waiting watcher prints a reply and exits > an answer to the open question: printed with kind "answer"  3005ms
+stderr | tests/emulator/board-replies-anywhere-r1-5.test.ts
+2026-11-08T07:55:58.940Z [14952] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+ ✓ tests/emulator/board-replies-anywhere-r1-5.test.ts (1 test) 6140ms
+   ✓ R1-5 a reply with no watcher waits for the next one > between watchers: the reply stays unmarked, then the next watcher prints it  5727ms
+stderr | tests/emulator/board-replies-anywhere-r1-8.test.ts
+2026-11-08T07:56:05.352Z [22240] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+ ✓ tests/emulator/board-replies-anywhere-r1-8.test.ts (2 tests) 5395ms
+   ✓ R1-8 the agent leaves replies to the watcher > no channel push and no marking by the agent; queued announcements unchanged  2032ms
+   ✓ R1-8 the agent leaves replies to the watcher > kanban_start_task reroutes a left-behind task’s waiting reply to this session’s watcher  1935ms
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "spec" comment (not a James kind)
+[2026-11-08T07:56:11.929Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa86b error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, evaluation error at L54:24 for 'update' @ L54, false for 'update' @ L96, false for 'create' @ L51, false for 'create' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "question" comment (not a James kind)
+[2026-11-08T07:56:11.954Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa86c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, evaluation error at L54:24 for 'update' @ L54, false for 'update' @ L96, false for 'create' @ L51, false for 'create' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "pr" comment (not a James kind)
+[2026-11-08T07:56:11.989Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa86d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, evaluation error at L54:24 for 'update' @ L54, false for 'update' @ L96, false for 'create' @ L51, false for 'create' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "after_deploy" comment (not a James kind)
+[2026-11-08T07:56:12.017Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa86e error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, evaluation error at L54:24 for 'update' @ L54, false for 'update' @ L96, false for 'create' @ L51, false for 'create' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "done" comment (not a James kind)
+[2026-11-08T07:56:12.047Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa86f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, evaluation error at L54:24 for 'update' @ L54, false for 'update' @ L96, false for 'create' @ L51, false for 'create' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "info" comment (not a James kind)
+[2026-11-08T07:56:12.076Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa870 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, evaluation error at L54:24 for 'update' @ L54, false for 'update' @ L96, false for 'create' @ L51, false for 'create' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "system" comment (not a James kind)
+[2026-11-08T07:56:12.104Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa871 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, evaluation error at L54:24 for 'update' @ L54, false for 'update' @ L96, false for 'create' @ L51, false for 'create' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot send a "bogus" comment (not a James kind)
+[2026-11-08T07:56:12.140Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa872 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, evaluation error at L54:24 for 'update' @ L54, false for 'update' @ L96, false for 'create' @ L51, false for 'create' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-08T07:56:12.160Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa873 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-08T07:56:12.177Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa874 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-08T07:56:12.196Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa875 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-08T07:56:12.214Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa876 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-08T07:56:12.234Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa877 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-08T07:56:12.263Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa878 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-08T07:56:12.286Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa879 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-08T07:56:12.309Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa87a error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-08T07:56:12.324Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa87b error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-08T07:56:12.343Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa87c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-08T07:56:12.371Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa87d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-08T07:56:12.386Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa87e error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > a comment authored as the agent is refused whatever the kind
+[2026-11-08T07:56:12.401Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa87f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot edit the agent's comment
+[2026-11-08T07:56:12.436Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa881 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L54:24 for 'update' @ L54, false for 'update' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot change a sent comment's kind
+[2026-11-08T07:56:12.479Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa883 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L54:24 for 'update' @ L54, false for 'update' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot change a sent comment's kind to another James kind
+[2026-11-08T07:56:12.509Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa885 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L54:24 for 'update' @ L54, false for 'update' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > comment kinds > James cannot change a sent comment's author
+[2026-11-08T07:56:12.544Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa887 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L54:24 for 'update' @ L54, false for 'update' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > archived task log > stranger can neither read nor write it
+[2026-11-08T07:56:12.668Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa88c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L30, false for 'create' @ L96, false for 'update' @ L30, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > archived task log > unverified James can neither read nor write it
+[2026-11-08T07:56:12.743Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa88f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L30, false for 'create' @ L96, false for 'update' @ L30, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > archived task log > anonymous can neither read nor write it
+[2026-11-08T07:56:12.819Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa892 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L30, false for 'create' @ L96, false for 'update' @ L30, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:12.886Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa895 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L28, false for 'create' @ L96, false for 'update' @ L28, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:12.906Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa896 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L28, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:12.920Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa897 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:12.977Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa899 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L32, false for 'create' @ L96, false for 'update' @ L32, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:12.990Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa89a error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L32, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.023Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa89c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L25, false for 'create' @ L96, false for 'update' @ L25, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.037Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa89d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L25, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.085Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa89f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L26, false for 'create' @ L96, false for 'update' @ L26, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.131Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8a1 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.147Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8a2 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L56, false for 'delete' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.162Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8a3 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L28, false for 'delete' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.177Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8a4 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L32, false for 'delete' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.190Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8a5 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L25, false for 'delete' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.259Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8a8 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L28, false for 'create' @ L96, false for 'update' @ L28, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.272Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8a9 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L28, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.285Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8aa error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.321Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8ac error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L32, false for 'create' @ L96, false for 'update' @ L32, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.343Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8ad error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L32, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.401Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8af error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L25, false for 'create' @ L96, false for 'update' @ L25, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.417Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8b0 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L25, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.456Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8b2 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L26, false for 'create' @ L96, false for 'update' @ L26, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.502Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8b4 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.519Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8b5 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L56, false for 'delete' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.541Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8b6 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L28, false for 'delete' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.552Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8b7 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L32, false for 'delete' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.564Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8b8 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L25, false for 'delete' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.649Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8bb error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L28, false for 'create' @ L96, false for 'update' @ L28, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.680Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8bc error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L28, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.710Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8bd error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L51, false for 'create' @ L96, false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.775Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8bf error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L32, false for 'create' @ L96, false for 'update' @ L32, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.797Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8c0 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L32, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.853Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8c2 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L25, false for 'create' @ L96, false for 'update' @ L25, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.884Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8c3 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L25, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:13.961Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8c5 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L26, false for 'create' @ L96, false for 'update' @ L26, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:14.037Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8c7 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L54, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:14.069Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8c8 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L56, false for 'delete' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:14.100Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8c9 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L28, false for 'delete' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:14.124Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8ca error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L32, false for 'delete' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents
+[2026-11-08T07:56:14.147Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8cb error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L25, false for 'delete' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > agents stay read-only from the browser > James reads an agent but cannot create, update or delete one
+[2026-11-08T07:56:14.203Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8ce error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L26, false for 'create' @ L96, false for 'update' @ L26, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > agents stay read-only from the browser > James reads an agent but cannot create, update or delete one
+[2026-11-08T07:56:14.215Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8cf error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L26, false for 'update' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > agents stay read-only from the browser > James reads an agent but cannot create, update or delete one
+[2026-11-08T07:56:14.239Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8d0 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L26, false for 'delete' @ L96
+
+stderr | tests/rules/web-threads-b1-4.rules.test.ts > default deny > James is refused on a collection the rules do not name
+[2026-11-08T07:56:14.255Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x6dcfa8d1 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L96, false for 'update' @ L96
+
+ ✓ tests/rules/web-threads-b1-4.rules.test.ts (34 tests) 3545ms
+   ✓ owner writes the new task fields, todos and projects > j@nullnoise.ai creates a task with the new fields and reads it back  398ms
+   ✓ any other principal is refused > stranger: refused on tasks, comments, todos, projects and agents  370ms
+   ✓ any other principal is refused > unverified James: refused on tasks, comments, todos, projects and agents  374ms
+   ✓ any other principal is refused > anonymous: refused on tasks, comments, todos, projects and agents  583ms
+stderr | tests/emulator/board-replies-anywhere-r1-4.test.ts
+2026-11-08T07:56:14.934Z [29376] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+ ✓ tests/emulator/board-replies-anywhere-r1-4.test.ts (2 tests) 4336ms
+   ✓ R1-4 printed means received > marks what it printed and clears the question it answers, as today  2026ms
+   ✓ R1-4 printed means received > another session’s reply it did not print stays unmarked, its question still open  1906ms
+stderr | tests/emulator/board-replies-anywhere-r1-9.test.ts
+2026-11-08T07:56:19.517Z [42504] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+ ✓ tests/emulator/board-replies-anywhere-r1-9.test.ts (8 tests) 3665ms
+   ✓ R1-9 an answer given in the session > clears the question, posts the session message, and no watcher prints the board answer  2077ms
+stderr | tests/emulator/board-replies-anywhere-r1-1.test.ts
+2026-11-08T07:56:23.417Z [44260] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+ ✓ tests/emulator/board-replies-anywhere-r1-1.test.ts (3 tests) 3345ms
+   ✓ R1-1 task results carry the watcher command > the command runs as given from another folder and prints the session’s reply  1875ms
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an unknown field
+[2026-11-08T07:56:27.397Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462480 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses severity NOTICE
+[2026-11-08T07:56:27.422Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462481 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses severity in lower case
+[2026-11-08T07:56:27.440Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462482 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses source server
+[2026-11-08T07:56:27.469Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462483 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses source scorm
+[2026-11-08T07:56:27.490Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462484 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses env test
+[2026-11-08T07:56:27.508Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462485 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses audience public
+[2026-11-08T07:56:27.529Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462486 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an empty event type
+[2026-11-08T07:56:27.561Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462487 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event type of 65 characters
+[2026-11-08T07:56:27.579Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462488 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a message of 2001 characters
+[2026-11-08T07:56:27.609Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462489 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a message that is not a string
+[2026-11-08T07:56:27.638Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x8646248a error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a context of 31 keys
+[2026-11-08T07:56:27.662Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x8646248b error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a context that is not a map
+[2026-11-08T07:56:27.684Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x8646248c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a timestamp of 41 characters
+[2026-11-08T07:56:27.717Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x8646248d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a session id of 101 characters
+[2026-11-08T07:56:27.748Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x8646248e error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a ts that is not a number
+[2026-11-08T07:56:27.764Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x8646248f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses expireAt as a number
+[2026-11-08T07:56:27.795Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462490 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses expireAt in the past
+[2026-11-08T07:56:27.826Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462491 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses expireAt more than 31 days out
+[2026-11-08T07:56:27.848Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462492 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a request id of 101 characters
+[2026-11-08T07:56:27.868Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462493 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a request id that is a number
+[2026-11-08T07:56:27.889Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462494 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a trace id of 101 characters
+[2026-11-08T07:56:27.906Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462495 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a user id of 101 characters
+[2026-11-08T07:56:27.922Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462496 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a client id of 101 characters
+[2026-11-08T07:56:27.938Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462497 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an empty app id
+[2026-11-08T07:56:27.968Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462498 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an app id of 65 characters
+[2026-11-08T07:56:27.988Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x86462499 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a schema version that is a string
+[2026-11-08T07:56:28.017Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x8646249a error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses a taxonomy version that is a string
+[2026-11-08T07:56:28.046Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x8646249b error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.067Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x8646249c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.093Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x8646249d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.108Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x8646249e error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.122Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x8646249f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.140Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624a0 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.169Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624a1 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.184Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624a2 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.199Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624a3 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.216Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624a4 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.230Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624a5 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.243Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624a6 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.262Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624a7 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.279Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624a8 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.296Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624a9 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.310Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624aa error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.323Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624ab error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.340Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624ac error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > refuses an event missing any one of its fields
+[2026-11-08T07:56:28.354Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624ad error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > stranger cannot store an event
+[2026-11-08T07:56:28.376Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624ae error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > unverified James cannot store an event
+[2026-11-08T07:56:28.392Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624af error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 creating a stored event > anonymous cannot store an event
+[2026-11-08T07:56:28.417Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624b0 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 a stored event is write-once and unreadable from any browser > James cannot read, list, change or delete it
+[2026-11-08T07:56:28.511Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624b4 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 a stored event is write-once and unreadable from any browser > James cannot read, list, change or delete it
+[2026-11-08T07:56:28.532Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624b5 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 a stored event is write-once and unreadable from any browser > James cannot read, list, change or delete it
+[2026-11-08T07:56:28.545Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624b6 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L90, false for 'delete' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 a stored event is write-once and unreadable from any browser > stranger cannot read, list, change or delete it
+[2026-11-08T07:56:28.638Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624ba error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 a stored event is write-once and unreadable from any browser > stranger cannot read, list, change or delete it
+[2026-11-08T07:56:28.652Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624bb error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 a stored event is write-once and unreadable from any browser > stranger cannot read, list, change or delete it
+[2026-11-08T07:56:28.664Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624bc error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L90, false for 'delete' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 a stored event is write-once and unreadable from any browser > unverified James cannot read, list, change or delete it
+[2026-11-08T07:56:28.760Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624c0 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 a stored event is write-once and unreadable from any browser > unverified James cannot read, list, change or delete it
+[2026-11-08T07:56:28.773Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624c1 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 a stored event is write-once and unreadable from any browser > unverified James cannot read, list, change or delete it
+[2026-11-08T07:56:28.791Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624c2 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L90, false for 'delete' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 a stored event is write-once and unreadable from any browser > anonymous cannot read, list, change or delete it
+[2026-11-08T07:56:28.901Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624c6 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 a stored event is write-once and unreadable from any browser > anonymous cannot read, list, change or delete it
+[2026-11-08T07:56:28.932Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624c7 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/rules/app-logs-5.rules.test.ts > L1-5 a stored event is write-once and unreadable from any browser > anonymous cannot read, list, change or delete it
+[2026-11-08T07:56:28.954Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x864624c8 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L90, false for 'delete' @ L96
+
+ ✓ tests/rules/app-logs-5.rules.test.ts (51 tests) 2202ms
+   ✓ L1-5 creating a stored event > refuses an event missing any one of its fields  307ms
+stderr | tests/emulator/app-logs-11.test.ts > L1-11 kanban_logs arguments > min_severity
+2026-11-08T07:56:30.660Z [19376] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+ ✓ tests/emulator/app-logs-11.test.ts (19 tests) 1543ms
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses a create with an extra field
+[2026-11-08T07:56:32.110Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e71 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses a create with a token of 4097 characters
+[2026-11-08T07:56:32.131Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e72 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses a create with an empty token
+[2026-11-08T07:56:32.149Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e73 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses a create with a token that is a number
+[2026-11-08T07:56:32.178Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e74 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses a create with a token that is null
+[2026-11-08T07:56:32.200Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e75 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses a create with a createdAt that is a string
+[2026-11-08T07:56:32.224Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e76 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses a create with an updatedAt that is a string
+[2026-11-08T07:56:32.240Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e77 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses a create with an updatedAt that is null
+[2026-11-08T07:56:32.270Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e78 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses a create without token
+[2026-11-08T07:56:32.290Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e79 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses a create without createdAt
+[2026-11-08T07:56:32.306Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e7a error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses a create without updatedAt
+[2026-11-08T07:56:32.333Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e7b error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with an extra field
+[2026-11-08T07:56:32.362Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e7d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with an extra field
+[2026-11-08T07:56:32.376Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e7e error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L46:32 for 'update' @ L46, false for 'update' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with a token of 4097 characters
+[2026-11-08T07:56:32.406Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e80 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with a token of 4097 characters
+[2026-11-08T07:56:32.425Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e81 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L46:32 for 'update' @ L46, false for 'update' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with an empty token
+[2026-11-08T07:56:32.451Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e83 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with an empty token
+[2026-11-08T07:56:32.465Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e84 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L46:32 for 'update' @ L46, false for 'update' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with a token that is a number
+[2026-11-08T07:56:32.495Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e86 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with a token that is a number
+[2026-11-08T07:56:32.521Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e87 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L46:32 for 'update' @ L46, false for 'update' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with a token that is null
+[2026-11-08T07:56:32.556Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e89 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with a token that is null
+[2026-11-08T07:56:32.570Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e8a error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L46:32 for 'update' @ L46, false for 'update' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with a createdAt that is a string
+[2026-11-08T07:56:32.609Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e8c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with a createdAt that is a string
+[2026-11-08T07:56:32.631Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e8d error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L46:32 for 'update' @ L46, false for 'update' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with an updatedAt that is a string
+[2026-11-08T07:56:32.680Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e8f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with an updatedAt that is a string
+[2026-11-08T07:56:32.694Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e90 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L46:32 for 'update' @ L46, false for 'update' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with an updatedAt that is null
+[2026-11-08T07:56:32.723Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e92 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: the owner > refuses an update with an updatedAt that is null
+[2026-11-08T07:56:32.737Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e93 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L46:32 for 'update' @ L46, false for 'update' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: everyone else > stranger cannot create, read, list, update or delete a device record
+[2026-11-08T07:56:32.767Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e95 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: everyone else > stranger cannot create, read, list, update or delete a device record
+[2026-11-08T07:56:32.834Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e98 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: everyone else > stranger cannot create, read, list, update or delete a device record
+[2026-11-08T07:56:32.848Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e99 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L45, false for 'delete' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: everyone else > unverified James cannot create, read, list, update or delete a device record
+[2026-11-08T07:56:32.880Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e9b error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: everyone else > unverified James cannot create, read, list, update or delete a device record
+[2026-11-08T07:56:32.933Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e9e error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: everyone else > unverified James cannot create, read, list, update or delete a device record
+[2026-11-08T07:56:32.946Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464e9f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L45, false for 'delete' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: everyone else > anonymous cannot create, read, list, update or delete a device record
+[2026-11-08T07:56:32.974Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464ea1 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L46, false for 'create' @ L96, false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: everyone else > anonymous cannot create, read, list, update or delete a device record
+[2026-11-08T07:56:33.090Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464ea4 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'update' @ L46, false for 'update' @ L96
+
+stderr | tests/rules/decision-notifications-87.rules.test.ts > decision-notifications 87: everyone else > anonymous cannot create, read, list, update or delete a device record
+[2026-11-08T07:56:33.121Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x7f464ea5 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'delete' @ L45, false for 'delete' @ L96
+
+ ✓ tests/rules/decision-notifications-87.rules.test.ts (24 tests) 1388ms
+stderr | tests/emulator/board-replies-anywhere-r1-10.test.ts
+2026-11-08T07:56:33.809Z [46508] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+ ✓ tests/emulator/board-replies-anywhere-r1-10.test.ts (6 tests) 1482ms
+ ✓ tests/emulator/web-threads-b4-16.test.ts (16 tests) 1157ms
+stderr | tests/emulator/app-logs-6.test.ts > L1-6 the agent stores its failures > a failed tool call: ERROR feature_error with agent, project and the line in its logs
+2026-11-08T07:56:38.169Z [4180] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/app-logs-6.test.ts > L1-6 logFailure (in-process) > keeps the caller request id and task id, caps the message and context values
+2026-11-08T07:56:38.480Z [4180] api_call_failed WARNING: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+ ✓ tests/emulator/app-logs-6.test.ts (3 tests) 1217ms
+stderr | tests/emulator/app-logs-9.test.ts > L1-9 kanban_logs with no arguments > returns the last day of warnings and worse, newest first, in the read shape
+2026-11-08T07:56:40.219Z [40852] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+ ✓ tests/emulator/app-logs-9.test.ts (6 tests) 1220ms
+stderr | tests/emulator/app-logs-10.test.ts > L1-10 kanban_logs with a request id > returns the whole trail of that operation, oldest first
+2026-11-08T07:56:42.125Z [30712] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+ ✓ tests/emulator/app-logs-10.test.ts (2 tests) 1028ms
+ ✓ tests/emulator/web-threads-b6-26.test.ts (12 tests) 783ms
+stderr | tests/emulator/decision-notifications-82.test.ts
+2026-11-08T07:56:44.509Z [9332] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/decision-notifications-82.test.ts
+2026-11-08T07:56:44.639Z [9332] registered agent=YmvRhlQVRpLgVEaUHTQ7 project=board-briefs-b7-dn-82-17-638711c4 cwd=/tmp/board-briefs-b7-dn-82-1794124604539
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > a push port that throws leaves the question call successful and logs one warning
+2026-11-08T07:56:44.659Z [9332] created task U3zGa2Qe03DZyNHwDUdW "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > a push port that throws leaves the question call successful and logs one warning
+2026-11-08T07:56:44.673Z [9332] asked on U3zGa2Qe03DZyNHwDUdW: Which branch?
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > a push port that throws leaves the question call successful and logs one warning
+2026-11-08T07:56:44.690Z [9332] api_call_failed WARNING: decision notification for task U3zGa2Qe03DZyNHwDUdW failed: push service down
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > a push port that throws leaves the question call successful and logs one warning
+2026-11-08T07:56:44.786Z [9332] created task LSd18Pe4Cg21Aw9MV5di "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > a push port that throws leaves the question call successful and logs one warning
+2026-11-08T07:56:44.822Z [9332] asked on LSd18Pe4Cg21Aw9MV5di: Barrier?
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > a push port that throws leaves the question call successful and logs one warning
+2026-11-08T07:56:44.837Z [9332] api_call_failed WARNING: decision notification for task LSd18Pe4Cg21Aw9MV5di failed: barrier
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > a throw without an error code is logged with status "unknown"
+2026-11-08T07:56:44.923Z [9332] created task 9VUipM2DpWnE642gGWXQ "B7 feature at spec"
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > a throw without an error code is logged with status "unknown"
+2026-11-08T07:56:44.960Z [9332] api_call_failed WARNING: decision notification for task 9VUipM2DpWnE642gGWXQ failed: push service down
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > a failed outcome is logged with the first failed code and the call succeeds
+2026-11-08T07:56:45.036Z [9332] created task ePCWABmmLETjE6U8YRYV "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > a failed outcome is logged with the first failed code and the call succeeds
+2026-11-08T07:56:45.069Z [9332] asked on ePCWABmmLETjE6U8YRYV: Still there?
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > a failed outcome is logged with the first failed code and the call succeeds
+2026-11-08T07:56:45.084Z [9332] api_call_failed WARNING: decision notification for task ePCWABmmLETjE6U8YRYV failed: 1 of 2 devices refused
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > stores nothing when every outcome is ok
+2026-11-08T07:56:45.161Z [9332] created task x2b7eeqGkM5VfKuOdxD3 "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > stores nothing when every outcome is ok
+2026-11-08T07:56:45.192Z [9332] asked on x2b7eeqGkM5VfKuOdxD3: All good?
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > stores nothing when every outcome is ok
+2026-11-08T07:56:45.231Z [9332] created task XdPn8zvVNABSNQYWCDiL "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > stores nothing when every outcome is ok
+2026-11-08T07:56:45.255Z [9332] asked on XdPn8zvVNABSNQYWCDiL: Barrier?
+
+stderr | tests/emulator/decision-notifications-82.test.ts > decision-notifications 82: sending fails > stores nothing when every outcome is ok
+2026-11-08T07:56:45.271Z [9332] api_call_failed WARNING: decision notification for task XdPn8zvVNABSNQYWCDiL failed: barrier
+
+stderr | tests/emulator/decision-notifications-82.test.ts
+2026-11-08T07:56:45.362Z [9332] agent YmvRhlQVRpLgVEaUHTQ7 shut down; 6 task(s) orphaned
+
+ ✓ tests/emulator/decision-notifications-82.test.ts (4 tests) 824ms
+stderr | tests/emulator/fix-last-stage-done.test.ts
+2026-11-08T07:56:46.159Z [7248] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/fix-last-stage-done.test.ts
+2026-11-08T07:56:46.423Z [7248] registered agent=9rD8BSNYhMCFaSjgsJB5 project=board-briefs-b7-last-sta-b4befe0c cwd=/tmp/board-briefs-b7-last-stage-done-1794124606325
+
+stderr | tests/emulator/fix-last-stage-done.test.ts > kanban_subtask never finishes a task > F1: a feature at main_ci (no after-deploy), "main_ci" done is refused and the task is unchanged
+2026-11-08T07:56:46.428Z [7248] created task 2xz2mZMgotgQxHchjzRx "B7 feature at main_ci"
+
+stderr | tests/emulator/fix-last-stage-done.test.ts > kanban_subtask never finishes a task > F2: the same call with a note is refused the same way and writes no comment
+2026-11-08T07:56:46.521Z [7248] created task l8g4M4ZqoFWlaLAsvs4W "B7 feature at main_ci"
+
+stderr | tests/emulator/fix-last-stage-done.test.ts > kanban_subtask never finishes a task > F3: "skipped" on the last stage is refused the same way, task unchanged
+2026-11-08T07:56:46.597Z [7248] created task jbxUTpRR4NRonI0Ng3Fm "B7 feature at main_ci"
+
+stderr | tests/emulator/fix-last-stage-done.test.ts > kanban_subtask never finishes a task > F4: the key "done" itself is refused the same way, task unchanged
+2026-11-08T07:56:46.675Z [7248] created task AUtWA56QHaSfsmrCyntL "B7 feature at main_ci"
+
+stderr | tests/emulator/fix-last-stage-done.test.ts > kanban_subtask never finishes a task > F5: follows the task's own chain: a bugfix at main_ci marking "main_ci" done is refused, task unchanged
+2026-11-08T07:56:46.754Z [7248] created task wJNdmVYt3NeQnHQIbOLj "B7 bugfix at main_ci"
+
+stderr | tests/emulator/fix-last-stage-done.test.ts > kanban_subtask never finishes a task > F5: follows the task's own chain: a chore at do marking "do" done is refused, task unchanged
+2026-11-08T07:56:46.833Z [7248] created task mhmvvXtqR5ibYJ0IDiWR "B7 chore at do"
+
+stderr | tests/emulator/fix-last-stage-done.test.ts > kanban_subtask never finishes a task > F5: follows the task's own chain: a feature with after-deploy steps at after_deploy marking "after_deploy" done is refused, task unchanged
+2026-11-08T07:56:46.913Z [7248] created task HhFvU3XUtEWEaRhP4iZt "B7 feature at after_deploy"
+
+stderr | tests/emulator/fix-last-stage-done.test.ts > kanban_subtask never finishes a task > F6: jumping ahead onto the last stage is refused: a feature at merged marking "main_ci" done stays at merged
+2026-11-08T07:56:46.986Z [7248] created task wRIQDl6M2Hgg0QG1tuEz "B7 feature at merged"
+
+stderr | tests/emulator/fix-last-stage-done.test.ts > kanban_subtask never finishes a task > F7: after a refusal, kanban_update_task done with a summary finishes the task and posts the Done message
+2026-11-08T07:56:47.065Z [7248] created task xNsIRZJCTDYxGECNOrtB "B7 feature at main_ci"
+
+stderr | tests/emulator/fix-last-stage-done.test.ts > kanban_subtask never finishes a task > F7: after a refusal, kanban_update_task done with a summary finishes the task and posts the Done message
+2026-11-08T07:56:47.111Z [7248] updated task xNsIRZJCTDYxGECNOrtB: updatedAt,summary,stage,doneAt,agentId,needs,working,unread
+
+stderr | tests/emulator/fix-last-stage-done.test.ts > kanban_subtask still advances when the next stage is not done (unchanged) > F8: a feature at merged marking "merged" done moves to main_ci and stays bound
+2026-11-08T07:56:47.140Z [7248] created task PrqJMQwEwArRzYAnkNkQ "B7 feature at merged"
+
+stderr | tests/emulator/fix-last-stage-done.test.ts > kanban_subtask still advances when the next stage is not done (unchanged) > F8: a feature with after-deploy steps at main_ci marking "main_ci" done moves to after_deploy and stays bound
+2026-11-08T07:56:47.170Z [7248] created task huk9EXwI3dcLn29eeXaQ "B7 feature at main_ci"
+
+stderr | tests/emulator/fix-last-stage-done.test.ts
+2026-11-08T07:56:47.220Z [7248] agent 9rD8BSNYhMCFaSjgsJB5 shut down; 10 task(s) orphaned
+
+ ✓ tests/emulator/fix-last-stage-done.test.ts (11 tests) 896ms
+stderr | tests/emulator/decision-notifications-83.test.ts
+2026-11-08T07:56:48.133Z [45472] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/decision-notifications-83.test.ts
+2026-11-08T07:56:48.263Z [45472] registered agent=Me8z5bftCUkCMymTBj42 project=board-briefs-b7-dn-83-17-48271e67 cwd=/tmp/board-briefs-b7-dn-83-1794124608157
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > removes the unregistered device and keeps the others
+2026-11-08T07:56:48.288Z [45472] created task tF9CVTcVuEOkOVh4iU1W "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > removes the unregistered device and keeps the others
+2026-11-08T07:56:48.310Z [45472] asked on tF9CVTcVuEOkOVh4iU1W: Anyone there?
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > removes the unregistered device and keeps the others
+2026-11-08T07:56:48.340Z [45472] api_call_failed WARNING: decision notification for task tF9CVTcVuEOkOVh4iU1W failed: 1 of 2 devices refused
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > does not send to the removed device for the next decision
+2026-11-08T07:56:48.389Z [45472] created task Mr18uSP1YieB9BMvH6gW "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > does not send to the removed device for the next decision
+2026-11-08T07:56:48.402Z [45472] asked on Mr18uSP1YieB9BMvH6gW: First?
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > does not send to the removed device for the next decision
+2026-11-08T07:56:48.433Z [45472] api_call_failed WARNING: decision notification for task Mr18uSP1YieB9BMvH6gW failed: 1 of 2 devices refused
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > does not send to the removed device for the next decision
+2026-11-08T07:56:48.449Z [45472] asked on Mr18uSP1YieB9BMvH6gW: Second?
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > removes every record that holds the token, for either unregistered code
+2026-11-08T07:56:48.505Z [45472] created task oMuayJB70qhe14iYvvZG "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > removes every record that holds the token, for either unregistered code
+2026-11-08T07:56:48.513Z [45472] asked on oMuayJB70qhe14iYvvZG: Clean up?
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > removes every record that holds the token, for either unregistered code
+2026-11-08T07:56:48.545Z [45472] api_call_failed WARNING: decision notification for task oMuayJB70qhe14iYvvZG failed: 2 of 3 devices refused
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > removes nothing for a failure that is not an unregistered token
+2026-11-08T07:56:48.587Z [45472] created task afS2uNrN8DLsOc5ahLK3 "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > removes nothing for a failure that is not an unregistered token
+2026-11-08T07:56:48.608Z [45472] asked on afS2uNrN8DLsOc5ahLK3: Retry later?
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > removes nothing for a failure that is not an unregistered token
+2026-11-08T07:56:48.639Z [45472] api_call_failed WARNING: decision notification for task afS2uNrN8DLsOc5ahLK3 failed: 2 of 2 devices refused
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > also removes the dead token when the decision is a spec
+2026-11-08T07:56:48.665Z [45472] created task lrjD92tKWgprLj0sFKaW "B7 feature at spec"
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > also removes the dead token when the decision is a spec
+2026-11-08T07:56:48.716Z [45472] api_call_failed WARNING: decision notification for task lrjD92tKWgprLj0sFKaW failed: 1 of 2 devices refused
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > reports the removal in the warning (removed: 1) while the call succeeds
+2026-11-08T07:56:48.754Z [45472] created task QA5OqlL69uw5FYeQP9Tm "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > reports the removal in the warning (removed: 1) while the call succeeds
+2026-11-08T07:56:48.763Z [45472] asked on QA5OqlL69uw5FYeQP9Tm: Logged?
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > reports the removal in the warning (removed: 1) while the call succeeds
+2026-11-08T07:56:48.793Z [45472] api_call_failed WARNING: decision notification for task QA5OqlL69uw5FYeQP9Tm failed: 1 of 2 devices refused
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > reports the removal in the warning (removed: 1) while the call succeeds
+2026-11-08T07:56:48.857Z [45472] created task meZ5ISrTbAgBn0oyvJ4w "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > reports the removal in the warning (removed: 1) while the call succeeds
+2026-11-08T07:56:48.880Z [45472] asked on meZ5ISrTbAgBn0oyvJ4w: Barrier?
+
+stderr | tests/emulator/decision-notifications-83.test.ts > decision-notifications 83: a dead token is dropped > reports the removal in the warning (removed: 1) while the call succeeds
+2026-11-08T07:56:48.897Z [45472] api_call_failed WARNING: decision notification for task meZ5ISrTbAgBn0oyvJ4w failed: barrier
+
+stderr | tests/emulator/decision-notifications-83.test.ts
+2026-11-08T07:56:48.972Z [45472] agent Me8z5bftCUkCMymTBj42 shut down; 7 task(s) orphaned
+
+ ✓ tests/emulator/decision-notifications-83.test.ts (6 tests) 816ms
+ ✓ tests/emulator/web-threads-b4-17.test.ts (9 tests) 687ms
+stderr | tests/emulator/decision-notifications-78.test.ts
+2026-11-08T07:56:50.927Z [19576] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/decision-notifications-78.test.ts
+2026-11-08T07:56:51.192Z [19576] registered agent=3MYTjRaxl5rFD4YgyXuy project=board-briefs-b7-dn-78-17-611cdfa4 cwd=/tmp/board-briefs-b7-dn-78-1794124611080
+
+stderr | tests/emulator/decision-notifications-78.test.ts > decision-notifications 78: asking a question > a fix brief notifies each device once with the deck headline
+2026-11-08T07:56:51.221Z [19576] created task gHQNcRi8FYnVWdQZWVK4 "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-78.test.ts > decision-notifications 78: asking a question > a fix brief notifies each device once with the deck headline
+2026-11-08T07:56:51.246Z [19576] asked on gHQNcRi8FYnVWdQZWVK4: ## Decision brief (fix)
+Yes: Mend the export
+
+### Where it came from
+You asked f
+
+stderr | tests/emulator/decision-notifications-78.test.ts > decision-notifications 78: asking a question > a CI fix brief notifies each device once with the deck headline
+2026-11-08T07:56:51.316Z [19576] created task 3bWUYjEmbuZ7oD1GcIe2 "B7 feature at pr"
+
+stderr | tests/emulator/decision-notifications-78.test.ts > decision-notifications 78: asking a question > a CI fix brief notifies each device once with the deck headline
+2026-11-08T07:56:51.336Z [19576] asked on 3bWUYjEmbuZ7oD1GcIe2: ## Decision brief (fix)
+Yes: Fix the lint error
+
+### Where it came from
+You aske
+
+stderr | tests/emulator/decision-notifications-78.test.ts > decision-notifications 78: asking a question > a round brief notifies each device once with the deck headline
+2026-11-08T07:56:51.408Z [19576] created task zdyCf3HSWY4Tw84DVvUJ "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-78.test.ts > decision-notifications 78: asking a question > a round brief notifies each device once with the deck headline
+2026-11-08T07:56:51.433Z [19576] asked on zdyCf3HSWY4Tw84DVvUJ: ## Decision brief (round)
+Yes: Go again
+
+### Where it came from
+You asked for it
+
+stderr | tests/emulator/decision-notifications-78.test.ts > decision-notifications 78: asking a question > a summary brief notifies each device once with the deck headline
+2026-11-08T07:56:51.508Z [19576] created task hdEtm209taVgI0lNYfBf "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-78.test.ts > decision-notifications 78: asking a question > a summary brief notifies each device once with the deck headline
+2026-11-08T07:56:51.526Z [19576] asked on hdEtm209taVgI0lNYfBf: ## Decision brief (summary)
+Yes: Ship the footer
+
+### Where it came from
+You ask
+
+stderr | tests/emulator/decision-notifications-78.test.ts > decision-notifications 78: asking a question > a plain question notifies each device once with the deck headline
+2026-11-08T07:56:51.597Z [19576] created task JQlWdV8lsnAztY5s37rn "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-78.test.ts > decision-notifications 78: asking a question > a plain question notifies each device once with the deck headline
+2026-11-08T07:56:51.619Z [19576] asked on JQlWdV8lsnAztY5s37rn: What should we call it?
+
+stderr | tests/emulator/decision-notifications-78.test.ts > decision-notifications 78: asking a question > notifies for a question with options, titled "Question"
+2026-11-08T07:56:51.679Z [19576] created task dLcFEjw3ffld2pDXYQma "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-78.test.ts > decision-notifications 78: asking a question > notifies for a question with options, titled "Question"
+2026-11-08T07:56:51.698Z [19576] asked on dLcFEjw3ffld2pDXYQma: Which font?
+
+stderr | tests/emulator/decision-notifications-78.test.ts > decision-notifications 78: asking a question > sends nothing when the options are refused and nothing is written
+2026-11-08T07:56:51.770Z [19576] created task lmwjFiRjsouDRJPqpDSY "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-78.test.ts
+2026-11-08T07:56:51.808Z [19576] agent 3MYTjRaxl5rFD4YgyXuy shut down; 7 task(s) orphaned
+
+ ✓ tests/emulator/decision-notifications-78.test.ts (7 tests) 729ms
+stderr | tests/emulator/swipe-deck-70.test.ts
+2026-11-08T07:56:52.622Z [39392] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/swipe-deck-70.test.ts
+2026-11-08T07:56:52.870Z [39392] registered agent=oUOIpP2mUoNAHTsZOHBj project=board-briefs-b7-ask-70-1-a89d06da cwd=/tmp/board-briefs-b7-ask-70-1794124612778
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > stores the options keyed a, b, c in order with labels trimmed
+2026-11-08T07:56:52.875Z [39392] created task KAmct4bY6UP1R1oRNSsd "Ask seed"
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > stores the options keyed a, b, c in order with labels trimmed
+2026-11-08T07:56:52.885Z [39392] asked on KAmct4bY6UP1R1oRNSsd: Which way?
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > accepts the 2 and 6 option limits and a 200 character label
+2026-11-08T07:56:52.917Z [39392] created task HMqVyFYw11LuUMBvFPOx "Ask seed"
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > accepts the 2 and 6 option limits and a 200 character label
+2026-11-08T07:56:52.930Z [39392] asked on HMqVyFYw11LuUMBvFPOx: Two?
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > accepts the 2 and 6 option limits and a 200 character label
+2026-11-08T07:56:52.963Z [39392] asked on HMqVyFYw11LuUMBvFPOx: Six?
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > without options the need is exactly question and text
+2026-11-08T07:56:52.994Z [39392] created task uWm7kXN3ivZry0Gkbav2 "Ask seed"
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > without options the need is exactly question and text
+2026-11-08T07:56:53.010Z [39392] asked on uWm7kXN3ivZry0Gkbav2: Plain?
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > refuses one option and writes nothing
+2026-11-08T07:56:53.040Z [39392] created task ddIte2asr6nV0xNdLsyc "Ask seed"
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > refuses seven options and writes nothing
+2026-11-08T07:56:53.104Z [39392] created task G0gUJILDZOfGSlSx3umA "Ask seed"
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > refuses an empty label and writes nothing
+2026-11-08T07:56:53.164Z [39392] created task ewO7bgV7hjIs29ErLhzb "Ask seed"
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > refuses a whitespace label and writes nothing
+2026-11-08T07:56:53.229Z [39392] created task XAAN2gRPnA2axa7uIQhc "Ask seed"
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > refuses a 201 character label and writes nothing
+2026-11-08T07:56:53.273Z [39392] created task qlaYwt9gAX0mY7w9bz5j "Ask seed"
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > gives the deck a choose card with the first option recommended
+2026-11-08T07:56:53.327Z [39392] created task WndzPzLvNfYgtzKzE7gD "Ask seed"
+
+stderr | tests/emulator/swipe-deck-70.test.ts > swipe-deck 70: Board.ask with options > gives the deck a choose card with the first option recommended
+2026-11-08T07:56:53.331Z [39392] asked on WndzPzLvNfYgtzKzE7gD: Pick one?
+
+stderr | tests/emulator/swipe-deck-70.test.ts
+2026-11-08T07:56:53.386Z [39392] agent oUOIpP2mUoNAHTsZOHBj shut down; 9 task(s) orphaned
+
+ ✓ tests/emulator/swipe-deck-70.test.ts (9 tests) 609ms
+ ✓ tests/emulator/web-threads-b4-19.test.ts (8 tests) 604ms
+ ✓ tests/emulator/swipe-deck-54.test.ts (8 tests) 530ms
+stderr | tests/emulator/swipe-deck-66.test.ts
+2026-11-08T07:56:56.175Z [19440] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/swipe-deck-66.test.ts
+2026-11-08T07:56:56.428Z [19440] registered agent=DkmZbM9voi2ekY9hjYml project=board-briefs-b7-retire-6-3d7e1e2e cwd=/tmp/board-briefs-b7-retire-66-1794124616326
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > retires into retiredNext and replies with the retired ids
+2026-11-08T07:56:56.433Z [19440] created task wYprNwMKTlHFfZgvIu3P "Retire seed"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > retires into retiredNext and replies with the retired ids
+2026-11-08T07:56:56.452Z [19440] retired 2 suggestion(s), refused 0
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > retiring twice changes nothing: no duplicates
+2026-11-08T07:56:56.467Z [19440] created task 0urHMB8o688l35Lhztau "Retire seed"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > retiring twice changes nothing: no duplicates
+2026-11-08T07:56:56.482Z [19440] retired 1 suggestion(s), refused 0
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > retiring twice changes nothing: no duplicates
+2026-11-08T07:56:56.498Z [19440] retired 1 suggestion(s), refused 0
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > makes one write per source task
+2026-11-08T07:56:56.514Z [19440] created task jKV602hG3U98kDSkAYS4 "Retire seed"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > makes one write per source task
+2026-11-08T07:56:56.517Z [19440] created task j28F0CWLcYBWQqFC1iZY "Retire seed"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > makes one write per source task
+2026-11-08T07:56:56.528Z [19440] retired 4 suggestion(s), refused 0
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > refuses each bad id with a reason and writes nothing for it
+2026-11-08T07:56:56.531Z [19440] created task 0ptGEvGOAgIJYuvA1I6P "Retire seed"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > refuses each bad id with a reason and writes nothing for it
+2026-11-08T07:56:56.534Z [19440] created task byyO2ecJ9k3kEFFSyHNF "Retire seed"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > refuses each bad id with a reason and writes nothing for it
+2026-11-08T07:56:56.538Z [19440] created task iBZPRlQSu9f4v9QmhCwA "Retire seed"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > refuses each bad id with a reason and writes nothing for it
+2026-11-08T07:56:56.543Z [19440] retired 0 suggestion(s), refused 10
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > retires the valid ids and refuses the others in one call
+2026-11-08T07:56:56.590Z [19440] created task CblBIsIIfNgjhHHtB9rD "Retire seed"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: retireSuggestions > retires the valid ids and refuses the others in one call
+2026-11-08T07:56:56.606Z [19440] retired 1 suggestion(s), refused 1
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: updateTask with retire_suggestions > retires on other finished tasks with no other field, from an unfinished bound task
+2026-11-08T07:56:56.621Z [19440] created task jYnPIX1rsmvaZ0yzhbr7 "Retire seed"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: updateTask with retire_suggestions > retires on other finished tasks with no other field, from an unfinished bound task
+2026-11-08T07:56:56.625Z [19440] created task IzomTk4fguLvmincJ95j "Mine"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: updateTask with retire_suggestions > retires on other finished tasks with no other field, from an unfinished bound task
+2026-11-08T07:56:56.636Z [19440] retired 1 suggestion(s), refused 0
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: updateTask with retire_suggestions > retires on other finished tasks with no other field, from an unfinished bound task
+2026-11-08T07:56:56.638Z [19440] updated task IzomTk4fguLvmincJ95j: updatedAt
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: updateTask with retire_suggestions > retires alongside finishing the bound task
+2026-11-08T07:56:56.671Z [19440] created task Vemp4BTHGWNoDPqZgzH9 "Retire seed"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: updateTask with retire_suggestions > retires alongside finishing the bound task
+2026-11-08T07:56:56.675Z [19440] created task FOTGlapvMdAIe25Z8PpI "Mine"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: updateTask with retire_suggestions > retires alongside finishing the bound task
+2026-11-08T07:56:56.700Z [19440] retired 1 suggestion(s), refused 0
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: updateTask with retire_suggestions > retires alongside finishing the bound task
+2026-11-08T07:56:56.702Z [19440] updated task FOTGlapvMdAIe25Z8PpI: updatedAt,summary,stage,doneAt,agentId,needs,working,unread
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: updateTask with retire_suggestions > writes nothing to a refused id
+2026-11-08T07:56:56.733Z [19440] created task 0LTYMqhlqPP7hUTJfChB "Retire seed"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: updateTask with retire_suggestions > writes nothing to a refused id
+2026-11-08T07:56:56.736Z [19440] created task OBwIuT7GHCBukxzFTkx6 "Mine"
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: updateTask with retire_suggestions > writes nothing to a refused id
+2026-11-08T07:56:56.761Z [19440] retired 0 suggestion(s), refused 2
+
+stderr | tests/emulator/swipe-deck-66.test.ts > swipe-deck 66: updateTask with retire_suggestions > writes nothing to a refused id
+2026-11-08T07:56:56.764Z [19440] updated task OBwIuT7GHCBukxzFTkx6: updatedAt
+
+stderr | tests/emulator/swipe-deck-66.test.ts
+2026-11-08T07:56:56.798Z [19440] agent DkmZbM9voi2ekY9hjYml shut down; 2 task(s) orphaned
+
+ ✓ tests/emulator/swipe-deck-66.test.ts (8 tests) 474ms
+ ✓ tests/emulator/swipe-deck-49.test.ts (7 tests) 574ms
+stderr | tests/emulator/decision-notifications-80.test.ts
+2026-11-08T07:56:58.619Z [15868] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/decision-notifications-80.test.ts
+2026-11-08T07:56:58.866Z [15868] registered agent=OJqis2NkZbh2Dc4jMgBA project=board-briefs-b7-dn-80-17-668f888e cwd=/tmp/board-briefs-b7-dn-80-1794124618765
+
+stderr | tests/emulator/decision-notifications-80.test.ts > decision-notifications 80: one notification per task > sends a revised spec under the same tag as the first
+2026-11-08T07:56:58.889Z [15868] created task hJGJW4oXLgC0pyKcQnE7 "B7 feature at spec"
+
+stderr | tests/emulator/decision-notifications-80.test.ts > decision-notifications 80: one notification per task > sends a new question under the same tag as the spec before it
+2026-11-08T07:56:58.995Z [15868] created task BF6TGT8Zq4dJ0e8vBFnC "B7 feature at spec"
+
+stderr | tests/emulator/decision-notifications-80.test.ts > decision-notifications 80: one notification per task > sends a new question under the same tag as the spec before it
+2026-11-08T07:56:59.053Z [15868] asked on BF6TGT8Zq4dJ0e8vBFnC: Which branch?
+
+stderr | tests/emulator/decision-notifications-80.test.ts > decision-notifications 80: one notification per task > gives another task its own tag
+2026-11-08T07:56:59.089Z [15868] created task nEn2N1wCtt265ETig4Vf "B7 feature at spec"
+
+stderr | tests/emulator/decision-notifications-80.test.ts > decision-notifications 80: one notification per task > gives another task its own tag
+2026-11-08T07:56:59.092Z [15868] created task 8L7MZeNfEVIOg71S3skC "B7 feature at spec"
+
+stderr | tests/emulator/decision-notifications-80.test.ts
+2026-11-08T07:56:59.206Z [15868] agent OJqis2NkZbh2Dc4jMgBA shut down; 4 task(s) orphaned
+
+ ✓ tests/emulator/decision-notifications-80.test.ts (3 tests) 442ms
+stderr | tests/emulator/app-logs-7.test.ts
+2026-11-08T07:56:59.910Z [38236] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.152Z [38236] api_call_failed WARNING: heartbeat failed #0
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.175Z [38236] api_call_failed WARNING: heartbeat failed #1
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.178Z [38236] api_call_failed WARNING: heartbeat failed #2
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.181Z [38236] api_call_failed WARNING: heartbeat failed #3
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.183Z [38236] api_call_failed WARNING: heartbeat failed #4
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.185Z [38236] api_call_failed WARNING: heartbeat failed #5
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.188Z [38236] api_call_failed WARNING: heartbeat failed #6
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.190Z [38236] api_call_failed WARNING: heartbeat failed #7
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.193Z [38236] api_call_failed WARNING: heartbeat failed #8
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.196Z [38236] api_call_failed WARNING: heartbeat failed #9
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.198Z [38236] api_call_failed WARNING: heartbeat failed #10
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.200Z [38236] api_call_failed WARNING: heartbeat failed #11
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.202Z [38236] api_call_failed WARNING: heartbeat failed #12
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.205Z [38236] api_call_failed WARNING: heartbeat failed #13
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.206Z [38236] api_call_failed WARNING: heartbeat failed #14
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.209Z [38236] api_call_failed WARNING: heartbeat failed #15
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.211Z [38236] api_call_failed WARNING: heartbeat failed #16
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.213Z [38236] api_call_failed WARNING: heartbeat failed #17
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.215Z [38236] api_call_failed WARNING: heartbeat failed #18
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.216Z [38236] api_call_failed WARNING: heartbeat failed #19
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.219Z [38236] api_call_failed WARNING: heartbeat failed #20
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.219Z [38236] api_call_failed WARNING: heartbeat failed #21
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.219Z [38236] api_call_failed WARNING: heartbeat failed #22
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.220Z [38236] api_call_failed WARNING: heartbeat failed #23
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores 20 in a minute; every one is still written to stderr
+2026-11-08T07:57:00.220Z [38236] api_call_failed WARNING: heartbeat failed #24
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > stores again once the minute has rolled on
+2026-11-08T07:58:01.240Z [38236] api_call_failed WARNING: heartbeat failed #100
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #0
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #1
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #2
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #3
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #4
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #5
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #6
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #7
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #8
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #9
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #10
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #11
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #12
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #13
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #14
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #15
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #16
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #17
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #18
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:08:50.000Z [38236] api_call_failed ERROR: listener failed #19
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:09:20.000Z [38236] api_call_failed ERROR: listener failed #20
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the minute is rolling, not the clock minute
+2026-11-08T08:09:51.000Z [38236] api_call_failed ERROR: listener failed #21
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:00.000Z [38236] api_call_failed WARNING: announce failed #0
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #1
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #2
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #3
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #4
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #5
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #6
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #7
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #8
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #9
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #10
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #11
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #12
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #13
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #14
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #15
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #16
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #17
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #18
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:28:40.000Z [38236] api_call_failed WARNING: announce failed #19
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:29:01.000Z [38236] api_call_failed WARNING: announce failed #20
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > the window rolls with each event, not from the first one
+2026-11-08T08:29:01.000Z [38236] api_call_failed WARNING: announce failed #21
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:57:59.500Z [38236] api_call_failed WARNING: trickle failed #0
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:02.500Z [38236] api_call_failed WARNING: trickle failed #1
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:05.500Z [38236] api_call_failed WARNING: trickle failed #2
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:08.500Z [38236] api_call_failed WARNING: trickle failed #3
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:11.500Z [38236] api_call_failed WARNING: trickle failed #4
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:14.500Z [38236] api_call_failed WARNING: trickle failed #5
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:17.500Z [38236] api_call_failed WARNING: trickle failed #6
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:20.500Z [38236] api_call_failed WARNING: trickle failed #7
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:23.500Z [38236] api_call_failed WARNING: trickle failed #8
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:26.500Z [38236] api_call_failed WARNING: trickle failed #9
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:29.500Z [38236] api_call_failed WARNING: trickle failed #10
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:32.500Z [38236] api_call_failed WARNING: trickle failed #11
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:35.500Z [38236] api_call_failed WARNING: trickle failed #12
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:38.500Z [38236] api_call_failed WARNING: trickle failed #13
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:41.500Z [38236] api_call_failed WARNING: trickle failed #14
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:44.500Z [38236] api_call_failed WARNING: trickle failed #15
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:47.500Z [38236] api_call_failed WARNING: trickle failed #16
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:50.500Z [38236] api_call_failed WARNING: trickle failed #17
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:53.500Z [38236] api_call_failed WARNING: trickle failed #18
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:56.500Z [38236] api_call_failed WARNING: trickle failed #19
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:58:57.500Z [38236] api_call_failed WARNING: trickle failed #20
+
+stderr | tests/emulator/app-logs-7.test.ts > L1-7 repeated agent failures > a steady trickle fills the window whatever the clock phase
+2026-11-08T08:59:00.500Z [38236] api_call_failed WARNING: trickle failed #21
+
+ ✓ tests/emulator/app-logs-7.test.ts (5 tests) 460ms
+stderr | tests/emulator/decision-notifications-77.test.ts
+2026-11-08T07:57:01.349Z [29940] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/decision-notifications-77.test.ts
+2026-11-08T07:57:01.598Z [29940] registered agent=xtSh71k2ZNp3jlWXSfRe project=board-briefs-b7-dn-77-17-35e2c03c cwd=/tmp/board-briefs-b7-dn-77-1794124621497
+
+stderr | tests/emulator/decision-notifications-77.test.ts > decision-notifications 77: posting a spec > sends every device one notification titled "Spec · <project>" with the Yes: line
+2026-11-08T07:57:01.626Z [29940] created task mmPyzxmVEBEgOD08WAL4 "Notify me"
+
+stderr | tests/emulator/decision-notifications-77.test.ts > decision-notifications 77: posting a spec > falls back to "Start building: <task title>" when the note is not a spec brief
+2026-11-08T07:57:01.732Z [29940] created task oNEniVBiWRA5DZeA2SzE "Order the replies"
+
+stderr | tests/emulator/decision-notifications-77.test.ts > decision-notifications 77: posting a spec > falls back to "Start building: <task title>" when the note is not a spec brief
+2026-11-08T07:57:01.769Z [29940] created task p1utiQ3FtHGLcP0MMF8J "Another one"
+
+stderr | tests/emulator/decision-notifications-77.test.ts > decision-notifications 77: posting a spec > cuts a long Yes: line to 60 characters the way the card does
+2026-11-08T07:57:01.841Z [29940] created task uAsVeZQY1dCR7YmN04b4 "Long one"
+
+stderr | tests/emulator/decision-notifications-77.test.ts > decision-notifications 77: posting a spec > sends nothing for the spec step in any other status
+2026-11-08T07:57:01.910Z [29940] created task KiUu8u6zrmiTVpj71k5h "Quiet steps"
+
+stderr | tests/emulator/decision-notifications-77.test.ts > decision-notifications 77: posting a spec > uses only the devices that hold a valid token
+2026-11-08T07:57:01.974Z [29940] created task 9ndQpNCZQ1hY134Imj5v "B7 feature at spec"
+
+stderr | tests/emulator/decision-notifications-77.test.ts
+2026-11-08T07:57:02.049Z [29940] agent xtSh71k2ZNp3jlWXSfRe shut down; 6 task(s) orphaned
+
+ ✓ tests/emulator/decision-notifications-77.test.ts (5 tests) 553ms
+ ✓ tests/emulator/web-threads-b4-18.test.ts (5 tests) 471ms
+ ✓ tests/emulator/web-threads-b4-28.test.ts (2 tests) 403ms
+stderr | tests/emulator/decision-notifications-79.test.ts
+2026-11-08T07:57:04.645Z [40064] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/decision-notifications-79.test.ts
+2026-11-08T07:57:04.902Z [40064] registered agent=PZi2iM9XkGBeZZKsG0eF project=board-briefs-b7-dn-79-17-21ba51be cwd=/tmp/board-briefs-b7-dn-79-1794124624797
+
+stderr | tests/emulator/decision-notifications-79.test.ts > decision-notifications 79: reports that stay silent > a pull request ready to merge
+2026-11-08T07:57:04.933Z [40064] created task 7IMAvMmhfNMdwsowFhUm "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-79.test.ts > decision-notifications 79: reports that stay silent > a pull request ready to merge
+2026-11-08T07:57:04.957Z [40064] updated task 7IMAvMmhfNMdwsowFhUm: updatedAt,pr,stage,needs
+
+stderr | tests/emulator/decision-notifications-79.test.ts > decision-notifications 79: reports that stay silent > after-deploy steps
+2026-11-08T07:57:04.995Z [40064] created task SLXt8fGvXJzJVXgx55Ws "B7 feature at main_ci"
+
+stderr | tests/emulator/decision-notifications-79.test.ts > decision-notifications 79: reports that stay silent > a to-do
+2026-11-08T07:57:05.065Z [40064] todo for james: Rotate the key
+
+stderr | tests/emulator/decision-notifications-79.test.ts > decision-notifications 79: reports that stay silent > a comment
+2026-11-08T07:57:05.084Z [40064] created task 2pkrWeN48Ip92MJGjtV9 "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-79.test.ts > decision-notifications 79: reports that stay silent > a step in progress or done, other than the spec
+2026-11-08T07:57:05.117Z [40064] created task E6lTRzjrZMyBoCNrGDfq "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-79.test.ts > decision-notifications 79: reports that stay silent > a finished task
+2026-11-08T07:57:05.165Z [40064] created task x3vZNHnYAWDwDK7qauQr "B7 chore at do"
+
+stderr | tests/emulator/decision-notifications-79.test.ts > decision-notifications 79: reports that stay silent > a finished task
+2026-11-08T07:57:05.174Z [40064] updated task x3vZNHnYAWDwDK7qauQr: updatedAt,summary,stage,doneAt,agentId,needs,working,unread
+
+stderr | tests/emulator/decision-notifications-79.test.ts
+2026-11-08T07:57:05.207Z [40064] agent PZi2iM9XkGBeZZKsG0eF shut down; 4 task(s) orphaned
+
+ ✓ tests/emulator/decision-notifications-79.test.ts (6 tests) 411ms
+ ✓ tests/emulator/decision-notifications-76.test.ts (5 tests) 373ms
+stderr | tests/emulator/board-briefs-b7-34.test.ts
+2026-11-08T07:57:06.820Z [45492] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts
+2026-11-08T07:57:07.083Z [45492] registered agent=d8V01Cl6amgiWeLqXLqv project=board-briefs-b7-34-17941-4c988eb3 cwd=/tmp/board-briefs-b7-34-1794124626969
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a reported pull request raises the merge decision > a feature at build: stage pr, waiting on the merge, PR recorded
+2026-11-08T07:57:07.088Z [45492] created task QxQhrF0Z1afgHNYKTNr2 "B7 feature at build"
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a reported pull request raises the merge decision > a feature at build: stage pr, waiting on the merge, PR recorded
+2026-11-08T07:57:07.105Z [45492] updated task QxQhrF0Z1afgHNYKTNr2: updatedAt,pr,stage,needs
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a reported pull request raises the merge decision > a bugfix at fix: stage pr, waiting on the merge, PR recorded
+2026-11-08T07:57:07.121Z [45492] created task 8ti0SSy3v7hpY4n2Phbi "B7 bugfix at fix"
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a reported pull request raises the merge decision > a bugfix at fix: stage pr, waiting on the merge, PR recorded
+2026-11-08T07:57:07.135Z [45492] updated task 8ti0SSy3v7hpY4n2Phbi: updatedAt,pr,stage,needs
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a reported pull request raises the merge decision > a feature already at pr: stage pr, waiting on the merge, PR recorded
+2026-11-08T07:57:07.149Z [45492] created task UqDXVVkNdYWAeYoXmai7 "B7 feature at pr"
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a reported pull request raises the merge decision > a feature already at pr: stage pr, waiting on the merge, PR recorded
+2026-11-08T07:57:07.165Z [45492] updated task UqDXVVkNdYWAeYoXmai7: updatedAt,pr,stage,needs
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a reported pull request raises the merge decision > a bugfix at pr whose need was cleared: stage pr, waiting on the merge, PR recorded
+2026-11-08T07:57:07.182Z [45492] created task rH5ifJx0k3laiznGJmke "B7 bugfix at pr"
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a reported pull request raises the merge decision > a bugfix at pr whose need was cleared: stage pr, waiting on the merge, PR recorded
+2026-11-08T07:57:07.196Z [45492] updated task rH5ifJx0k3laiznGJmke: updatedAt,pr,stage,needs
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a pull request reported outside the build stages > a feature at spec, waiting on the spec: records the PR only (stage and need unchanged)
+2026-11-08T07:57:07.213Z [45492] created task 5vBjh4DXBmUlHzG1xGnD "B7 feature at spec"
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a pull request reported outside the build stages > a feature at spec, waiting on the spec: records the PR only (stage and need unchanged)
+2026-11-08T07:57:07.228Z [45492] updated task 5vBjh4DXBmUlHzG1xGnD: updatedAt,pr
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a pull request reported outside the build stages > a feature at approved: records the PR only (stage and need unchanged)
+2026-11-08T07:57:07.243Z [45492] created task YYcKduUTKIEqodh5Rb8N "B7 feature at approved"
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a pull request reported outside the build stages > a feature at approved: records the PR only (stage and need unchanged)
+2026-11-08T07:57:07.259Z [45492] updated task YYcKduUTKIEqodh5Rb8N: updatedAt,pr
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a pull request reported outside the build stages > a feature at merged: records the PR only and leaves the need
+2026-11-08T07:57:07.278Z [45492] created task crwg604i2FNIsLfvUIJs "B7 feature at merged"
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a pull request reported outside the build stages > a feature at merged: records the PR only and leaves the need
+2026-11-08T07:57:07.290Z [45492] updated task crwg604i2FNIsLfvUIJs: updatedAt,pr
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a pull request reported outside the build stages > a bugfix at main_ci: records the PR only and leaves the need
+2026-11-08T07:57:07.308Z [45492] created task EPr4uNf34ryEslCHnQKu "B7 bugfix at main_ci"
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a pull request reported outside the build stages > a bugfix at main_ci: records the PR only and leaves the need
+2026-11-08T07:57:07.320Z [45492] updated task EPr4uNf34ryEslCHnQKu: updatedAt,pr
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a pull request reported outside the build stages > a feature at after_deploy, waiting on the steps: records the PR only and leaves the need
+2026-11-08T07:57:07.337Z [45492] created task DAhd2OI7KS2Efpfk6u7S "B7 feature at after_deploy"
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts > B7-34 a pull request reported outside the build stages > a feature at after_deploy, waiting on the steps: records the PR only and leaves the need
+2026-11-08T07:57:07.351Z [45492] updated task DAhd2OI7KS2Efpfk6u7S: updatedAt,pr
+
+stderr | tests/emulator/board-briefs-b7-34.test.ts
+2026-11-08T07:57:07.391Z [45492] agent d8V01Cl6amgiWeLqXLqv shut down; 9 task(s) orphaned
+
+ ✓ tests/emulator/board-briefs-b7-34.test.ts (9 tests) 423ms
+ ✓ tests/emulator/app-logs-1.test.ts (4 tests) 362ms
+ ✓ tests/emulator/web-threads-b5-23.test.ts (7 tests) 325ms
+ ✓ tests/emulator/web-threads-b4-14.test.ts (4 tests) 337ms
+stderr | tests/emulator/app-logs-12.test.ts > L1-12 stored events expire after 30 days > an event from the agent expires 30 days after it happened
+2026-11-08T07:57:11.166Z [47036] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/app-logs-12.test.ts > L1-12 stored events expire after 30 days > an event from the agent expires 30 days after it happened
+2026-11-08T07:57:11.167Z [47036] api_call_failed WARNING: heartbeat failed
+
+ ✓ tests/emulator/app-logs-12.test.ts (3 tests) 347ms
+stderr | tests/emulator/board-briefs-b7-35.test.ts
+2026-11-08T07:57:12.031Z [9324] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/board-briefs-b7-35.test.ts
+2026-11-08T07:57:12.276Z [9324] registered agent=c42KzOLz3doNmEtrNkIq project=board-briefs-b7-35-17941-4beb5876 cwd=/tmp/board-briefs-b7-35-1794124632180
+
+stderr | tests/emulator/board-briefs-b7-35.test.ts > B7-35 finishing a task writes the Done message > writes one Done message carrying the summary and marks the task unread
+2026-11-08T07:57:12.281Z [9324] created task bQ515CG0I6Q29EDav9iy "B7 feature at main_ci"
+
+stderr | tests/emulator/board-briefs-b7-35.test.ts > B7-35 finishing a task writes the Done message > writes one Done message carrying the summary and marks the task unread
+2026-11-08T07:57:12.300Z [9324] updated task bQ515CG0I6Q29EDav9iy: updatedAt,summary,stage,doneAt,agentId,needs,working,unread
+
+stderr | tests/emulator/board-briefs-b7-35.test.ts > B7-35 finishing a task writes the Done message > says "Done." when the session gives no summary
+2026-11-08T07:57:12.340Z [9324] created task Qi1XPyFIgKYR7YAJnqQx "B7 chore at do"
+
+stderr | tests/emulator/board-briefs-b7-35.test.ts > B7-35 finishing a task writes the Done message > says "Done." when the session gives no summary
+2026-11-08T07:57:12.355Z [9324] updated task Qi1XPyFIgKYR7YAJnqQx: updatedAt,stage,doneAt,agentId,needs,working,unread
+
+stderr | tests/emulator/board-briefs-b7-35.test.ts > B7-35 finishing a task writes the Done message > writes no second Done message for a task that is already done
+2026-11-08T07:57:12.388Z [9324] created task jlSkD7J3eQhW3RhMgJHE "B7 bugfix at done"
+
+stderr | tests/emulator/board-briefs-b7-35.test.ts > B7-35 finishing a task writes the Done message > writes no second Done message for a task that is already done
+2026-11-08T07:57:12.402Z [9324] updated task jlSkD7J3eQhW3RhMgJHE: updatedAt,summary
+
+stderr | tests/emulator/board-briefs-b7-35.test.ts > B7-35 finishing a task writes the Done message > does not write a Done message for other updates
+2026-11-08T07:57:12.422Z [9324] created task hQQkICBFDjC024s94s3E "B7 feature at build"
+
+stderr | tests/emulator/board-briefs-b7-35.test.ts > B7-35 finishing a task writes the Done message > does not write a Done message for other updates
+2026-11-08T07:57:12.431Z [9324] updated task hQQkICBFDjC024s94s3E: updatedAt,summary,needs
+
+stderr | tests/emulator/board-briefs-b7-35.test.ts > B7-35 finishing a task writes the Done message > does not write a Done message for other updates
+2026-11-08T07:57:12.448Z [9324] updated task hQQkICBFDjC024s94s3E: updatedAt,summary
+
+stderr | tests/emulator/board-briefs-b7-35.test.ts > B7-35 finishing a task writes the Done message > does not write a Done message for other updates
+2026-11-08T07:57:12.467Z [9324] created task N9KLTEmZpGWj6wQ1a8Aw "B7 feature at main_ci"
+
+stderr | tests/emulator/board-briefs-b7-35.test.ts > B7-35 finishing a task writes the Done message > does not write a Done message for other updates
+2026-11-08T07:57:12.480Z [9324] updated task N9KLTEmZpGWj6wQ1a8Aw: updatedAt,summary,stage,doneAt,agentId,needs,working,unread
+
+stderr | tests/emulator/board-briefs-b7-35.test.ts
+2026-11-08T07:57:12.514Z [9324] agent c42KzOLz3doNmEtrNkIq shut down; 1 task(s) orphaned
+
+ ✓ tests/emulator/board-briefs-b7-35.test.ts (4 tests) 335ms
+ ✓ tests/emulator/web-threads-b5-22.test.ts (7 tests) 301ms
+stderr | tests/emulator/fix-stale-stage-need.test.ts
+2026-11-08T07:57:14.046Z [29716] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/fix-stale-stage-need.test.ts
+2026-11-08T07:57:14.298Z [29716] registered agent=sKQPHh8FyaAJjf5QqG2L project=board-briefs-b7-stale-ne-a5f50a44 cwd=/tmp/board-briefs-b7-stale-need-1794124634193
+
+stderr | tests/emulator/fix-stale-stage-need.test.ts > marking a later stage done clears the need of the stage it skips > a feature at pr waiting on the merge, "merged" done: moves on and waits on nothing
+2026-11-08T07:57:14.302Z [29716] created task F6sePaFyuuclFCzZ1JSy "B7 feature at pr"
+
+stderr | tests/emulator/fix-stale-stage-need.test.ts > marking a later stage done clears the need of the stage it skips > a bugfix at pr waiting on the merge, "merged" done: moves on and waits on nothing
+2026-11-08T07:57:14.340Z [29716] created task 4ddZxuxY73KIkMGlxCni "B7 bugfix at pr"
+
+stderr | tests/emulator/fix-stale-stage-need.test.ts > marking a later stage done clears the need of the stage it skips > a feature at spec waiting on approval, "approved" done: moves on and waits on nothing
+2026-11-08T07:57:14.372Z [29716] created task hcHlXiKaQqMzQZj6ZQZE "B7 feature at spec"
+
+stderr | tests/emulator/fix-stale-stage-need.test.ts > marking a later stage done clears the need of the stage it skips > marking the waiting stage itself done still clears its need (unchanged)
+2026-11-08T07:57:14.404Z [29716] created task GlqVHoF9ix89jomAJ3cm "B7 feature at pr"
+
+stderr | tests/emulator/fix-stale-stage-need.test.ts > marking a later stage done clears the need of the stage it skips > an open question is not a stage need: it stays when stages are skipped
+2026-11-08T07:57:14.435Z [29716] created task Uql9RbFR2ycpkR7CGkpb "B7 feature at pr"
+
+stderr | tests/emulator/fix-stale-stage-need.test.ts > marking a later stage done clears the need of the stage it skips > a stage the task has already passed changes nothing
+2026-11-08T07:57:14.465Z [29716] created task GDcd0ybHe8wAtQeN7gU9 "B7 feature at main_ci"
+
+stderr | tests/emulator/fix-stale-stage-need.test.ts
+2026-11-08T07:57:14.517Z [29716] agent sKQPHh8FyaAJjf5QqG2L shut down; 6 task(s) orphaned
+
+ ✓ tests/emulator/fix-stale-stage-need.test.ts (6 tests) 325ms
+stderr | tests/emulator/app-logs-3.test.ts > L1-3 a refused batch > the log store resolves, stores nothing and never rejects
+[2026-11-08T07:57:15.460Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x2af10971 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+stderr | tests/emulator/app-logs-3.test.ts > L1-3 a refused batch > the app keeps logging, and nothing about the failure is ever stored
+[2026-11-08T07:57:15.511Z]  @firebase/firestore: Firestore (12.19.0): GrpcConnection RPC 'Write' stream 0x2af10973 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L91, false for 'create' @ L96, false for 'update' @ L90, false for 'update' @ L96
+
+ ✓ tests/emulator/app-logs-3.test.ts (2 tests) 283ms
+stderr | tests/emulator/swipe-deck-58.test.ts
+2026-11-08T07:57:16.386Z [2164] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/swipe-deck-58.test.ts > swipe-deck 58: remoteUrl on the agent document > is null on registration when there is no sessions file
+2026-11-08T07:57:16.511Z [2164] registered agent=ptXL4JHuAHL92CdOf8dU project=swipe-deck-58-none-17941-4fb8e109 cwd=/tmp/swipe-deck-58-none-1794124636406
+
+stderr | tests/emulator/swipe-deck-58.test.ts > swipe-deck 58: remoteUrl on the agent document > is null on registration when there is no sessions file
+2026-11-08T07:57:16.548Z [2164] agent ptXL4JHuAHL92CdOf8dU shut down; 0 task(s) orphaned
+
+stderr | tests/emulator/swipe-deck-58.test.ts > swipe-deck 58: remoteUrl on the agent document > is the claude.ai link on registration when the sessions file has a bridge id
+2026-11-08T07:57:16.560Z [2164] registered agent=trDd1Q4qBr9CiqfPQlJ3 project=swipe-deck-58-link-17941-5c944924 cwd=/tmp/swipe-deck-58-link-1794124636551
+
+stderr | tests/emulator/swipe-deck-58.test.ts > swipe-deck 58: remoteUrl on the agent document > is the claude.ai link on registration when the sessions file has a bridge id
+2026-11-08T07:57:16.595Z [2164] agent trDd1Q4qBr9CiqfPQlJ3 shut down; 0 task(s) orphaned
+
+stderr | tests/emulator/swipe-deck-58.test.ts > swipe-deck 58: remoteUrl on the agent document > refreshRemoteUrl follows the file, writes only on change, and goes back to null
+2026-11-08T07:57:16.608Z [2164] registered agent=MCLmY03KXZ2kn1IPA9EQ project=swipe-deck-58-refresh-17-79d27b4a cwd=/tmp/swipe-deck-58-refresh-1794124636598
+
+stderr | tests/emulator/swipe-deck-58.test.ts > swipe-deck 58: remoteUrl on the agent document > refreshRemoteUrl follows the file, writes only on change, and goes back to null
+2026-11-08T07:57:16.654Z [2164] agent MCLmY03KXZ2kn1IPA9EQ shut down; 0 task(s) orphaned
+
+stderr | tests/emulator/swipe-deck-58.test.ts > swipe-deck 58: remoteUrl on the agent document > a heartbeat refreshes remoteUrl when the file changed, and writes none when it did not
+2026-11-08T07:57:16.656Z [2164] registered agent=sZS7my5Otlg6XWbfEixl project=swipe-deck-58-beat-17941-7e37b690 cwd=/tmp/swipe-deck-58-beat-1794124636656
+
+stderr | tests/emulator/swipe-deck-58.test.ts > swipe-deck 58: remoteUrl on the agent document > a heartbeat refreshes remoteUrl when the file changed, and writes none when it did not
+2026-11-08T07:57:16.722Z [2164] agent sZS7my5Otlg6XWbfEixl shut down; 0 task(s) orphaned
+
+ ✓ tests/emulator/swipe-deck-58.test.ts (4 tests) 320ms
+stderr | tests/emulator/decision-notifications-81.test.ts
+2026-11-08T07:57:17.509Z [42832] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/decision-notifications-81.test.ts
+2026-11-08T07:57:17.769Z [42832] registered agent=nNy36J6SEANpe15zw3Kh project=board-briefs-b7-dn-81-17-883b3ec0 cwd=/tmp/board-briefs-b7-dn-81-1794124637660
+
+stderr | tests/emulator/decision-notifications-81.test.ts > decision-notifications 81: no devices > posting a spec stores it as before and sends nothing
+2026-11-08T07:57:17.784Z [42832] created task Aqgan4RA7fQBz704ThO9 "B7 feature at spec"
+
+stderr | tests/emulator/decision-notifications-81.test.ts > decision-notifications 81: no devices > asking a question stores it as before and sends nothing
+2026-11-08T07:57:17.871Z [42832] created task GHEyzfOv4EQdsUK9YXXV "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-81.test.ts > decision-notifications 81: no devices > asking a question stores it as before and sends nothing
+2026-11-08T07:57:17.885Z [42832] asked on GHEyzfOv4EQdsUK9YXXV: Which branch?
+
+stderr | tests/emulator/decision-notifications-81.test.ts > decision-notifications 81: no devices > a devices collection holding only unusable documents counts as no devices
+2026-11-08T07:57:17.937Z [42832] created task J0WPVFAwEP2bbEzEFyYj "B7 feature at build"
+
+stderr | tests/emulator/decision-notifications-81.test.ts > decision-notifications 81: no devices > a devices collection holding only unusable documents counts as no devices
+2026-11-08T07:57:17.949Z [42832] asked on J0WPVFAwEP2bbEzEFyYj: Anything?
+
+stderr | tests/emulator/decision-notifications-81.test.ts
+2026-11-08T07:57:17.997Z [42832] agent nNy36J6SEANpe15zw3Kh shut down; 3 task(s) orphaned
+
+ ✓ tests/emulator/decision-notifications-81.test.ts (3 tests) 339ms
+ ✓ tests/emulator/app-logs-2.test.ts (2 tests) 261ms
+ ✓ tests/emulator/web-threads-b4-11.test.ts (2 tests) 247ms
+ ✓ tests/emulator/app-logs-4.test.ts (3 tests) 227ms
+ ✓ tests/emulator/web-threads-b5-24.test.ts (1 test) 190ms
+stderr | tests/emulator/swipe-deck-65.test.ts
+2026-11-08T07:57:22.167Z [8476] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/swipe-deck-65.test.ts
+2026-11-08T07:57:22.424Z [8476] registered agent=GzjXfj5AEQyn9Yl6DRlI project=board-briefs-b7-retire-6-252a9f3a cwd=/tmp/board-briefs-b7-retire-65-1794124642319
+
+stderr | tests/emulator/swipe-deck-65.test.ts > swipe-deck 65: openSuggestions > lists every line of a finished task in the window with <taskId>:<index> ids
+2026-11-08T07:57:22.428Z [8476] created task 8t0k5VLbIbjybhtIC1IG "Retire seed"
+
+stderr | tests/emulator/swipe-deck-65.test.ts > swipe-deck 65: openSuggestions > leaves retired indices out and keeps the original positions in the ids
+2026-11-08T07:57:22.435Z [8476] created task 2BanUbGrNU9vIW5GycgG "Retire seed"
+
+stderr | tests/emulator/swipe-deck-65.test.ts > swipe-deck 65: openSuggestions > is empty when every line is retired, or the task has no Suggested next
+2026-11-08T07:57:22.440Z [8476] created task 635uw6BtkIWd1OFfhGqC "Retire seed"
+
+stderr | tests/emulator/swipe-deck-65.test.ts > swipe-deck 65: openSuggestions > is empty when every line is retired, or the task has no Suggested next
+2026-11-08T07:57:22.444Z [8476] created task RJLBQINjkQfNwUpk4AhQ "Retire seed"
+
+stderr | tests/emulator/swipe-deck-65.test.ts > swipe-deck 65: openSuggestions > is empty for an unfinished task even with a Suggested next list
+2026-11-08T07:57:22.448Z [8476] created task vBNKmwKBMYvV0b7dMHTz "Retire seed"
+
+stderr | tests/emulator/swipe-deck-65.test.ts > swipe-deck 65: openSuggestions > is empty for a finished task outside the 7-day window, and open just inside it
+2026-11-08T07:57:22.458Z [8476] created task 4lIVsJ9qMFDlo04Tmdfm "Retire seed"
+
+stderr | tests/emulator/swipe-deck-65.test.ts > swipe-deck 65: openSuggestions > is empty for a finished task outside the 7-day window, and open just inside it
+2026-11-08T07:57:22.462Z [8476] created task ovl1qjgwaBluWdCfE48z "Retire seed"
+
+stderr | tests/emulator/swipe-deck-65.test.ts
+2026-11-08T07:57:22.477Z [8476] agent GzjXfj5AEQyn9Yl6DRlI shut down; 0 task(s) orphaned
+
+ ✓ tests/emulator/swipe-deck-65.test.ts (5 tests) 158ms
+stderr | tests/emulator/app-logs-8.test.ts
+2026-11-08T07:57:23.160Z [22240] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/app-logs-8.test.ts > L1-8 the log store fails under the agent > refuses the write: the agent carries on and logs nothing about it to the store
+2026-11-08T07:57:23.387Z [22240] api_call_failed ERROR: board registration failed: deadline exceeded
+
+stderr | tests/emulator/app-logs-8.test.ts > L1-8 the log store fails under the agent > refuses the write: the agent carries on and logs nothing about it to the store
+2026-11-08T07:57:23.396Z [22240] storing a log event failed: 7 PERMISSION_DENIED: refused
+
+stderr | tests/emulator/app-logs-8.test.ts > L1-8 the log store fails under the agent > refuses the write: the agent carries on and logs nothing about it to the store
+2026-11-08T07:57:23.397Z [22240] api_call_failed WARNING: heartbeat failed: unavailable
+
+stderr | tests/emulator/app-logs-8.test.ts > L1-8 the log store fails under the agent > is unreachable: the agent carries on and logs nothing about it to the store
+2026-11-08T07:57:23.447Z [22240] api_call_failed ERROR: board registration failed: deadline exceeded
+
+stderr | tests/emulator/app-logs-8.test.ts > L1-8 the log store fails under the agent > is unreachable: the agent carries on and logs nothing about it to the store
+2026-11-08T07:57:23.447Z [22240] storing a log event failed: 14 UNAVAILABLE: no connection
+
+stderr | tests/emulator/app-logs-8.test.ts > L1-8 the log store fails under the agent > is unreachable: the agent carries on and logs nothing about it to the store
+2026-11-08T07:57:23.448Z [22240] api_call_failed WARNING: heartbeat failed: unavailable
+
+ ✓ tests/emulator/app-logs-8.test.ts (2 tests) 177ms
+stderr | tests/emulator/agent-heartbeat.test.ts
+2026-11-08T07:57:24.256Z [2428] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+
+stderr | tests/emulator/agent-heartbeat.test.ts > agent heartbeat > writes at most 12 heartbeats an hour and is online at every minute of it
+2026-11-08T07:57:24.275Z [2428] registered agent=KyvraZvayyAiuIrg9G6j project=heartbeat-1794124644275-986b28b5 cwd=/tmp/heartbeat-1794124644275
+
+stderr | tests/emulator/agent-heartbeat.test.ts > agent heartbeat > writes at most 12 heartbeats an hour and is online at every minute of it
+2026-11-08T07:57:24.417Z [2428] agent KyvraZvayyAiuIrg9G6j shut down; 0 task(s) orphaned
+
+ ✓ tests/emulator/agent-heartbeat.test.ts (1 test) 144ms
+ ✓ tests/emulator/web-threads-b6-25.test.ts (3 tests) 519ms
+
+ Test Files  55 passed (55)
+      Tests  389 passed (389)
+   Start at  08:55:16
+   Duration  130.22s (transform 486ms, setup 0ms, collect 22.44s, tests 95.11s, environment 638ms, prepare 3.98s)
+
++  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+emulator exit 0
