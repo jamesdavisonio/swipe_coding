@@ -5,10 +5,10 @@ import type { NeedKind, Task, Todo } from '@kanban/shared'
 import {
   answerQuestion,
   approveSpec,
+  markMerged,
   markRead,
   markTodosDone,
   queueSuggestion,
-  requestMerge,
   sendNote,
   tickRemainingSteps,
 } from '../../data.ts'
@@ -28,7 +28,7 @@ interface Write {
 export interface DeckUi {
   fly: (card: DeckCard, to: Ghost['to'], from: Drag | null) => void
   toast: (text: string) => void
-  openSheet: (kind: 'choices' | 'hold' | 'skip', card: DeckCard) => void
+  openSheet: (kind: 'choices' | 'skip', card: DeckCard) => void
   closeSheet: () => void
 }
 
@@ -64,6 +64,8 @@ function writeOf(card: DeckCard, task: Task | null, todos: readonly Todo[]): Wri
       return { action: 'approve_spec', run: () => approveSpec(task) }
     case 'phrase':
       return { action: 'gate_reply', run: () => answerQuestion(task, { label: action.phrase }) }
+    case 'merge':
+      return { action: 'mark_merged', run: () => markMerged(task) }
     case 'tick_all':
       return { action: 'tick_all_steps', run: () => tickRemainingSteps(task) }
     case 'read':
@@ -76,6 +78,7 @@ function writeOf(card: DeckCard, task: Task | null, todos: readonly Todo[]): Wri
 function sentText(card: DeckCard): string {
   if (card.kind === 'next') return 'A new task is queued.'
   if (card.kind === 'summary') return 'Got it.'
+  if (card.kind === 'merge') return `Told ${card.session} it's merged.`
   return `Sent to ${card.session}: ${stampText(card).yes.toLowerCase()}.`
 }
 
@@ -110,7 +113,6 @@ function agree(ctx: Ctx, card: DeckCard, from: Drag | null) {
   const action = card.action
   if (!action) return refuse(ctx.ui, 'Answer this one with the mic.')
   if (action.type === 'choose') return ctx.ui.openSheet('choices', card)
-  if (action.type === 'merge') return ctx.ui.openSheet('hold', card)
   const write = writeOf(card, ctx.deck.taskOf(card.taskId), ctx.deck.todos)
   if (write) commit(ctx, card, write, { to: 'right', from })
 }
@@ -157,18 +159,6 @@ function choose(ctx: Ctx, card: DeckCard, choice: DeckChoice) {
   commit(ctx, card, write, { to: 'right', from: null })
 }
 
-function merge(ctx: Ctx, card: DeckCard) {
-  const task = ctx.deck.taskOf(card.taskId)
-  ctx.ui.closeSheet()
-  if (!task) return
-  commit(
-    ctx,
-    card,
-    { action: 'request_merge', run: () => requestMerge(task) },
-    { to: 'right', from: null }
-  )
-}
-
 // A voice note: the card goes up and away. A suggested-next card is queued (titled with what it
 // suggests) with the note as its description; anything else goes to the session, and the deck
 // waits for its revised card.
@@ -206,7 +196,6 @@ export function useDeckActions(deck: DeckModel, ui: DeckUi) {
     later: (card: DeckCard, from: Drag | null) => later(ctx, card, from),
     skip: (card: DeckCard, forGood: boolean) => skip(ctx, card, forGood),
     choose: (card: DeckCard, choice: DeckChoice) => choose(ctx, card, choice),
-    merge: (card: DeckCard) => merge(ctx, card),
     note: (card: DeckCard, text: string) => note(ctx, card, text),
   }
 }

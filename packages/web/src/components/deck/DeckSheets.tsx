@@ -2,7 +2,6 @@
 import type { DeckCard } from '../../lib/deck.ts'
 import ChoicesSheet from './ChoicesSheet.tsx'
 import DetailsSheet from './DetailsSheet.tsx'
-import HoldSheet from './HoldSheet.tsx'
 import ListenSheet from './ListenSheet.tsx'
 import OverviewSheet from './OverviewSheet.tsx'
 import SkipSheet from './SkipSheet.tsx'
@@ -12,7 +11,7 @@ import type { DeckModel } from './use-deck.ts'
 import type { Reading } from './use-listen.ts'
 import type { Recognition } from './use-recognition.ts'
 
-export type SheetKind = 'details' | 'overview' | 'choices' | 'hold' | 'skip' | 'voice' | 'listen'
+export type SheetKind = 'details' | 'overview' | 'choices' | 'skip' | 'voice' | 'listen'
 export interface OpenSheet {
   kind: SheetKind
   cardId: string | null
@@ -79,8 +78,6 @@ export default function DeckSheets({
           onClose={onClose}
         />
       )
-    case 'hold':
-      return <HoldSheet card={card} onConfirm={() => actions.merge(card)} onClose={onClose} />
     case 'voice':
       return (
         <VoiceSheet

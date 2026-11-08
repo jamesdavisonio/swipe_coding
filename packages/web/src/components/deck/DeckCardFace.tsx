@@ -5,7 +5,7 @@
 import { useId, type ComponentProps, type CSSProperties } from 'react'
 import { KIND_LABEL, stampText, type DeckCard } from '../../lib/deck.ts'
 import { cn } from '../../lib/cn.ts'
-import { Check, ChevronUp } from '../../lib/icons.ts'
+import { Check, ChevronUp, ExternalLink } from '../../lib/icons.ts'
 import { relativeTime } from '../../lib/threads.ts'
 import { laterNote, yesNote } from './stamps.ts'
 import { toneClass } from './tones.ts'
@@ -138,6 +138,38 @@ function CardMeta({ card, now, top }: { card: DeckCard; now: number; top: boolea
   )
 }
 
+// The page the card points to, in a new tab: a link on the top card, a picture of one on the
+// copies. Following it answers nothing; the card stays until James agrees or passes.
+function CardLink({ card, top }: { card: DeckCard; top: boolean }) {
+  if (!card.link) return null
+  const look =
+    'inline-flex min-h-11 items-center gap-1.5 self-start rounded-md text-sm font-semibold underline underline-offset-4'
+  const body = (
+    <>
+      <ExternalLink aria-hidden="true" className="size-4" />
+      {card.link.label}
+    </>
+  )
+  if (!top)
+    return (
+      <span aria-hidden="true" className={look}>
+        {body}
+      </span>
+    )
+  return (
+    <a
+      href={card.link.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      // A drag that starts on the link moves the card, not a copy of the link.
+      draggable={false}
+      className={cn(look, 'focus-visible:outline-current')}
+    >
+      {body}
+    </a>
+  )
+}
+
 // The way to the details: a button on the top card, a picture of one on the copies.
 function DetailsHint({ onDetails }: { onDetails?: () => void }) {
   const look = 'mx-auto flex min-h-11 items-center gap-1.5 rounded-md px-3 text-sm font-semibold'
@@ -198,6 +230,7 @@ export default function DeckCardFace({
           {card.headline}
         </h2>
         <CardBody card={card} />
+        <CardLink card={card} top={top} />
       </div>
       <DetailsHint onDetails={top ? onDetails : undefined} />{' '}
       {/* Last in the text, first on screen (absolute, above the content). */}

@@ -1,7 +1,7 @@
 // Dragging a deck sheet back the way it came, from anywhere on it: a bottom sheet goes down, the
-// top sheet goes up. A sheet whose body is scrolled away from that edge scrolls first, the hold
-// button keeps its own press, and a drag past the distance closes the sheet. While the drag owns
-// the gesture, the browser's own panning is held off so the finger stays with the sheet.
+// top sheet goes up. A sheet whose body is scrolled away from that edge scrolls first, and a drag
+// past the distance closes the sheet. While the drag owns the gesture, the browser's own panning
+// is held off so the finger stays with the sheet.
 import { useEffect, useRef, useState, type PointerEvent, type RefObject } from 'react'
 
 export type SheetSide = 'bottom' | 'top'
@@ -9,8 +9,6 @@ export type SheetSide = 'bottom' | 'top'
 const CLOSE_DRAG_PX = 80
 const START_SLOP_PX = 4
 const CLICK_AFTER_DRAG_MS = 400
-// Elements that keep their own press (the hold button) carry `data-no-sheet-drag`.
-const NO_SHEET_DRAG = 'data-no-sheet-drag'
 
 interface Gesture {
   id: number
@@ -50,8 +48,7 @@ export function useSheetDrag(opts: {
   }, [opts.sheet])
 
   function onPointerDown(e: PointerEvent<HTMLElement>) {
-    const target = e.target as Element
-    if (e.button > 0 || target.closest(`[${NO_SHEET_DRAG}]`)) return
+    if (e.button > 0) return
     gesture.current = { id: e.pointerId, x: e.clientX, y: e.clientY, owned: false }
   }
 

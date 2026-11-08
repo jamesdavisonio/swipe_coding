@@ -6,7 +6,7 @@ const YES_NOTE: Record<DeckAction['type'], string> = {
   approve: 'Spec confirmed, building starts',
   phrase: 'Sent to the session',
   choose: 'Pick one next',
-  merge: 'Hold 3 seconds to confirm',
+  merge: "Tells the session it's merged",
   tick_all: 'Every step ticked',
   todos_done: 'Marks them all done',
   read: 'Nothing else is sent',

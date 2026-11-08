@@ -1,0 +1,47 @@
+
+> lint
+> eslint .
+
+
+C:\Users\Intel\Documents\code\kanban-merge\packages\agent\test\protocol.ts
+  277:60  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  281:57  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  327:36  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  363:39  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-merge\tests\app-logs-1.test.ts
+  38:36  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-merge\tests\emulator\board-replies-anywhere-r1-1.test.ts
+  25:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-merge\tests\emulator\board-replies-anywhere-r1-9.test.ts
+  43:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  44:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  65:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-merge\tests\fixtures\app-logs-emulator.ts
+  107:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  141:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  315:10  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-merge\tests\fixtures\board-replies-anywhere-emulator.ts
+  192:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-merge\tests\swipe-deck-42.test.ts
+  111:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-merge\tests\swipe-deck-54.test.tsx
+  80:3  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  89:5  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  91:5  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-merge\tests\swipe-deck-61.test.ts
+  38:31  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\Intel\Documents\code\kanban-merge\tests\swipe-deck-67.test.ts
+  33:10  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+✖ 19 problems (0 errors, 19 warnings)
+
+lint exit 0

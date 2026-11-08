@@ -17,8 +17,6 @@ export function motionMs(token: MotionToken): number {
 export const HAPTIC = {
   armed: 12, // a dragged card crosses the threshold
   commit: 18, // a card is acted on
-  holdStart: 10, // the hold button is pressed
-  confirmed: [20, 60, 20], // the hold completed
   refused: [8, 40, 8], // a move the card does not allow
 } as const
 

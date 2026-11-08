@@ -498,20 +498,6 @@ export { forJamesTaskId }
 
 // ---- swipe deck ------------------------------------------------------------------
 
-// The held merge button: asks the session to merge, only while the task waits on its PR at stage
-// pr. The need is cleared and the stage stays pr until the session reports the merge.
-export async function requestMerge(task: Task) {
-  await transitionTask(task.id, (cur) => {
-    if (cur.stage !== 'pr' || cur.needs?.kind !== 'pr') return null
-    const pr = prName(cur)
-    return {
-      patch: { needs: null },
-      history: `Asked to merge ${pr}`,
-      comment: { kind: 'comment', body: `Merge ${pr} into main.` },
-    }
-  })
-}
-
 // A note on a PR James was asked to merge: changes first. The need is cleared (the session
 // reports the PR again when it is ready), only while the task still waits on it.
 async function notePr(task: Task, note: string) {

@@ -15,7 +15,15 @@ import {
   type Todo,
 } from '@kanban/shared'
 import { LIST_MARKER, parseBrief, suggestedNext, type Brief } from './brief.ts'
-import { activeNeed, isListed, prName, questionOptions, specVersion, stepCount } from './threads.ts'
+import {
+  activeNeed,
+  isListed,
+  prName,
+  questionOptions,
+  specVersion,
+  stepCount,
+  webUrl,
+} from './threads.ts'
 
 export { HEADLINE_MAX }
 export type CardKind = DecisionKind | 'merge' | 'after_deploy' | 'todos' | 'summary' | 'next'
@@ -43,6 +51,11 @@ export const KIND_LABEL: Record<CardKind, string> = {
   summary: 'Done',
   next: 'Suggested next',
 }
+// A web page the card points to, opened in a new tab (a merge card's pull request on GitHub).
+export interface DeckLink {
+  label: string
+  href: string
+}
 export interface DeckChoice {
   key?: string
   label: string
@@ -69,6 +82,7 @@ export interface DeckCard {
   choices: DeckChoice[]
   action: DeckAction | null
   important: boolean
+  link: DeckLink | null
   at: number
   passed: boolean
   revised: boolean
@@ -119,7 +133,7 @@ export function exampleOf(brief: Brief | null): string | null {
 const YES_STAMP: Record<Exclude<DeckAction['type'], 'phrase'>, string> = {
   approve: 'Build it',
   choose: 'Choose',
-  merge: 'Merge',
+  merge: 'I merged it',
   tick_all: 'All done',
   todos_done: 'All done',
   read: 'Got it',
@@ -157,6 +171,7 @@ function card(base: CardBase, fields: CardFields): DeckCard {
     choices: [],
     action: null,
     important: false,
+    link: null,
     revised: false,
     steps: [],
     todoIds: [],
@@ -212,12 +227,20 @@ function specCard(base: CardBase, task: Task, body: string | undefined): DeckCar
   })
 }
 
+// The pull request's page on GitHub, for a web url only (http or https).
+function prLink(task: Task): DeckLink | null {
+  const href = webUrl(task.pr?.url)
+  return href && task.pr ? { label: `Open PR #${task.pr.number} on GitHub`, href } : null
+}
+
+// James merges on GitHub (the card's link) and agreeing tells the session it is merged.
 function mergeCard(base: CardBase, task: Task): DeckCard {
   return taskCard(base, task, {
     kind: 'merge',
     headline: `Merge ${prName(task)} into main`,
     action: { type: 'merge' },
     important: true,
+    link: prLink(task),
   })
 }
 

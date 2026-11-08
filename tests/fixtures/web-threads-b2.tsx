@@ -112,7 +112,6 @@ export const actions = {
   markMerged: vi.fn((_task: Task) => Promise.resolve()),
   markRead: vi.fn((_task: Task) => Promise.resolve()),
   // swipe-deck writes
-  requestMerge: vi.fn((_task: Task) => Promise.resolve()),
   sendNote: vi.fn((_task: Task, _text: string) => Promise.resolve()),
   tickRemainingSteps: vi.fn((_task: Task) => Promise.resolve()),
   markTodosDone: vi.fn((_todos: readonly Todo[]) => Promise.resolve()),
