@@ -173,17 +173,19 @@ export function withoutSuggestedNext(text: string): string {
   return block([...lines.slice(0, from), ...tail])
 }
 
-// The latest session message that holds a well-formed brief of `gate`, with that brief. Earlier
-// briefs and plainer messages after it do not matter; James's own messages never count.
-export function latestBrief(
-  comments: readonly Pick<Comment, 'author' | 'body'>[],
+// The latest session message that holds a well-formed brief of `gate`, with that brief and the
+// message itself. Earlier briefs and plainer messages after it do not matter; James's own messages
+// never count. `comments` are oldest first.
+export function latestBrief<C extends Pick<Comment, 'author' | 'body'>>(
+  comments: readonly C[],
   gate: Gate
-): { brief: Brief; body: string } | null {
+): { brief: Brief; body: string; comment: C } | null {
   for (let i = comments.length - 1; i >= 0; i--) {
-    const { author, body } = comments[i]
+    const comment = comments[i]
+    const { author, body } = comment
     if (author === 'james' || typeof body !== 'string') continue
     const brief = parseBrief(body)
-    if (brief?.gate === gate) return { brief, body }
+    if (brief?.gate === gate) return { brief, body, comment }
   }
   return null
 }

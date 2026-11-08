@@ -6,6 +6,7 @@
 // through the guards at the top of this file.
 import {
   DONE_VISIBLE_MS,
+  NEED_KINDS,
   STAGES,
   isDone,
   isTaskVisible,
@@ -26,7 +27,6 @@ const HOUR_MS = 60 * MINUTE_MS
 const DAY_MS = 24 * HOUR_MS
 const CLOCK_DIGITS = 2
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-const NEED_KINDS: readonly NeedKind[] = ['spec', 'question', 'pr', 'after_deploy']
 
 // 'all', or a project id.
 export type ProjectFilter = string

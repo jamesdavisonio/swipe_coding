@@ -21,6 +21,7 @@ export const COLLECTIONS = {
   comments: 'comments',
   todos: 'todos',
   devices: 'devices',
+  notifier: 'notifier', // the notifier's lease (docs/features/notifier.md); Admin SDK only
 } as const
 
 export type Author = 'james' | 'agent'
@@ -56,6 +57,7 @@ export const STAGES: readonly Stage[] = [
 
 // What James has to decide right now; the session sets it, his decision clears it.
 export type NeedKind = 'spec' | 'question' | 'pr' | 'after_deploy'
+export const NEED_KINDS: readonly NeedKind[] = ['spec', 'question', 'pr', 'after_deploy']
 export interface TaskNeed {
   kind: NeedKind
   question?: string
@@ -157,6 +159,7 @@ export interface Task {
   lastCommentAt: number | null
   log: LogEntry[] // decision history, append-only, capped at LOG_CAP (see appendLog)
   retiredNext?: number[] // Suggested next indices a later session retired as done
+  notified?: string // the decision the notifier last sent ('spec:<comment id>', 'question:<text>')
 }
 
 export interface Comment {
