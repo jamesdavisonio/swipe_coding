@@ -133,6 +133,12 @@ brief>` (or `spec:none`), `question:<the question text>`; it sends when the key 
 - Task changes are handled in snapshot order.
 - The CLI (`node packages/agent/src/notifier.ts`), when the lease is busy, writes
   "another notifier is running" to stderr and exits with code 1.
+- (Before delta round 2) The logon task's action runs
+  `powershell.exe -NoProfile -WindowStyle Hidden -Command "npm run notifier"` with
+  `-WorkingDirectory` the repository root; the script calls `New-ScheduledTaskAction`,
+  `New-ScheduledTaskTrigger -AtLogOn`, `New-ScheduledTaskSettingsSet` (with `-RestartCount`),
+  `Register-ScheduledTask` and `Unregister-ScheduledTask` directly (no splatting). The script is
+  checked statically; it is never run by the tests (it would register a real task).
 
 **Unresolved:** none.
 
