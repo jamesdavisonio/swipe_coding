@@ -1,7 +1,7 @@
-// decision-notifications 82 in the Firestore emulator (`npm run test:rules`): when sending fails
-// (the push port throws, or reports a failed token) the session's tool call still succeeds with
-// its usual result, and one WARNING api_call_failed event (target fcm, status, task_id,
-// device_count, removed) is stored for kanban_logs to show.
+// decision-notifications 82 in the Firestore emulator (`npm run test:rules`): when the notifier's
+// send fails (the push port throws, or reports a failed token) the session's tool call still
+// succeeds with its usual result, and one WARNING api_call_failed event (target fcm, status,
+// task_id, device_count, removed) is stored for kanban_logs to show.
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { DocumentData } from 'firebase-admin/firestore'
 import { briefText } from '../fixtures/swipe-deck-brief.ts'
@@ -13,13 +13,16 @@ import {
   seedDevices,
   taskAt,
   useBoard,
+  useNotifier,
+  waitForSends,
 } from '../fixtures/board-briefs-b7-emulator.ts'
 
 const push = fakePush()
-const board = useBoard('dn-82', push)
+const board = useBoard('dn-82')
+const db = useNotifier(push)
 beforeEach(async () => {
   push.reset()
-  await seedDevices(board(), ['tok-a', 'tok-b'])
+  await seedDevices(db(), ['tok-a', 'tok-b'])
 })
 
 const forTask = (id: string) => (e: DocumentData) =>
@@ -50,7 +53,7 @@ describe('decision-notifications 82: sending fails', () => {
         removed: 0,
       },
     })
-    await logBarrier(board(), push)
+    await logBarrier(db(), push)
     expect(await agentLogs(forTask(t.id))).toHaveLength(1)
   })
 
@@ -85,7 +88,8 @@ describe('decision-notifications 82: sending fails', () => {
   it('stores nothing when every outcome is ok', async () => {
     const t = await taskAt(board(), 'feature', { stage: 'build' })
     await board().ask(t.id, 'All good?')
-    await logBarrier(board(), push)
+    await waitForSends(push, t.id)
+    await logBarrier(db(), push)
     expect(await agentLogs(forTask(t.id))).toHaveLength(0)
   })
 })

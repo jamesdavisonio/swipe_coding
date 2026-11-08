@@ -135,6 +135,27 @@ export async function logFailure(input: FailureInput): Promise<void> {
   }
 }
 
+// A Firestore-side failure of a listener, batch or write: the stderr / agent.log line, plus a
+// stored api_call_failed event (WARNING for a batch or write, ERROR for a dead listener).
+export function firestoreFailure(
+  severity: 'WARNING' | 'ERROR',
+  what: string,
+  err: Error,
+  taskId?: string
+): void {
+  log(`${what}: ${err.message}`)
+  void logFailure({
+    severity,
+    event_type: 'api_call_failed',
+    message: err.message,
+    context: {
+      target: 'firestore',
+      status: errorStatus(err),
+      ...(taskId ? { task_id: taskId } : {}),
+    },
+  })
+}
+
 // ---- reading --------------------------------------------------------------------------------
 
 export class InvalidLogArgError extends Error {

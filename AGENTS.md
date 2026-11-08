@@ -11,7 +11,7 @@ report in through an MCP server and receive James's replies through a background
 - **Frontend:** React 19, Vite 7, Tailwind 4 — `packages/web` (PWA)
 - **Backend:** Firestore via firebase-admin from the desktop agent — `packages/agent` (MCP server + Claude Code channel). No Cloud Functions.
 - **Data:** Firestore `eur3`, project `kanban-nullnoise`; collections `projects`, `agents`, `tasks`, `comments`, `todos`, `logs`, `devices`
-- **Push:** decision cards notify the phone via Firebase Cloud Messaging, sent by the agent (ADR 0006); `VITE_FIREBASE_VAPID_KEY` in `packages/web/.env`
+- **Push:** decision cards notify the phone via Firebase Cloud Messaging, sent by the notifier process (ADR 0006, `docs/features/notifier.md`); `VITE_FIREBASE_VAPID_KEY` in `packages/web/.env`
 - **AI:** none in the app
 - **Deploy:** Firebase Hosting + Firestore rules; `npm run deploy`
 
@@ -20,6 +20,7 @@ report in through an MCP server and receive James's replies through a background
 ```
 npm install
 npm run web                # Vite dev server; packages/web/.env holds the Firebase web config
+npm run notifier           # the decision notifier (node --watch); or `npm run notifier:install` once for a logon task
 ```
 
 ## How to run tests
