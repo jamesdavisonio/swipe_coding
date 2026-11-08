@@ -119,6 +119,9 @@ export const actions = {
   queueSuggestion: vi.fn((_projectId: string, _suggestion: string, _note?: string) =>
     Promise.resolve('new-task')
   ),
+  // decision-notifications device records
+  saveDevice: vi.fn((_deviceId: string, _token: string) => Promise.resolve()),
+  removeDevice: vi.fn((_deviceId: string) => Promise.resolve()),
 }
 
 export const logSpy = {

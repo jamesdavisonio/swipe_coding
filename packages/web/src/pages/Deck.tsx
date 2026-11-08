@@ -2,6 +2,7 @@
 // card says, left for later, up for the details, down for the overview; the microphone changes
 // the decision in his own words and the speaker reads the card aloud. Every move also has a
 // button and a key. The design is docs/features/swipe-deck-prototype.html.
+import { useEffect } from 'react'
 import CardStage from '../components/deck/CardStage.tsx'
 import DeckDock from '../components/deck/DeckDock.tsx'
 import DeckSheets from '../components/deck/DeckSheets.tsx'
@@ -17,6 +18,7 @@ import { useGhost } from '../components/deck/use-ghost.ts'
 import type { Drag, Release } from '../components/deck/use-swipe.ts'
 import { useToast } from '../components/deck/use-toast.ts'
 import type { DeckCard } from '../lib/deck.ts'
+import { refreshPush } from '../lib/push.ts'
 
 // A to-do card has no session to take a note.
 const takesNote = (card: DeckCard | null): card is DeckCard =>
@@ -34,6 +36,8 @@ export default function Deck() {
     closeSheet: sheets.close,
   })
   const top = deck.cards[0] ?? null
+  // With notifications on, a token Chrome rotated replaces the stored one (once per visit).
+  useEffect(() => void refreshPush(), [])
 
   function move(m: Move) {
     if (m === 'overview') return sheets.open('overview', null)

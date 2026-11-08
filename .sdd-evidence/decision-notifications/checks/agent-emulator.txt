@@ -1,0 +1,70 @@
+i  emulators: Starting emulators: firestore
+i  emulators: Detected demo project ID "demo-kanban", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Firestore Emulator logging to firestore-debug.log
++  firestore: Firestore Emulator UI websocket is running on 9150.
+i  Running script: npm run test:agent
+
+> test:agent
+> npm run test -w @kanban/agent
+
+
+> @kanban/agent@0.0.1 test
+> node test/protocol.ts
+
+  [agent] 2026-11-08T06:55:00.440Z [4820] firestore mode=emulator 127.0.0.1:8080 project=demo-kanban
+  [agent] 2026-11-08T06:55:00.451Z [4820] mcp connected cwd=C:\Users\Intel\Documents\code\kanban-deck board=emulator
+ok - initialize advertises claude/channel
+ok - initialize advertises tools
+ok - instructions explain the watcher
+ok - instructions describe the workflow
+ok - all 11 tools listed
+ok - kanban_update_task inputSchema has retire_suggestions: string[]
+ok - kanban_ask inputSchema has options: string[] (12 tools)
+  [agent] 2026-11-08T06:55:01.356Z [4820] registered agent=cgQ0KS9cWIbzxueAADDq project=kanban-deck-3c503d81 cwd=C:\Users\Intel\Documents\code\kanban-deck
+ok - whoami works (board emulator)
+  [agent] 2026-11-08T06:55:01.818Z [4820] created task 53DaBxLzrggkt8Ni3qoE "Protocol test task"
+ok - create_task → 53DaBxLzrggkt8Ni3qoE
+ok - list_tasks shows it, For James pinned first
+  [agent] 2026-11-08T06:55:01.877Z [4820] created task hda2giRs3h0msUJJmq7O "Protocol retire seed"
+  [agent] 2026-11-08T06:55:01.994Z [4820] created task fW8iGxwmOdal1rrJUwot "Protocol retire seed"
+ok - list_tasks: a done task lists its open suggestions, retired index left out
+ok - list_tasks: an all-retired done task has no suggestions field
+ok - list_tasks: an open task has no suggestions field
+  [agent] 2026-11-08T06:55:02.121Z [4820] retired 1 suggestion(s), refused 1
+  [agent] 2026-11-08T06:55:02.127Z [4820] updated task 53DaBxLzrggkt8Ni3qoE: updatedAt
+ok - update_task retire_suggestions replies with the brief, retired and refused
+  [agent] 2026-11-08T06:55:02.201Z [4820] updated task 53DaBxLzrggkt8Ni3qoE: updatedAt,title
+ok - update_task without retire_suggestions has no retired or refused
+ok - create_task gives the watcher command
+ok - reply waits undelivered for a watcher
+ok - watcher printed the reply in 1874 ms
+ok - deliveredAt set once printed
+ok - no channel event carries the reply
+ok - subtask spec awaiting_approval → needs spec
+  [agent] 2026-11-08T06:55:04.274Z [4820] asked on 53DaBxLzrggkt8Ni3qoE: Approve the spec?
+ok - ask → needs question
+ok - watcher printed the answer
+ok - answer → needs cleared
+ok - no channel event carries the answer
+ok - subtask spec done → stage approved
+ok - subtask approved done → stage build
+  [agent] 2026-11-08T06:55:06.300Z [4820] asked on 53DaBxLzrggkt8Ni3qoE: Which route?
+ok - ask with options → needs question with keyed options
+  [agent] 2026-11-08T06:55:06.381Z [4820] asked on 53DaBxLzrggkt8Ni3qoE: Which option?
+  [agent] 2026-11-08T06:55:06.451Z [4820] updated task 53DaBxLzrggkt8Ni3qoE: updatedAt,needs
+ok - update_task in_progress after ask → needs null
+  [agent] 2026-11-08T06:55:06.541Z [4820] todo for james: Merge the PR
+ok - todo_for_james created
+  [agent] 2026-11-08T06:55:06.608Z [4820] updated task 53DaBxLzrggkt8Ni3qoE: updatedAt,summary,pr,stage,needs,doneAt,agentId,working,unread
+ok - update_task done moves stage to done
+ok - stored task is done, unbound, doneAt stamped, pr recorded
+cleaned up test data
+
+all good
++  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+!  Firestore Emulator has exited upon receiving signal: SIGINT
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+exit 0

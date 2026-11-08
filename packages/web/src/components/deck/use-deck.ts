@@ -1,10 +1,12 @@
 // Everything the deck shows, from the board's live data and what this phone remembers: the cards
 // in order (minus the ones just acted on and the ones waiting for a revised card), the sessions
-// working now, and the lookups the sheets need. The order itself is lib/deck.ts's.
+// working now, and the lookups the sheets need. The order itself is lib/deck.ts's; a `?task=<id>`
+// (a tapped notification) puts that task's card first, a project tapped in the overview its cards.
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import type { Task } from '@kanban/shared'
 import { useAgents, useAllTasks, useOpenTodos, useProjects } from '../../data.ts'
-import { buildDeck, projectFirst } from '../../lib/deck.ts'
+import { buildDeck, projectFirst, taskFirst } from '../../lib/deck.ts'
 import { activeNeed } from '../../lib/threads.ts'
 import { useNow } from '../../lib/use-now.ts'
 import { useGone } from './use-gone.ts'
@@ -37,6 +39,7 @@ export function useDeck() {
   const waiting = useWaiting(tasks.data)
   const { specBodies, setSpecBody } = useSpecBodies()
   const [first, setFirst] = useState<string | null>(null)
+  const openTask = useSearchParams()[0].get('task')
 
   const built = useMemo(
     () =>
@@ -63,7 +66,8 @@ export function useDeck() {
   const { gone, hide, unhide } = useGone(built)
   const held = new Set(waiting.waiting.map((w) => w.taskId))
   const shown = built.filter((c) => !gone.has(c.id) && !(c.taskId !== null && held.has(c.taskId)))
-  const cards = first ? projectFirst(shown, first) : shown
+  const taskOrdered = openTask ? taskFirst(shown, openTask) : shown
+  const cards = first ? projectFirst(taskOrdered, first) : taskOrdered
 
   const nameOf = useMemo(() => new Map(projects.data.map((p) => [p.id, p.name])), [projects.data])
   const taskOf = (id: string | null): Task | null =>

@@ -1,0 +1,2 @@
+✓ firestore.rules passed lint.
+exit 0

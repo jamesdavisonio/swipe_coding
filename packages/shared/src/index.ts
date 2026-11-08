@@ -3,6 +3,7 @@
 //
 // Firestore layout (all top-level collections, numeric ms timestamps):
 //   projects/{projectId}   agents/{agentId}   tasks/{taskId}   comments/{commentId}   todos/{todoId}
+//   devices/{deviceId}
 
 // Both addresses are James; Google reports whichever is primary on the signed-in account.
 export const OWNER_EMAILS: readonly string[] = ['j@nullnoise.ai', 'james@nullnoise.ai']
@@ -19,6 +20,7 @@ export const COLLECTIONS = {
   tasks: 'tasks',
   comments: 'comments',
   todos: 'todos',
+  devices: 'devices',
 } as const
 
 export type Author = 'james' | 'agent'
@@ -317,6 +319,15 @@ export function initialTaskFields(input: {
 }
 
 export * from './templates.ts'
+export * from './brief.ts'
+export * from './decision.ts'
+
+// A browser registered for decision notifications (devices/{random per-browser id}).
+export interface Device {
+  token: string
+  createdAt: number
+  updatedAt: number
+}
 
 // ---- App logs (docs/features/app-logs.md) ---------------------------------------------------
 
@@ -370,27 +381,4 @@ export function boundedLogFields(
     ts,
     request_id: typeof rid === 'string' ? rid : null,
   }
-}
-
-// ---- Suggested next (pure) --------------------------------------------------------
-// A finished summary may end with a `### Suggested next` list: one follow-up task per line. The
-// web shows each line as a card, the agent lists the open ones to sessions; both read it here.
-
-export const SUGGESTED_NEXT_HEADING = /^###\s+Suggested next\s*$/i
-export const MARKDOWN_HEADING = /^#{1,6}\s/
-export const LIST_MARKER = /^(?:[-*]\s+|\d+\.\s+)/
-
-// The suggestions under a `### Suggested next` heading: one per line until the next heading or
-// the end, list markers and blanks dropped.
-export function suggestedNext(text: string): string[] {
-  const lines = text.split(/\r?\n/)
-  const from = lines.findIndex((line) => SUGGESTED_NEXT_HEADING.test(line.trim()))
-  if (from < 0) return []
-  const items: string[] = []
-  for (const line of lines.slice(from + 1)) {
-    if (MARKDOWN_HEADING.test(line.trim())) break
-    const item = line.trim().replace(LIST_MARKER, '').trim()
-    if (item !== '') items.push(item)
-  }
-  return items
 }

@@ -1,32 +1,24 @@
 // The swipe deck's cards: one for each thing waiting on James, in the order he decides them.
 // Pure data in, plain cards out: no React, no Firestore. Brief text comes from sessions, so every
-// brief goes through lib/brief.ts, which reads anything unexpected as "no brief".
-import type { Project, Task, TaskNeed, Todo } from '@kanban/shared'
-import { LIST_MARKER, parseBrief, suggestedNext, type Brief } from './brief.ts'
+// brief goes through lib/brief.ts, which reads anything unexpected as "no brief". A decision
+// card's kind and headline come from @kanban/shared, which the agent's notifications also use.
 import {
-  activeNeed,
-  isListed,
-  prName,
-  questionBrief,
-  questionOptions,
-  questionTitle,
-  specVersion,
-  stepCount,
-} from './threads.ts'
+  DECISION_LABEL,
+  HEADLINE_MAX,
+  fitHeadline,
+  questionDecision,
+  specDecision,
+  type DecisionKind,
+  type Project,
+  type Task,
+  type TaskNeed,
+  type Todo,
+} from '@kanban/shared'
+import { LIST_MARKER, parseBrief, suggestedNext, type Brief } from './brief.ts'
+import { activeNeed, isListed, prName, questionOptions, specVersion, stepCount } from './threads.ts'
 
-export const HEADLINE_MAX = 60
-export type CardKind =
-  | 'ci_failed'
-  | 'merge'
-  | 'spec'
-  | 'fix'
-  | 'round'
-  | 'summary_gate'
-  | 'question'
-  | 'after_deploy'
-  | 'todos'
-  | 'summary'
-  | 'next'
+export { HEADLINE_MAX }
+export type CardKind = DecisionKind | 'merge' | 'after_deploy' | 'todos' | 'summary' | 'next'
 // Most important first (James, 2026-11-07): decisions, then merges, then hand work, then finished
 // work, then every suggestion.
 export const KIND_ORDER: readonly CardKind[] = [
@@ -44,13 +36,8 @@ export const KIND_ORDER: readonly CardKind[] = [
 ]
 // The card's type, written as a word as well as shown by its colour.
 export const KIND_LABEL: Record<CardKind, string> = {
-  ci_failed: 'CI failed',
+  ...DECISION_LABEL,
   merge: 'Merge',
-  spec: 'Spec',
-  fix: 'Fix',
-  round: 'Another round',
-  summary_gate: 'Ship it',
-  question: 'Question',
   after_deploy: 'After deploy',
   todos: 'To-do',
   summary: 'Done',
@@ -102,25 +89,18 @@ export interface DeckInput {
   now: number
 }
 
-const ELLIPSIS = '…'
 // Between what a Suggested next line asks for and why: an em dash with a space on each side.
 export const SUGGESTION_SEPARATOR = ' — '
 const EXAMPLE_LEAD = 'For example,'
 // Where a part's prose breaks into sentences: after . ! or ?, and before a list item (a part's
 // lines are joined with spaces, so "- …" or "1. …" items run on in one line).
 const SENTENCE_BREAK = /(?<=[.!?])\s+|\s+(?=(?:[-*]|\d+\.)\s)/
-// A fix brief at one of these stages proposes a fix for a failed CI run.
-const CI_STAGES: readonly string[] = ['pr', 'merged', 'main_ci']
 
 // ---- words --------------------------------------------------------------------------
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
 
 const capitalised = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
-
-// A headline that fits the card: over HEADLINE_MAX characters it is cut, ending in "…".
-const fitHeadline = (text: string): string =>
-  text.length > HEADLINE_MAX ? `${text.slice(0, HEADLINE_MAX - 1)}${ELLIPSIS}` : text
 
 // The "For example," sentence of the brief's "What will change" part (a list item's too, its
 // marker dropped), without the lead-in and starting with a capital letter; null when none.
@@ -204,28 +184,6 @@ function taskCard(base: CardBase, task: Task, fields: TaskCardFields): DeckCard 
   })
 }
 
-// The card kind a question is: a gate brief's own kind (a fix brief once the PR is up is a
-// failed CI's fix), otherwise a plain question.
-function questionKind(task: Task, brief: Brief | null): CardKind {
-  switch (brief?.gate) {
-    case 'fix':
-      return CI_STAGES.includes(task.stage) ? 'ci_failed' : 'fix'
-    case 'round':
-      return 'round'
-    case 'summary':
-      return 'summary_gate'
-    default:
-      return 'question'
-  }
-}
-
-const FALLBACK_PREFIX: Partial<Record<CardKind, string>> = {
-  ci_failed: 'Fix CI',
-  fix: 'Fix it',
-  round: 'Another round',
-  summary_gate: 'Ship it',
-}
-
 // Two or more options are a choice (the first recommended); a brief's Reply line is its phrase.
 function questionAnswers(
   need: TaskNeed,
@@ -242,25 +200,13 @@ function questionAnswers(
 }
 
 function questionCard(base: CardBase, task: Task, need: TaskNeed): DeckCard {
-  const brief = questionBrief(need)
-  const kind = questionKind(task, brief)
-  const prefix = FALLBACK_PREFIX[kind]
-  const fallback = prefix ? `${prefix}: ${task.title}` : questionTitle(task, need)
-  return taskCard(base, task, {
-    kind,
-    headline: brief?.yes ?? fallback,
-    brief,
-    ...questionAnswers(need, brief),
-  })
+  const decision = questionDecision(task, need)
+  return taskCard(base, task, { ...decision, ...questionAnswers(need, decision.brief) })
 }
 
 function specCard(base: CardBase, task: Task, body: string | undefined): DeckCard {
-  const parsed = body === undefined ? null : parseBrief(body)
-  const brief = parsed?.gate === 'spec' ? parsed : null
   return taskCard(base, task, {
-    kind: 'spec',
-    headline: brief?.yes ?? `Start building: ${task.title}`,
-    brief,
+    ...specDecision(task, body),
     action: { type: 'approve' },
     revised: specVersion(task) > 1,
   })
@@ -430,13 +376,15 @@ export function buildDeck(input: DeckInput): DeckCard[] {
   return passedLast(ordered(cards), input.passed)
 }
 
+// The cards `pick` chooses first, then the rest, each group keeping its order.
+const firstWhere = (cards: readonly DeckCard[], pick: (c: DeckCard) => boolean): DeckCard[] => [
+  ...cards.filter(pick),
+  ...cards.filter((c) => !pick(c)),
+]
+
 // The project's cards first, then the rest, each group keeping its order.
-export function projectFirst(cards: readonly DeckCard[], projectId: string): DeckCard[] {
-  return [
-    ...cards.filter((c) => c.projectId === projectId),
-    ...cards.filter((c) => c.projectId !== projectId),
-  ]
-}
+export const projectFirst = (cards: readonly DeckCard[], projectId: string): DeckCard[] =>
+  firstWhere(cards, (c) => c.projectId === projectId)
 
 // How many cards are waiting: by kind (in KIND_ORDER, kinds with none left out) and by project
 // (in deck order, each with its kinds in KIND_ORDER).
@@ -457,3 +405,8 @@ export function deckOverview(cards: readonly DeckCard[]): DeckOverview {
   })
   return { total: cards.length, byKind: kindsOf(cards), byProject }
 }
+
+// That task's cards first, then the rest, each group keeping its order (a notification opens the
+// deck on its task this way). A task with no cards leaves the order as it is.
+export const taskFirst = (cards: readonly DeckCard[], taskId: string): DeckCard[] =>
+  firstWhere(cards, (c) => c.taskId === taskId)

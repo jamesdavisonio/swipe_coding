@@ -1,8 +1,9 @@
 // Swipe down: what is waiting, from the top. The count, a chip per kind, a row per project
-// (tapping one puts all its cards first) and who is working now.
+// (tapping one puts all its cards first), who is working now and the notifications bell.
 import { cn } from '../../lib/cn.ts'
 import { deckOverview, KIND_LABEL, type DeckCard } from '../../lib/deck.ts'
 import DeckSheet from './DeckSheet.tsx'
+import NotifySwitch from './NotifySwitch.tsx'
 import { kindToneClass } from './tones.ts'
 import type { WorkingSession } from './working.ts'
 
@@ -63,6 +64,7 @@ export default function OverviewSheet({
           {`Working now: ${working.map((w) => `${w.title} (${w.projectName})`).join(', ')}.`}
         </p>
       ) : null}
+      <NotifySwitch />
     </DeckSheet>
   )
 }

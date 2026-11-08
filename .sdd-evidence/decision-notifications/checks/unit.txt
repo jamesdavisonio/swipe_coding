@@ -1,0 +1,217 @@
+
+ RUN  v3.2.7 C:/Users/Intel/Documents/code/kanban-deck
+
+ ✓ tests/web-threads-b2-30.test.tsx (5 tests) 2047ms
+   ✓ B2-30 keyboard and names on Threads > reaches every control with Tab  1380ms
+   ✓ B2-30 keyboard and names on Threads > opens a thread with the keyboard  307ms
+ ✓ tests/web-threads-b6-25.test.tsx (18 tests) 1920ms
+   ✓ B6-25 the History sheet > is a dialog named Decision history with the task title as its heading  350ms
+   ✓ B6-25 earlier history from the archive > lists the archived entries above the rest once asked, not before  466ms
+ ✓ tests/web-threads-b6-29.test.tsx (5 tests) 1996ms
+   ✓ B6-29 the archive read in the History sheet > shows a loading status while the earlier history loads  655ms
+   ✓ B6-29 empty copy and a refused reopen > a refused reopen shows "Couldn't save. Try again." and keeps the note for another try  766ms
+ ✓ tests/web-threads-b4-30.test.tsx (13 tests) 2306ms
+   ✓ B4-30 deciding with the keyboard alone > writes and sends a change request from the keyboard  685ms
+ ✓ tests/web-threads-b6-27.test.tsx (7 tests) 2299ms
+   ✓ B6-27 reopening brings a long-done task back > reopened from its thread, it is on Threads again  1194ms
+   ✓ B6-27 reopening brings a long-done task back > reopened from the Done tab's older list, it is on Threads again  887ms
+ ✓ tests/web-threads-b3-28.test.tsx (5 tests) 2647ms
+   ✓ B3-28 a reply while offline > shows at once with one tick and stays while the write is queued  821ms
+   ✓ B3-28 a reply while offline > when the network returns, the snapshot carries it once and the ticks advance  468ms
+   ✓ B3-28 a reply whose write fails for good > removes the message, puts the text back and shows an inline error  472ms
+   ✓ B3-28 a reply whose write fails for good > logs api_call_failed with the Firestore code under the reply request id  397ms
+   ✓ B3-28 a reply whose write fails for good > the restored text can be sent again  487ms
+ ✓ tests/web-threads-b4-17.test.tsx (11 tests) 2896ms
+   ✓ B4-17 the question sheet shows the question > keeps Send answer disabled for whitespace-only text  628ms
+   ✓ B4-17 answering > typed text calls answerQuestion once with the label only and closes  477ms
+   ✓ B4-17 answering > disables Send answer while typed text is being saved, so a double tap writes once  521ms
+   ✓ B4-17 answering > keeps the typed text and shows an inline error when the write fails  435ms
+ ✓ tests/web-threads-b5-22.test.tsx (27 tests) 2814ms
+   ✓ B5-22 the project header > links back to Projects  370ms
+   ✓ B5-22 the tabs > choosing a tab presses it and sets the tab param  345ms
+   ✓ B5-22 For James > Add stays disabled until there is text, then calls addTodo with the project  523ms
+   ✓ B5-22 For James > a refused add logs api_call_failed with the Firestore code  361ms
+ ✓ tests/web-threads-b4-16.test.tsx (15 tests) 3628ms
+   ✓ B4-16 Request a change > Changes… shows the change box with Send to session disabled until there is text  559ms
+   ✓ B4-16 Request a change > sends the text with requestChange once and closes when it resolves  487ms
+   ✓ B4-16 Request a change > Cancel goes back to the spec without writing  512ms
+   ✓ B4-16 Request a change > is disabled while the write is pending, so a second tap writes nothing  493ms
+   ✓ B4-16 Request a change > keeps the text and shows an inline error when the write fails  490ms
+ ✓ tests/web-threads-b4-20.test.tsx (11 tests) 3863ms
+   ✓ B4-20 focus while a sheet is open > keeps Tab inside the spec sheet  1332ms
+   ✓ B4-20 focus while a sheet is open > keeps Shift+Tab inside the after-deploy sheet  1068ms
+   ✓ B4-20 dismissing a sheet > Escape with a change typed sends nothing  612ms
+ ✓ tests/web-threads-b3-14.test.tsx (20 tests) 4958ms
+   ✓ B3-14 composer keys > Enter inserts a newline and does not send  664ms
+   ✓ B3-14 composer keys > whitespace-only text (spaces) cannot be sent  329ms
+   ✓ B3-14 composer keys > whitespace-only text (newlines and spaces) cannot be sent  328ms
+   ✓ B3-14 sending > with a question (the write is an answer), sends the reply for that task under a fresh comment id  349ms
+   ✓ B3-14 sending > with no need (the write is a comment), sends the reply for that task under a fresh comment id  342ms
+   ✓ B3-14 sending > clears the box and shows the message at once with one tick, before the snapshot has it  449ms
+   ✓ B3-14 sending > shows the message once however many snapshots then contain it, with advancing ticks  436ms
+   ✓ B3-14 sending > the same text sent twice takes two ids and shows twice, each once after the echo  355ms
+ ✓ tests/web-threads-b5-30.test.tsx (14 tests) 6193ms
+   ✓ B5-30 Projects > reaches every control with Tab and names each one  602ms
+   ✓ B5-30 a project > on the live tab reaches every control with Tab and names each one  426ms
+   ✓ B5-30 a project > on the james tab reaches every control with Tab and names each one  663ms
+   ✓ B5-30 a project > on the done tab reaches every control with Tab and names each one  596ms
+   ✓ B5-30 a project > ticks a todo with Space and adds one with the keyboard alone  879ms
+   ✓ B5-30 a project > reveals older done tasks with the keyboard  495ms
+   ✓ B5-30 a project > opens a live task with the keyboard  407ms
+   ✓ B5-30 New task > reaches every control with Tab and names each one, steps field included  862ms
+   ✓ B5-30 New task > queues a task with the keyboard alone  722ms
+ ✓ tests/web-threads-b3-30.test.tsx (13 tests) 1895ms
+   ✓ B3-30 keyboard and names on the thread > reaches every control with Tab  537ms
+   ✓ B3-30 keyboard and names on the thread > types and sends a reply with the keyboard alone  684ms
+ ✓ tests/web-threads-b5-24.test.tsx (6 tests) 1560ms
+   ✓ B5-24 New task for a project with no live session > with no agent at all, Queue task saves and returns to Threads  636ms
+   ✓ B5-24 New task for a project with no live session > with only a stale agent, Queue task saves and returns to Threads  427ms
+   ✓ B5-24 New task for a project with no live session > with agents live only in other projects, Queue task saves and returns to Threads  414ms
+ ✓ tests/web-threads-b6-26.test.tsx (20 tests) 6968ms
+   ✓ B6-26 Reopen on the thread > keeps Reopen and send disabled while the trimmed note is empty  498ms
+   ✓ B6-26 Reopen on the thread > Cancel closes the sheet and writes nothing  649ms
+   ✓ B6-26 Reopen on the thread > calls reopenTask once with the task and the note, closes, and stays on the thread  860ms
+   ✓ B6-26 Reopen on the thread > is disabled while the save is pending, so a second tap writes nothing  741ms
+   ✓ B6-26 Reopen on the thread > on a refused save keeps the sheet and the note, alerts, and logs api_call_failed  778ms
+   ✓ B6-26 Reopen on the thread > logs reopen and the task_reopened milestone with the task id, under one request id  697ms
+   ✓ B6-26 Reopen from the Done tab and the History sheet > each Done card's Reopen opens the sheet for that task and saving opens its thread  689ms
+   ✓ B6-26 Reopen from the Done tab and the History sheet > the History sheet's Reopen task opens the Reopen sheet, and saving opens the thread  867ms
+ ✓ tests/web-threads-b2-11.test.tsx (8 tests) 1339ms
+ ✓ tests/swipe-deck-54.test.tsx (12 tests) 1357ms
+   ✓ swipe-deck 54 recording > shows interim words as they come and sends the final words with the arrow  329ms
+ ✓ tests/web-threads-b4-19.test.tsx (13 tests) 1290ms
+ ✓ tests/swipe-deck-49.test.tsx (28 tests) 1559ms
+ ✓ tests/swipe-deck-51.test.tsx (20 tests) 1579ms
+ ✓ tests/board-briefs-b7-32.test.tsx (7 tests) 1502ms
+   ✓ B7-32 the spec sheet leads with the spec brief > shows the latest spec brief as a card, then a collapsed Full spec toggle  350ms
+ ✓ tests/web-threads-b3-15.test.tsx (14 tests) 1138ms
+   ✓ B3-15 history > Decision history opens the History sheet for this task, and it closes  313ms
+ ✓ tests/board-briefs-b7-41.test.tsx (4 tests) 1260ms
+   ✓ B7-41 keyboard and names for the brief controls > Full spec is reached with Tab and toggles with Enter  542ms
+   ✓ B7-41 keyboard and names for the brief controls > the one-tap answer on a Threads row is reached with Tab and answers with Enter  366ms
+ ✓ tests/web-threads-b6-30.test.tsx (12 tests) 9285ms
+   ✓ B6-30 the History sheet from the keyboard > opens from Decision history, names every control and keeps Tab inside  1109ms
+   ✓ B6-30 the History sheet from the keyboard > Escape closes it and focuses Decision history again  345ms
+   ✓ B6-30 the History sheet from the keyboard > Close closes it and focuses Decision history again  334ms
+   ✓ B6-30 the History sheet from the keyboard > opens from a Done card's History with Enter; Escape returns focus to it  608ms
+   ✓ B6-30 the Reopen sheet from the keyboard > opens from Reopen, names every control and keeps Tab inside  690ms
+   ✓ B6-30 the Reopen sheet from the keyboard > reopens with the keyboard alone  787ms
+   ✓ B6-30 the Reopen sheet from the keyboard > Escape with a note typed writes nothing and focuses Reopen again  769ms
+   ✓ B6-30 the Reopen sheet from the keyboard > Cancel on the sheet opened from the footer writes nothing and focuses Reopen again  796ms
+   ✓ B6-30 the Reopen sheet from the keyboard > Close on the sheet opened from the footer writes nothing and focuses Reopen again  808ms
+   ✓ B6-30 the Reopen sheet from the keyboard > Cancel on the sheet opened from a Done card writes nothing and focuses the card's Reopen again  906ms
+   ✓ B6-30 the Reopen sheet from the keyboard > Close on the sheet opened from a Done card writes nothing and focuses the card's Reopen again  958ms
+   ✓ B6-30 the Reopen sheet from the keyboard > reaches every Done card control with Tab, each named, and opens Reopen with Enter  1174ms
+ ✓ tests/web-threads-b5-23.test.tsx (22 tests) 9772ms
+   ✓ B5-23 the stage preview > adds After deploy when there are steps, and drops it when the box is unticked  502ms
+   ✓ B5-23 Queue task > is disabled while the trimmed title is empty  393ms
+   ✓ B5-23 Queue task > calls createTask once with the trimmed title and description and the clean steps  2081ms
+   ✓ B5-23 Queue task > sends no steps when the box is unticked again, and the defaults when untouched  584ms
+   ✓ B5-23 Queue task > returns to Threads once the save resolves, with the new row visible  2136ms
+   ✓ B5-23 Queue task > logs queue_task and the task_queued milestone with the new id, under one request id  301ms
+   ✓ B5-23 Queue task > is disabled while the save is pending, so a second tap writes nothing  354ms
+   ✓ B5-23 Queue task > on a refused save shows the alert, keeps the form, and logs api_call_failed  2241ms
+ ✓ tests/web-threads-b4-28.test.tsx (7 tests) 1155ms
+   ✓ B4-28 a tick while offline > shows the tick at once and keeps it while the write is queued  331ms
+ ✓ tests/web-threads-b2-6.test.tsx (28 tests) 825ms
+   ✓ B2-6 Threads screen > lists "Needs you" rows in order, then "Quiet" rows in order  317ms
+ ✓ tests/web-threads-b3-13.test.tsx (19 tests) 1271ms
+ ✓ tests/web-threads-b4-18.test.tsx (7 tests) 852ms
+ ✓ tests/web-threads-b2-7.test.tsx (5 tests) 1248ms
+   ✓ B2-7 project chips > shows All first, then one chip per project, all exposing aria-pressed; All is pressed  369ms
+   ✓ B2-7 project chips > tapping a project shows only its rows, presses its chip and logs the filter  304ms
+   ✓ B2-7 project chips > All resets the filter, clears it from the URL and logs it  309ms
+ ✓ tests/web-threads-b5-29.test.tsx (22 tests) 1287ms
+ ✓ tests/swipe-deck-61-details.test.tsx (9 tests) 918ms
+   ✓ swipe-deck 61 details of a next card > shows the four regions in order, "Suggested by" with session, project and time  349ms
+ ✓ tests/swipe-deck-62.test.tsx (8 tests) 1163ms
+   ✓ swipe-deck 62 skip sheet > a left drag opens it with both answers and the card still there  440ms
+ ✓ tests/board-briefs-b7-33.test.tsx (13 tests) 1183ms
+ ✓ tests/swipe-deck-53.test.tsx (13 tests) 1156ms
+   ✓ swipe-deck 53 named controls > Agree acts, Later brings the next card up, Listen speaks, Change it opens the voice sheet  382ms
+ ✓ tests/swipe-deck-50.test.tsx (7 tests) 877ms
+   ✓ swipe-deck 50 choices sheet > opens on Agree with the choices, recommended (the first) first  340ms
+ ✓ tests/board-briefs-b7-34.test.tsx (3 tests) 843ms
+   ✓ B7-34 the PR sheet leads with the summary brief > shows the session's latest summary brief as a card above the PR content  501ms
+ ✓ tests/web-threads-b5-21.test.tsx (13 tests) 906ms
+ ✓ tests/web-threads-b2-9.test.tsx (8 tests) 665ms
+ ✓ tests/web-threads-b3-29.test.tsx (10 tests) 686ms
+ ✓ tests/decision-notifications-74.test.tsx (4 tests) 663ms
+   ✓ decision-notifications 74 unsupported > without notifications the control is disabled and the line shows  380ms
+ ✓ tests/web-threads-b2-12.test.tsx (10 tests) 516ms
+ ✓ tests/board-briefs-b7-36.test.tsx (7 tests) 562ms
+ ✓ tests/decision-notifications-72.test.tsx (4 tests) 448ms
+   ✓ decision-notifications 72 turning it on > asks for permission, registers the worker, stores one device record and shows on  318ms
+ ✓ tests/board-briefs-b7-31.test.tsx (30 tests) 526ms
+ ✓ tests/decision-notifications-73.test.tsx (4 tests) 577ms
+   ✓ decision-notifications 73 blocked > permission answered "denied": nothing is registered and the blocked line shows  343ms
+ ✓ tests/swipe-deck-55.test.tsx (3 tests) 469ms
+ ✓ tests/decision-notifications-71.test.tsx (3 tests) 458ms
+ ✓ tests/swipe-deck-48.test.tsx (7 tests) 563ms
+ ✓ tests/decision-notifications-75.test.tsx (3 tests) 461ms
+ ✓ tests/decision-notifications-85.test.tsx (8 tests) 378ms
+ ✓ tests/app-logs-1.test.ts (6 tests) 25ms
+ ✓ tests/swipe-deck-57.test.ts (19 tests) 64ms
+ ✓ tests/app-logs-3.test.ts (3 tests) 22ms
+ ✓ tests/web-threads-b2-29.test.tsx (7 tests) 407ms
+ ✓ tests/app-logs-2.test.ts (2 tests) 15ms
+ ✓ tests/swipe-deck-47.test.ts (7 tests) 22ms
+ ✓ tests/web-threads-b2-8.test.tsx (6 tests) 388ms
+ ✓ tests/web-threads-b1-contract.test.ts (15 tests) 14ms
+ ✓ tests/web-threads-b3-2.test.tsx (4 tests) 432ms
+2026-11-08T06:51:59.129Z [8200] firestore mode=offline the test runner never uses the live board; run through npm run test:rules (emulator)
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+ ✓ tests/swipe-deck-43.test.ts (7 tests) 16ms
+ ✓ tests/board-briefs-b7-35.test.tsx (3 tests) 338ms
+ ✓ tests/swipe-deck-42.test.ts (8 tests) 14ms
+ ✓ tests/swipe-deck-46.test.ts (6 tests) 13ms
+ ✓ tests/decision-notifications-78.test.ts (15 tests) 14ms
+ ✓ tests/decision-notifications-88.test.ts (7 tests) 9ms
+ ✓ tests/board-briefs-b7-37.test.ts (6 tests) 2629ms
+   ✓ B7-37 the session instructions > is what the MCP server sends: initialize returns SESSION_INSTRUCTIONS  2622ms
+ ✓ tests/swipe-deck-64.test.ts (6 tests) 7ms
+ ✓ tests/web-threads-b1-4.test.ts (3 tests) 6ms
+ ✓ tests/decision-notifications-77.test.ts (11 tests) 12ms
+ ✓ tests/web-threads-b2-10.test.tsx (4 tests) 202ms
+ ✓ tests/decision-notifications-84.test.tsx (27 tests) 260ms
+ ✓ tests/swipe-deck-45.test.ts (8 tests) 12ms
+ ✓ tests/swipe-deck-44.test.ts (5 tests) 8ms
+ ✓ tests/swipe-deck-67.test.ts (9 tests) 10ms
+ ✓ tests/web-threads-b1-2.test.ts (8 tests) 6ms
+2026-11-08T06:52:00.833Z [40952] firestore mode=offline the test runner never uses the live board; run through npm run test:rules (emulator)
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+ ✓ tests/web-threads-b1-1.test.ts (6 tests) 6ms
+ ✓ tests/swipe-deck-59.test.ts (10 tests) 5ms
+ ✓ tests/web-threads-b1-3.test.ts (6 tests) 5ms
+ ✓ tests/fix-comments-index.test.ts (6 tests) 5ms
+ ✓ tests/swipe-deck-56.test.ts (2 tests) 4ms
+ ✓ tests/decision-notifications-76.test.tsx (3 tests) 183ms
+ ✓ tests/swipe-deck-69.test.ts (6 tests) 4ms
+ ✓ tests/sample.test.ts (1 test) 3ms
+ ✓ tests/decision-notifications-80.test.ts (2 tests) 7ms
+ ✓ tests/swipe-deck-68.test.ts (2 tests) 4ms
+ ✓ tests/swipe-deck-52.test.tsx (3 tests) 146ms
+ ✓ tests/decision-notifications-86.test.tsx (4 tests) 182ms
+ ✓ tests/swipe-deck-61.test.ts (10 tests) 8ms
+ ✓ tests/swipe-deck-63.test.ts (1 test) 3ms
+ ✓ tests/fix-last-stage-done.test.ts (1 test) 3ms
+ ✓ tests/decision-notifications-79.test.ts (4 tests) 2ms
+2026-11-08T06:52:01.990Z [45332] firestore mode=offline the test runner never uses the live board; run through npm run test:rules (emulator)
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+2026-11-08T06:52:03.232Z [41128] firestore mode=emulator 127.0.0.1:1 project=demo-kanban
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+2026-11-08T06:52:04.054Z [45352] firestore mode=service_account project=not-a-real-project via C:\Users\Intel\AppData\Local\Temp\tests-never-live-rcZ08i\sa.json
+agent.log not writable (Access to this API has been restricted. Use --allow-fs-write to manage permissions.); logging to stderr only
+ ✓ tests/fix-tests-never-live.test.ts (6 tests) 6578ms
+   ✓ the board connection never uses a key under the test runner > a key named by KANBAN_SA is refused, unread, and the board stays offline  1669ms
+   ✓ the board connection never uses a key under the test runner > a key at a default location (%APPDATA%\kanban\sa.json) is refused, unread  1707ms
+   ✓ the board connection never uses a key under the test runner > VITEST alone, as in the runner main process, is enough  1130ms
+   ✓ the board connection never uses a key under the test runner > the emulator still works under the test runner  1249ms
+   ✓ the board connection never uses a key under the test runner > outside the test runner the same key is used as before (sessions unaffected)  819ms
+
+ Test Files  93 passed (93)
+      Tests  860 passed (860)
+   Start at  07:51:36
+   Duration  27.74s (transform 4.70s, setup 0ms, collect 104.38s, tests 110.81s, environment 108.23s, prepare 19.02s)
+
+unit exit 0
