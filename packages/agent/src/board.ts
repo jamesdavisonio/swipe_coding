@@ -36,31 +36,9 @@ import {
   type TaskType,
   type Todo,
 } from '@kanban/shared'
-import { errorStatus, logFailure, setLogIdentity } from './app-log.ts'
+import { firestoreFailure, setLogIdentity } from './app-log.ts'
 import { getDb, log } from './firestore.ts'
-import { fcmPush, notifyDecision, type PushPort } from './push.ts'
 import { readRemoteUrl } from './remote.ts'
-
-// A Firestore-side failure of a listener or batch: the stderr / agent.log line, plus a stored
-// event (WARNING for a batch, ERROR for a dead listener).
-function firestoreFailure(
-  severity: 'WARNING' | 'ERROR',
-  what: string,
-  err: Error,
-  taskId?: string
-) {
-  log(`${what}: ${err.message}`)
-  void logFailure({
-    severity,
-    event_type: 'api_call_failed',
-    message: err.message,
-    context: {
-      target: 'firestore',
-      status: errorStatus(err),
-      ...(taskId ? { task_id: taskId } : {}),
-    },
-  })
-}
 
 // The session's Claude-app link as Claude Code's sessions file has it right now. Home and pid are
 // read at each call: the pid is CLAUDE_PID when set, else the Claude Code process that started
@@ -174,11 +152,8 @@ export class Board {
   private heartbeat: NodeJS.Timeout | null = null
   // The remoteUrl last written to the agent document, so only a change is written.
   private remoteUrl: string | null = null
-  // Where decision notifications go (tests pass a fake that records them).
-  readonly push: PushPort
 
-  constructor(cwd = process.cwd(), push: PushPort = fcmPush()) {
-    this.push = push
+  constructor(cwd = process.cwd()) {
     this.db = getDb()
     const hostname = osHostname()
     this.id = {
@@ -501,10 +476,8 @@ export class Board {
     const patch = { updatedAt: t, ...subtaskPatch(task, resolveStage(task, key), status) }
     if (note) await this.writeAgentComment(task, note, 'info', patch)
     else await this.db.collection(C.tasks).doc(taskId).update(patch)
-    const updated = { ...task, ...(patch as Partial<Task>) }
-    // A spec posted for approval is a decision: James's phone hears of it.
-    if (status === 'awaiting_approval') await notifyDecision(this.db, this.push, updated, note)
-    return updated
+    // A spec posted for approval is a decision; the notifier (notifier.ts) tells James's phone.
+    return { ...task, ...(patch as Partial<Task>) }
   }
 
   // ---- comments -------------------------------------------------------------
@@ -557,7 +530,6 @@ export class Board {
       : { kind: 'question', question }
     const c = await this.writeAgentComment(task, question, 'question', { needs })
     log(`asked on ${taskId}: ${question.slice(0, 80)}`)
-    await notifyDecision(this.db, this.push, { ...task, needs })
     return c
   }
 

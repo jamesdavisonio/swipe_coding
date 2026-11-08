@@ -1,7 +1,8 @@
-// Sending decision notices to James's devices (docs/features/decision-notifications.md). A session
-// that puts a decision on the board (a spec for approval, a question) sends one notification to
-// every registered browser. Sending never fails the session's tool call: a failure is a WARNING
-// readable through kanban_logs, and a token the push service no longer knows is dropped.
+// Sending decision notices to James's devices (docs/features/decision-notifications.md). The
+// notifier (notifier.ts, docs/features/notifier.md) sends one notification to every registered
+// browser for each decision a task starts waiting on (a spec for approval, a question). Sending
+// never fails the notifier: a failure is a WARNING readable through kanban_logs, and a token the
+// push service no longer knows is dropped.
 import { getMessaging } from 'firebase-admin/messaging'
 import type { DocumentReference, Firestore } from 'firebase-admin/firestore'
 import { z } from 'zod'
