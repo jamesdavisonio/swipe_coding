@@ -103,10 +103,11 @@ change.` offers that phrase as the single action. A question with neither has no
     dragged left opens the skip sheet of criterion 62 instead (changed 2026-11-07, fix
     next-card-context).
 50. A card with choices opens a sheet of them, recommended first; tapping one answers with it,
-    and closing the sheet leaves the card. An important card opens a sheet whose button must be
-    held for 3 seconds; letting go early sends nothing and says to keep holding; the full hold
-    asks the session to merge: the need is cleared and the session receives "Merge PR #<n> into
-    main." Nothing is typed anywhere.
+    and closing the sheet leaves the card. Nothing is typed anywhere. ~~An important card opens a
+    sheet whose button must be held for 3 seconds; letting go early sends nothing and says to keep
+    holding; the full hold asks the session to merge: the need is cleared and the session receives
+    "Merge PR #<n> into main."~~ (Merge half superseded 2026-11-08 by `merge-on-github.md` 89–93:
+    the merge card links to the PR on GitHub and agreeing marks it merged at once, with no hold.)
 51. Swiping up, or the up arrow, opens the details: the example first, then the brief's parts,
     then "Open in Claude" linking to the bound session's Claude link when the agent document has
     one (absent otherwise). Swiping down, or the down arrow, opens the overview. Every sheet

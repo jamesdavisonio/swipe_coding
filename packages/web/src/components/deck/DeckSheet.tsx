@@ -1,4 +1,4 @@
-// A deck sheet: from the bottom (details, choices, skip, hold, voice, listen) or the top (overview).
+// A deck sheet: from the bottom (details, choices, skip, voice, listen) or the top (overview).
 // Radix Dialog underneath for the dialog role, focus trap and Escape; it closes with its ✕, a tap
 // on the dim layer, Escape, or a drag back the way it came from anywhere on it. The listen sheet
 // is not modal: the deck stays usable while it reads.
