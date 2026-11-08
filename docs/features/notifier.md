@@ -139,6 +139,14 @@ brief>` (or `spec:none`), `question:<the question text>`; it sends when the key 
   `New-ScheduledTaskTrigger -AtLogOn`, `New-ScheduledTaskSettingsSet` (with `-RestartCount`),
   `Register-ScheduledTask` and `Unregister-ScheduledTask` directly (no splatting). The script is
   checked statically; it is never run by the tests (it would register a real task).
+- (Before delta round 3, James chose "another round" on the board, 2026-11-08 15:39) The
+  `New-ScheduledTaskAction` call is written on one line (no backtick continuation) with literal
+  arguments: `-Execute 'powershell.exe'`, `-Argument` a single-quoted literal holding
+  `-NoProfile -WindowStyle Hidden -Command "npm run notifier"`, and `-WorkingDirectory`. No variable
+  is passed to `-Argument`. The static check reads the script line by line: block comments
+  (`<# #>`) and here-strings are removed, a `#` outside a string ends the line's code (trailing
+  comments included), quoted strings never span a line, and the action line is the line whose code
+  outside strings calls `New-ScheduledTaskAction`; its strings are checked on that same line.
 
 **Unresolved:** none.
 
