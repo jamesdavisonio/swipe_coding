@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import type { Task } from '@kanban/shared'
-import { useAgents, useAllTasks, useOpenTodos, useProjects } from '../../data.ts'
+import { useAgents, useAllTasks, useProjects } from '../../data.ts'
 import { buildDeck, projectFirst, taskFirst } from '../../lib/deck.ts'
 import { activeNeed } from '../../lib/threads.ts'
 import { useNow } from '../../lib/use-now.ts'
@@ -32,7 +32,6 @@ function useSpecBodies() {
 export function useDeck() {
   const now = useNow()
   const tasks = useAllTasks()
-  const todos = useOpenTodos()
   const projects = useProjects()
   const agents = useAgents()
   const memory = usePhoneMemory()
@@ -45,19 +44,18 @@ export function useDeck() {
     () =>
       buildDeck({
         tasks: tasks.data,
-        todos: todos.data,
         projects: projects.data,
         specBodies,
         handledNext: memory.handledNext,
         passed: memory.passed,
         now,
       }),
-    [tasks.data, todos.data, projects.data, specBodies, memory.handledNext, memory.passed, now]
+    [tasks.data, projects.data, specBodies, memory.handledNext, memory.passed, now]
   )
 
   // Passes of cards that have left the deck are forgotten, but only from a loaded board: the empty
   // list before the first snapshot (or after a failed read) would wipe every pass.
-  const loaded = [tasks, todos, projects].every((s) => !s.loading && s.error === null)
+  const loaded = [tasks, projects].every((s) => !s.loading && s.error === null)
   const { forgetPassedExcept } = memory
   useEffect(() => {
     if (loaded) forgetPassedExcept(new Set(built.map((c) => c.id)))
@@ -78,7 +76,9 @@ export function useDeck() {
   return {
     now,
     cards,
-    todos: todos.data,
+    // The board's tasks and projects, for the to-do drawer (one listener each).
+    tasks: tasks.data,
+    projects: projects.data,
     specTasks: tasks.data.filter((t) => activeNeed(t)?.kind === 'spec'),
     working: workingSessions({ tasks: tasks.data, agents: agents.data, nameOf, now }),
     memory,

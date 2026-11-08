@@ -13,7 +13,6 @@ const KIND_TONE: Record<CardKind, Tone> = {
   summary_gate: 'round',
   question: 'decision',
   after_deploy: 'todo',
-  todos: 'todo',
   summary: 'summary',
   next: 'next',
 }

@@ -2,13 +2,15 @@
 // card says, left for later, up for the details, down for the overview; the microphone changes
 // the decision in his own words and the speaker reads the card aloud. Every move also has a
 // button and a key. The design is docs/features/swipe-deck-prototype.html.
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import CardStage from '../components/deck/CardStage.tsx'
 import DeckDock from '../components/deck/DeckDock.tsx'
 import DeckSheets from '../components/deck/DeckSheets.tsx'
 import DeckTopBar from '../components/deck/DeckTopBar.tsx'
 import EmptyDeck from '../components/deck/EmptyDeck.tsx'
 import SpecBodies from '../components/deck/SpecBodies.tsx'
+import TodoButton from '../components/deck/TodoButton.tsx'
+import TodoDrawer from '../components/deck/TodoDrawer.tsx'
 import WaitingLine from '../components/deck/WaitingLine.tsx'
 import { useDeck } from '../components/deck/use-deck.ts'
 import { useDeckActions } from '../components/deck/use-deck-actions.ts'
@@ -16,18 +18,16 @@ import { useDeckKeys, type Move } from '../components/deck/use-deck-keys.ts'
 import { useDeckSheet } from '../components/deck/use-deck-sheet.ts'
 import { useGhost } from '../components/deck/use-ghost.ts'
 import type { Drag, Release } from '../components/deck/use-swipe.ts'
+import { useTodoDrawer } from '../components/deck/use-todo-drawer.ts'
 import { useToast } from '../components/deck/use-toast.ts'
-import type { DeckCard } from '../lib/deck.ts'
 import { refreshPush } from '../lib/push.ts'
-
-// A to-do card has no session to take a note.
-const takesNote = (card: DeckCard | null): card is DeckCard =>
-  card !== null && card.kind !== 'todos'
 
 export default function Deck() {
   const deck = useDeck()
   const toast = useToast()
   const sheets = useDeckSheet(deck.cards)
+  const todos = useTodoDrawer(deck.tasks, deck.projects)
+  const todoButton = useRef<HTMLButtonElement>(null)
   const { ghost, fly, landed } = useGhost()
   const actions = useDeckActions(deck, {
     fly,
@@ -45,10 +45,10 @@ export default function Deck() {
     if (m === 'later') actions.later(top, null)
     else if (m === 'agree') actions.agree(top, null)
     else if (m === 'details') sheets.open('details', top)
-    else if (m === 'change' && takesNote(top)) sheets.startNote(top)
+    else if (m === 'change') sheets.startNote(top)
     else if (m === 'listen' && sheets.canListen) sheets.toggleListen(top)
   }
-  useDeckKeys(!sheets.modal, move)
+  useDeckKeys(!sheets.modal && !todos.open, move)
 
   function onRelease(release: Release | null, drag: Drag) {
     if (!top || !release) return
@@ -87,8 +87,9 @@ export default function Deck() {
         )}
       </main>
       <DeckDock
+        start={<TodoButton ref={todoButton} open={todos.summary.open} onOpen={todos.show} />}
         hasCard={top !== null}
-        canChange={takesNote(top)}
+        canChange={top !== null}
         onLater={() => move('later')}
         onAgree={() => move('agree')}
         onChange={() => move('change')}
@@ -109,6 +110,9 @@ export default function Deck() {
         actions={actions}
         onClose={sheets.close}
       />
+      {todos.open ? (
+        <TodoDrawer drawer={todos} now={deck.now} returnFocus={() => todoButton.current?.focus()} />
+      ) : null}
     </div>
   )
 }

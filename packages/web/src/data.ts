@@ -166,6 +166,9 @@ export const useProjectTasks = (projectId: string | undefined) =>
 export const useOpenTodos = () =>
   useCollection<Todo>(COLLECTIONS.todos, [where('done', '==', false)], [])
 
+// Every to-do, done or not, for the deck's to-do drawer (one listener; grouped client-side).
+export const useAllTodos = () => useCollection<Todo>(COLLECTIONS.todos, [], [])
+
 // A project's todos; sorted client-side so no composite index is needed.
 export const useProjectTodos = (projectId: string | undefined) =>
   useCollection<Todo>(
@@ -548,18 +551,6 @@ export async function tickRemainingSteps(task: Task) {
       comment: { kind: 'comment', body: AFTER_DEPLOY_DONE },
     }
   })
-}
-
-// "All done" on a to-do card: every given open to-do done, in one batch.
-export async function markTodosDone(todos: readonly Todo[]) {
-  const open = todos.filter((todo) => !todo.done)
-  if (open.length === 0) return
-  const t = now()
-  const batch = writeBatch(db)
-  for (const todo of open) {
-    batch.update(doc(db, COLLECTIONS.todos, todo.id), { done: true, doneAt: t })
-  }
-  await batch.commit()
 }
 
 // "Start it" on a suggestion: queues it as a feature in the project; a note is its description.

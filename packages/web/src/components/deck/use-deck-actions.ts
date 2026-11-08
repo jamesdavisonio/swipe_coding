@@ -1,13 +1,12 @@
 // What each move does to the top card. Every write goes through `track` (as Threads' taps do),
 // so a failed one is logged under the tap's request id; the card leaves at once and comes back
 // if the write fails.
-import type { NeedKind, Task, Todo } from '@kanban/shared'
+import type { NeedKind, Task } from '@kanban/shared'
 import {
   answerQuestion,
   approveSpec,
   markMerged,
   markRead,
-  markTodosDone,
   queueSuggestion,
   sendNote,
   tickRemainingSteps,
@@ -42,13 +41,9 @@ const FAILED = "Couldn't send that. The card is back."
 const NOTE_CLEARS_NEED: readonly NeedKind[] = ['spec', 'question', 'pr']
 
 // The write a card's right swipe makes; null for the moves that open a sheet first.
-function writeOf(card: DeckCard, task: Task | null, todos: readonly Todo[]): Write | null {
+function writeOf(card: DeckCard, task: Task | null): Write | null {
   const action = card.action
   if (!action) return null
-  if (action.type === 'todos_done') {
-    const ids = new Set(card.todoIds)
-    return { action: 'todos_done', run: () => markTodosDone(todos.filter((t) => ids.has(t.id))) }
-  }
   if (action.type === 'queue') {
     const queued = suggestedTask(card)
     return queued
@@ -113,7 +108,7 @@ function agree(ctx: Ctx, card: DeckCard, from: Drag | null) {
   const action = card.action
   if (!action) return refuse(ctx.ui, 'Answer this one with the mic.')
   if (action.type === 'choose') return ctx.ui.openSheet('choices', card)
-  const write = writeOf(card, ctx.deck.taskOf(card.taskId), ctx.deck.todos)
+  const write = writeOf(card, ctx.deck.taskOf(card.taskId))
   if (write) commit(ctx, card, write, { to: 'right', from })
 }
 
@@ -127,7 +122,7 @@ function later(ctx: Ctx, card: DeckCard, from: Drag | null) {
 
 // A done card dragged left: the same write as agreeing to it, flying out to the left.
 function dismiss(ctx: Ctx, card: DeckCard, from: Drag | null) {
-  const write = writeOf(card, ctx.deck.taskOf(card.taskId), ctx.deck.todos)
+  const write = writeOf(card, ctx.deck.taskOf(card.taskId))
   if (write) commit(ctx, card, write, { to: 'left', from })
 }
 
