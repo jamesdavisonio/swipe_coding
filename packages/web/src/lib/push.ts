@@ -74,7 +74,8 @@ export async function enablePush(): Promise<PushState> {
     return 'blocked'
   }
   try {
-    const deviceId = crypto.randomUUID()
+    // Created on first enable; a browser whose permission was reset keeps its one record.
+    const deviceId = storedDeviceId() ?? crypto.randomUUID()
     await saveDevice(deviceId, await pushToken())
     localStorage.setItem(DEVICE_ID_KEY, deviceId)
   } catch (err) {

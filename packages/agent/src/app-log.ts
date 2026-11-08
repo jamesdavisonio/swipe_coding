@@ -72,7 +72,7 @@ export function setLogIdentity(agentId: string, projectId: string): void {
 
 // What an error says about itself: its `code` when it has one, else 'unknown'.
 export function errorStatus(err: unknown): string | number {
-  const code = (err as { code?: unknown }).code
+  const code = (err as { code?: unknown } | null | undefined)?.code
   return typeof code === 'string' || typeof code === 'number' ? code : 'unknown'
 }
 
