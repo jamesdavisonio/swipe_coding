@@ -1,6 +1,6 @@
 # Feature: Phone notifications for decision cards
 
-**Status:** Drafting
+**Status:** Confirmed (James, board, 2026-11-08 05:41)
 **Date:** 2026-11-08
 **Task class:** Large (four behaviours, N1–N4, across web, agent, shared and hosting; numbering
 continues from `swipe-deck.md`, 42–70)
