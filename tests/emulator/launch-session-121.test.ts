@@ -88,9 +88,7 @@ describe('launch-session 121: which requests the notifier starts', () => {
     const t = await putLaunchTask(db, await putProject(db), requested())
     const lease = db.collection('notifier').doc('lease')
     await lease.set({ pid: 1, hostname: 'elsewhere', startedAt: Date.now(), lastSeen: Date.now() })
-    await expect(startNotifier({ db, push, launch } as never)).rejects.toBeInstanceOf(
-      NotifierBusyError
-    )
+    await expect(startNotifier({ db, push, launch })).rejects.toBeInstanceOf(NotifierBusyError)
     expect(await launchState(db, t.id)).toBe('requested')
     // Once the foreign holder is gone a notifier on another port starts it; the busy one never did.
     await lease.delete()

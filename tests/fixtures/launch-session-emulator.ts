@@ -82,7 +82,7 @@ export function putLaunchTask(
   over: Record<string, unknown> = {}
 ): Promise<Task> {
   const fields = { projectId, ...(launch ? { launch } : {}), ...over }
-  return putTask(db, fields)
+  return putTask(db, fields as Partial<Omit<Task, 'id'>>)
 }
 export const requested = (): Record<string, unknown> => ({
   state: 'requested',
@@ -138,9 +138,7 @@ const running: Notifier[] = []
 
 // Starts a notifier with the fake push and `launch`; stopAll() stops every one this file started.
 export async function startWith(db: Db, launch: LaunchPort, extra: Record<string, unknown> = {}) {
-  const n = await startNotifier({ db, push, launch, ...extra } as Parameters<
-    typeof startNotifier
-  >[0])
+  const n = await startNotifier({ db, push, launch, ...extra })
   running.push(n)
   return n
 }

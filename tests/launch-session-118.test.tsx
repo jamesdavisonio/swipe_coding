@@ -56,8 +56,8 @@ describe('launch-session 118: Start session', () => {
   })
 
   it('while the save is pending a second tap writes nothing', async () => {
-    createTask.mockImplementation(pendingCreate)
     open()
+    createTask.mockImplementation(pendingCreate)
     typeName('Search page')
     fireEvent.click(startButton())
     fireEvent.click(startButton())
@@ -67,8 +67,8 @@ describe('launch-session 118: Start session', () => {
   })
 
   it('a refused save keeps the sheet and its text and says it could not be sent', async () => {
-    createTask.mockRejectedValue(new Error('permission-denied'))
     open()
+    createTask.mockRejectedValue(new Error('permission-denied'))
     typeName('Search page')
     typeIdea('Search by title and by project.')
     fireEvent.click(startButton())
@@ -84,8 +84,8 @@ describe('launch-session 118: Start session', () => {
   })
 
   it('after a refused save the same text can be sent again', async () => {
-    createTask.mockRejectedValueOnce(new Error('offline'))
     open()
+    createTask.mockRejectedValueOnce(new Error('offline'))
     typeName('Search page')
     fireEvent.click(startButton())
     await flush()
