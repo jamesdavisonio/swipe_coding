@@ -275,6 +275,8 @@ class TaskLauncher implements Launcher {
       await this.fail(task, invalid, 'requested')
       return
     }
+    // The lease may have been lost while the project was read: then nothing is claimed.
+    if (this.stopped) return
     if (!(await this.transition(task, 'requested', { 'launch.state': 'starting' }))) return
     this.claimed.add(task.id)
     await this.launch(task, project)
@@ -297,6 +299,8 @@ class TaskLauncher implements Launcher {
       })
       return
     }
+    // Lost the lease after the claim: the claim stays, so the next holder reports it interrupted.
+    if (this.stopped) return
     log(`launcher: starting a session for task ${task.id} in ${project.cwd}`)
     let sessionId: string
     try {
