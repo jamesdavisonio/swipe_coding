@@ -331,7 +331,7 @@ export async function sendReply(task: Task, reply: { id: string; body: string })
   batch.update(doc(db, COLLECTIONS.tasks, task.id), {
     lastCommentAt: t,
     updatedAt: t,
-    ...(kind === 'answer' ? { needs: needAfterAnswer(task.needs) } : {}),
+    ...(kind === 'answer' ? { needs: needAfterAnswer(task) } : {}),
   })
   await batch.commit()
 }
@@ -377,7 +377,7 @@ export async function answerQuestion(task: Task, answer: { key?: string; label: 
     if (need?.kind !== 'question') return null
     if (answer.key !== undefined && !need.options?.some((o) => o.key === answer.key)) return null
     return {
-      patch: { needs: needAfterAnswer(need) },
+      patch: { needs: needAfterAnswer(cur) },
       history: need.question ? `Answered ${need.question}: ${label}` : `Answered: ${label}`,
       comment: { kind: 'answer', body: label },
     }

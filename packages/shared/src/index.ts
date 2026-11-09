@@ -66,11 +66,19 @@ export interface TaskNeed {
   resume?: { kind: 'spec' }
 }
 
-// What a need leaves behind once James answers it: the spec it was asked over, otherwise nothing.
-// Read defensively, as the need comes from the database.
-export const needAfterAnswer = (
-  need: Pick<TaskNeed, 'resume'> | null | undefined
-): TaskNeed | null => (need?.resume?.kind === 'spec' ? { kind: 'spec' } : null)
+// The stages at which a spec a question was asked over can still be waiting for approval.
+const RESUME_STAGES: readonly Stage[] = ['spec', 'approved']
+
+// What a task's need leaves behind once James answers it: the spec it was asked over, while the
+// task is still at its spec (or approved) stage; otherwise nothing. Read defensively, as the need
+// comes from the database.
+export const needAfterAnswer = (task: {
+  needs: Pick<TaskNeed, 'resume'> | null | undefined
+  stage: Stage
+}): TaskNeed | null =>
+  task.needs?.resume?.kind === 'spec' && RESUME_STAGES.includes(task.stage)
+    ? { kind: 'spec' }
+    : null
 
 export interface TaskSpec {
   goal: string
