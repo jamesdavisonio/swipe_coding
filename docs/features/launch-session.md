@@ -167,6 +167,27 @@ scope):**
   button "Start session"; refused save: "Couldn't start it. Try again."; toast
   "Starting a session for <name>".
 
+**Contract decisions added after the first fidelity check (2026-11-09, before the repair):**
+
+- `launch.requestedAt` is kept unchanged when the PC moves `launch` to `starting`, `started` or
+  `failed`.
+- An interrupted claim (left in `starting`) is a failure like any other: reason `interrupted`,
+  the comment "Couldn't start a session: interrupted" and the WARNING, once each.
+- The WARNING's `status`: `folder_not_found` for a missing folder, `interrupted` for an
+  interrupted claim, otherwise the error's `code` when it is a non-empty string (for example
+  `ENOENT` when the executable is not found, `exit_<n>` when it exits with code n), else
+  `unknown`.
+- The real port is `claudeLaunchPort(opts?: { command?: string; prefixArgs?: string[] })`
+  (default `command` is `claude`, `prefixArgs` empty). It runs `command` with
+  `[...prefixArgs, ...claudeArgs(req)]` in `req.cwd`, never through a shell, and resolves with
+  `sessionId` taken from the line `backgrounded · <id> · <name>` it prints. A non-zero exit
+  rejects with an Error whose `code` is `exit_<n>` and whose message is the last non-empty
+  line of its error output (else `claude exited with code <n>`); a missing executable rejects
+  with the spawn error (`code` `ENOENT`). Tests drive it with `command: process.execPath` and a
+  fake script as `prefixArgs[0]`.
+- The `user_action` event: once per successful Start session, after the save resolves,
+  `{ feature, action: 'start_session', target: <new task id> }`; none on a refused save.
+
 **Unresolved:** none.
 
 ## Files & modules affected
