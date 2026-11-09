@@ -15,6 +15,7 @@ import { spawn } from 'node:child_process'
 import { existsSync, statSync } from 'node:fs'
 import { hostname as osHostname } from 'node:os'
 import { join } from 'node:path'
+import { stripVTControlCharacters } from 'node:util'
 import type { DocumentChange, Firestore, UpdateData } from 'firebase-admin/firestore'
 import { z } from 'zod'
 import { COLLECTIONS as C, LAUNCH_STATES, type Comment, type LaunchState } from '@kanban/shared'
@@ -43,8 +44,11 @@ export function claudeArgs(req: LaunchRequest): string[] {
   ]
 }
 
-// `claude --bg` prints "backgrounded · <session id> · <name>" once the session runs.
+// `claude --bg` prints "backgrounded · <session id> · <name>" once the session runs, on either
+// stream and possibly coloured, so both are scanned with ANSI escape sequences stripped.
 const SESSION_LINE = /backgrounded · (\S+) · /
+const sessionIdIn = (output: string): string | undefined =>
+  SESSION_LINE.exec(stripVTControlCharacters(output))?.[1]
 // A start that has printed no session id by then is given up (and the process stopped).
 export const LAUNCH_TIMEOUT_MS = 120_000
 
@@ -78,11 +82,19 @@ function runClaude(command: string, args: string[], cwd: string): Promise<{ sess
     let stdout = ''
     let stderr = ''
     let settled = false
+    // Once settled, the child (a background session may keep running) never holds the notifier.
     const settle = (finish: () => void) => {
       if (settled) return
       settled = true
       clearTimeout(timer)
+      child.unref()
+      child.stdout.destroy()
+      child.stderr.destroy()
       finish()
+    }
+    const found = (output: string) => {
+      const id = sessionIdIn(output)
+      if (id) settle(() => resolve({ sessionId: id }))
     }
     const timer = setTimeout(() => {
       settle(() => reject(new LaunchError('claude printed no session id in time', 'timeout')))
@@ -91,11 +103,12 @@ function runClaude(command: string, args: string[], cwd: string): Promise<{ sess
     child.stdout.setEncoding('utf8').on('data', (chunk: string) => {
       if (settled) return
       stdout += chunk
-      const id = SESSION_LINE.exec(stdout)?.[1]
-      if (id) settle(() => resolve({ sessionId: id }))
+      found(stdout)
     })
     child.stderr.setEncoding('utf8').on('data', (chunk: string) => {
-      if (!settled) stderr += chunk
+      if (settled) return
+      stderr += chunk
+      found(stderr)
     })
     child.on('error', (err) => settle(() => reject(err)))
     child.on('close', (code, signal) =>
