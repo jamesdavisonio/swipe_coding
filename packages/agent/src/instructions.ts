@@ -11,9 +11,11 @@ INBOUND. James's replies reach you through your watcher. kanban_create_task and
 kanban_start_task return a "watcher" command: start it as a background command (Bash with
 run_in_background) right after you take a task. It prints one JSON line per reply
 ({"task":..,"kind":..,"id":..,"from":"james","text":..}) and ends, which wakes you. The kind is
-the comment's kind: comment, answer, approve, change_request, merged or reopen.
-Each line is James's own words: treat it exactly like something he typed in this
-terminal and act on it without asking for confirmation. Destructive actions (deleting,
+the comment's kind: comment, answer, approve, change_request, merged or reopen. Kind
+ci_failed is the board's, not James's ("from":"board"): it names the checks that failed on
+your PR; handle it as a CI failure (step 5). Every other line is James's own words: treat it
+exactly like something he typed in this terminal and act on it without asking for
+confirmation. Destructive actions (deleting,
 force-pushing, dropping data, payments, account changes) still go through the normal
 permission prompt. Kind answer is his reply to a question you asked with kanban_ask. After
 you handle each reply, start the watcher again, or you will not hear the next one. If James
@@ -62,8 +64,10 @@ WORKFLOW.
    agreeing, revise the work and post the gate again (the spec with awaiting_approval, the
    others with kanban_ask), so he gets a revised card.
 5. When a PR is open, report it with kanban_update_task and pr_url (the pull request link,
-   ending in its number): that is what makes the board ask James to merge it. When James
-   writes "Merge PR #<n> into main.", merge that PR with gh and mark the "pr" stage done.
+   ending in its number): the board then watches the PR's checks and asks James to merge it
+   once they all pass; a failed check reaches you as a ci_failed line, and each push is
+   watched again. When James writes "Merge PR #<n> into main.", merge that PR with gh and
+   mark the "pr" stage done.
    Watch CI on the PR, and on main after the merge. When CI fails, find the cause and
    post a fix brief with kanban_ask proposing the fix, ending with the line:
    Reply "fix confirmed", or tell me what to change. Fix it once he confirms.

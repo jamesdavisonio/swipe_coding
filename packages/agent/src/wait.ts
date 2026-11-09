@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // kanban watcher: `node wait.ts --agent <agentId>`, run by a session as a background command.
 //
-// It waits for James's replies to the session's tasks, claims them (marks them received), prints
-// one JSON line per reply on stdout and exits 0, which wakes the session. Anything it cannot
+// It waits for James's replies to the session's tasks (and the notifier's reports of a PR's failed
+// checks, kind ci_failed, from "board"), claims them (marks them received), prints one JSON line
+// per reply on stdout and exits 0, which wakes the session. Anything it cannot
 // deliver (board offline, unknown or shut-down session, listener or claim error) is one stdout
 // line and exit 1. Bad arguments are one line and exit 2, before the board is touched.
 // Diagnostics go to stderr through log(); stdout carries only these lines.
@@ -10,7 +11,7 @@
 import type { Firestore } from 'firebase-admin/firestore'
 import { COLLECTIONS as C, WATCHER_SETTLE_MS, type AgentDoc, type Comment } from '@kanban/shared'
 import { errorStatus, logFailure } from './app-log.ts'
-import { claimReplies } from './board.ts'
+import { claimReplies, isWatcherReply } from './board.ts'
 import { boardStatus, getDb, log } from './firestore.ts'
 
 const AGENT_ID = /^[A-Za-z0-9_-]{1,64}$/
@@ -53,8 +54,15 @@ function parseAgentId(argv: string[]): string | null {
     : null
 }
 
+// James's reply is from him; a ci_failed report is the board's own (the notifier's) words.
 const replyLine = (c: Comment) =>
-  JSON.stringify({ task: c.taskId, kind: c.kind, id: c.id, from: 'james', text: c.body })
+  JSON.stringify({
+    task: c.taskId,
+    kind: c.kind,
+    id: c.id,
+    from: c.author === 'james' ? 'james' : 'board',
+    text: c.body,
+  })
 
 // Fails when the session's agent document is missing, or its lastSeen is 0 (it shut down).
 function watchSession(
@@ -73,7 +81,7 @@ function watchSession(
 }
 
 // Calls `onChange` with the replies waiting for the agent after every change. The existing
-// composite index serves the query; the author is checked here.
+// composite index serves the query; the author and kind are checked here (isWatcherReply).
 function watchReplies(
   db: Firestore,
   agentId: string,
@@ -89,7 +97,7 @@ function watchReplies(
       for (const change of snap.docChanges()) {
         const c: Comment = { ...(change.doc.data() as Omit<Comment, 'id'>), id: change.doc.id }
         if (change.type === 'removed') pending.delete(c.id)
-        else if (c.author === 'james') pending.set(c.id, c)
+        else if (isWatcherReply(c)) pending.set(c.id, c)
       }
       onChange()
     }, onError)
