@@ -1,12 +1,19 @@
 // Sending decision notices to James's devices (docs/features/decision-notifications.md). The
 // notifier (notifier.ts, docs/features/notifier.md) sends one notification to every registered
-// browser for each decision a task starts waiting on (a spec for approval, a question). Sending
+// browser for each decision a task starts waiting on (a spec for approval, a question), and for
+// each merge card that appears once a PR's checks passed (docs/features/pr-ready.md). Sending
 // never fails the notifier: a failure is a WARNING readable through kanban_logs, and a token the
 // push service no longer knows is dropped.
 import { getMessaging } from 'firebase-admin/messaging'
 import type { DocumentReference, Firestore } from 'firebase-admin/firestore'
 import { z } from 'zod'
-import { COLLECTIONS as C, decisionNotice, type DecisionNotice, type Task } from '@kanban/shared'
+import {
+  COLLECTIONS as C,
+  decisionNotice,
+  mergeNotice,
+  type DecisionNotice,
+  type Task,
+} from '@kanban/shared'
 import { errorStatus, logFailure } from './app-log.ts'
 
 export type PushOutcome =
@@ -103,21 +110,21 @@ const reportFailure = (f: SendFailure) =>
     },
   })
 
-// Sends the decision `task` now waits on to every registered device (nothing without one, or
-// when the task waits on no decision). `specBody` is the spec brief posted with a spec. Resolves
-// once sent, dead tokens dropped and any failure logged; it never rejects.
-export async function notifyDecision(
+// Sends the notice `noticeOf` makes (from the project's name) to every registered device
+// (nothing without one, or when it makes no notice). Resolves once sent, dead tokens dropped and
+// any failure logged; it never rejects.
+async function notify(
   db: Firestore,
   push: PushPort,
-  task: Pick<Task, 'id' | 'title' | 'stage' | 'needs' | 'projectId'>,
-  specBody?: string
+  task: Pick<Task, 'id' | 'projectId'>,
+  noticeOf: (projectName: string) => DecisionNotice | null
 ): Promise<void> {
   let deviceCount = 0
   try {
     const devices = await readDevices(db)
     deviceCount = devices.length
     if (devices.length === 0) return
-    const notice = decisionNotice(task, await projectName(db, task.projectId), specBody)
+    const notice = noticeOf(await projectName(db, task.projectId))
     if (!notice) return
     const outcomes = await push.sendDecision(notice, [...new Set(devices.map((d) => d.token))])
     const failed = outcomes.filter((o): o is FailedOutcome => !o.ok)
@@ -139,3 +146,19 @@ export async function notifyDecision(
     })
   }
 }
+
+// Sends the decision `task` now waits on (nothing when it waits on no decision). `specBody` is
+// the spec brief posted with a spec.
+export const notifyDecision = (
+  db: Firestore,
+  push: PushPort,
+  task: Pick<Task, 'id' | 'title' | 'stage' | 'needs' | 'projectId'>,
+  specBody?: string
+): Promise<void> => notify(db, push, task, (name) => decisionNotice(task, name, specBody))
+
+// Sends the merge card that appeared once the task's PR checks passed (docs/features/pr-ready.md).
+export const notifyMerge = (
+  db: Firestore,
+  push: PushPort,
+  task: Pick<Task, 'id' | 'title' | 'projectId'>
+): Promise<void> => notify(db, push, task, (name) => mergeNotice(task, name))

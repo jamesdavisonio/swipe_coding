@@ -8,7 +8,10 @@
 // stores the key; when the need stops being a decision, it removes `notified`. Changes are handled
 // one at a time, in snapshot order. A lease (notifier/lease) makes sure only one notifier sends.
 // While it holds the lease it also starts the sessions James asks for from the phone: every task
-// change goes to the launcher too (launcher.ts, docs/features/launch-session.md).
+// change goes to the launcher too (launcher.ts, docs/features/launch-session.md); and it watches
+// the checks of every PR a session reported: every task change goes to the PR watcher too
+// (pr-watcher.ts, docs/features/pr-ready.md), which raises the merge need once they pass. That
+// merge card is notified once per PR head, under the decision key 'merge:<number>:<head>'.
 //
 // Command line: `node packages/agent/src/notifier.ts` (`npm run notifier`, with --watch). It logs
 // to stderr / agent.log only; when another notifier holds the lease it says so and exits 1.
@@ -21,11 +24,27 @@ import {
   type QuerySnapshot,
 } from 'firebase-admin/firestore'
 import { z } from 'zod'
-import { COLLECTIONS as C, NEED_KINDS, STAGES, latestBrief, type Task } from '@kanban/shared'
+import {
+  COLLECTIONS as C,
+  NEED_KINDS,
+  PR_CHECKS,
+  STAGES,
+  isMergeReady,
+  latestBrief,
+  type Task,
+} from '@kanban/shared'
 import { firestoreFailure } from './app-log.ts'
 import { boardStatus, getDb, log } from './firestore.ts'
+import { ghPort, type GithubPort } from './github.ts'
 import { claudeLaunchPort, startLauncher, type LaunchPort, type Launcher } from './launcher.ts'
-import { fcmPush, notifyDecision, type PushPort } from './push.ts'
+import {
+  GITHUB_GIVE_UP_MS,
+  NO_CHECKS_GRACE_MS,
+  PR_POLL_MS,
+  startPrWatcher,
+  type PrWatcher,
+} from './pr-watcher.ts'
+import { fcmPush, notifyDecision, notifyMerge, type PushPort } from './push.ts'
 
 export interface Notifier {
   stop(): Promise<void>
@@ -36,6 +55,13 @@ export interface NotifierOptions {
   push?: PushPort
   // How sessions are started (default: the `claude` executable).
   launch?: LaunchPort
+  // How PRs' checks are read (default: the `gh` executable; nothing under the emulator).
+  github?: GithubPort
+  // How often each watched PR is read; how long a PR with no checks waits before it counts as
+  // passed; how long reads may fail before the merge card is shown anyway.
+  prPollMs?: number
+  noChecksGraceMs?: number
+  githubGiveUpMs?: number
   now?: () => number
   leaseMs?: number
   heartbeatMs?: number
@@ -65,14 +91,22 @@ const NeedDoc = z.object({
   question: z.string().optional(),
   options: z.array(z.object({ key: z.string(), label: z.string() })).optional(),
 })
+const PrDoc = z.object({
+  number: z.number(),
+  checks: z.enum(PR_CHECKS).optional(),
+  head: z.string().optional(),
+})
 const TaskDoc = z.object({
   projectId: z.string().min(1),
   title: z.string(),
   stage: z.enum(STAGES),
   needs: NeedDoc.nullable(),
   notified: z.string().optional(),
+  pr: PrDoc.nullish(),
 })
-type NotifierTask = Pick<Task, 'id' | 'projectId' | 'title' | 'stage' | 'needs' | 'notified'>
+type NotifierTask = Pick<Task, 'id' | 'projectId' | 'title' | 'stage' | 'needs' | 'notified'> & {
+  pr?: z.infer<typeof PrDoc> | null
+}
 
 const CommentDoc = z.object({
   author: z.enum(['james', 'agent']),
@@ -165,11 +199,21 @@ async function latestSpecComment(db: Firestore, taskId: string): Promise<SpecCom
 interface Decision {
   key: string
   specBody?: string
+  merge?: boolean
+}
+
+// A merge card the PR watcher raised (its checks passed, or could not be read): one per PR head.
+// A merge need of an older session's agent, not yet checked, is no card yet.
+function mergeDecision(task: NotifierTask): Decision | null {
+  const pr = task.pr
+  if (!pr || !isMergeReady(pr.checks)) return null
+  return { key: `merge:${pr.number}:${pr.head ?? ''}`, merge: true }
 }
 
 // The decision the task waits on, with its key; null when its need is not a decision.
 async function decisionOf(db: Firestore, task: NotifierTask): Promise<Decision | null> {
   if (task.needs?.kind === 'question') return { key: `question:${task.needs.question ?? ''}` }
+  if (task.needs?.kind === 'pr') return mergeDecision(task)
   if (task.needs?.kind !== 'spec') return null
   const brief = await latestSpecComment(db, task.id)
   return brief ? { key: `spec:${brief.id}`, specBody: brief.body } : { key: 'spec:none' }
@@ -181,6 +225,10 @@ interface Settings {
   db: Firestore
   push: PushPort
   launch: LaunchPort
+  github: GithubPort
+  prPollMs: number
+  noChecksGraceMs: number
+  githubGiveUpMs: number
   now: () => number
   leaseMs: number
   heartbeatMs: number
@@ -196,6 +244,8 @@ class TaskNotifier implements Notifier {
   private queue: Promise<void> = Promise.resolve()
   // Starts the sessions James asks for; exists only while this notifier holds the lease.
   private launcher: Launcher | null = null
+  // Watches the reported PRs' checks; exists only while this notifier holds the lease.
+  private prs: PrWatcher | null = null
   private unsubscribe: (() => void) | null = null
   private heartbeat: NodeJS.Timeout | null = null
   private retry: NodeJS.Timeout | null = null
@@ -213,6 +263,14 @@ class TaskNotifier implements Notifier {
     await claimLease(this.lease, this.opts.now(), this.opts.leaseMs)
     log(`notifier started: holds the lease (pid ${process.pid} on ${osHostname()})`)
     this.launcher = startLauncher({ db: this.opts.db, spawn: this.opts.launch, now: this.opts.now })
+    this.prs = startPrWatcher({
+      db: this.opts.db,
+      github: this.opts.github,
+      now: this.opts.now,
+      pollMs: this.opts.prPollMs,
+      noChecksGraceMs: this.opts.noChecksGraceMs,
+      giveUpMs: this.opts.githubGiveUpMs,
+    })
     this.heartbeat = setInterval(() => void this.beat(), this.opts.heartbeatMs)
     this.listen()
     await this.ready
@@ -223,6 +281,7 @@ class TaskNotifier implements Notifier {
     this.halt()
     await this.queue
     await this.launcher?.stop()
+    await this.prs?.stop()
     await releaseLease(this.lease)
     log('notifier stopped: lease released')
   }
@@ -231,6 +290,7 @@ class TaskNotifier implements Notifier {
   private halt(): void {
     this.stopped = true
     this.launcher?.halt()
+    this.prs?.halt()
     this.unsubscribe?.()
     this.unsubscribe = null
     if (this.heartbeat) clearInterval(this.heartbeat)
@@ -268,6 +328,7 @@ class TaskNotifier implements Notifier {
 
   private enqueue(snap: QuerySnapshot): void {
     for (const change of snap.docChanges()) {
+      this.prs?.enqueue(change)
       if (change.type === 'removed') continue
       this.queue = this.queue.then(() => this.handleChange(change))
       this.launcher?.enqueue(change)
@@ -298,7 +359,8 @@ class TaskNotifier implements Notifier {
       this.handled.set(task.id, null)
       return
     }
-    await notifyDecision(this.opts.db, this.opts.push, task, decision.specBody)
+    if (decision.merge) await notifyMerge(this.opts.db, this.opts.push, task)
+    else await notifyDecision(this.opts.db, this.opts.push, task, decision.specBody)
     await ref.update({ notified: decision.key })
     this.handled.set(task.id, decision.key)
   }
@@ -312,6 +374,10 @@ export async function startNotifier(opts: NotifierOptions = {}): Promise<Notifie
     db: opts.db ?? getDb(),
     push: opts.push ?? fcmPush(),
     launch: opts.launch ?? claudeLaunchPort(),
+    github: opts.github ?? ghPort(),
+    prPollMs: opts.prPollMs ?? PR_POLL_MS,
+    noChecksGraceMs: opts.noChecksGraceMs ?? NO_CHECKS_GRACE_MS,
+    githubGiveUpMs: opts.githubGiveUpMs ?? GITHUB_GIVE_UP_MS,
     now: opts.now ?? Date.now,
     leaseMs: opts.leaseMs ?? LEASE_MS,
     heartbeatMs: opts.heartbeatMs ?? HEARTBEAT_MS,
