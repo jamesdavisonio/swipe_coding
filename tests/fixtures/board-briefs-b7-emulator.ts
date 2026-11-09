@@ -9,6 +9,7 @@
 import { afterAll, beforeAll } from 'vitest'
 import type { Comment, DecisionNotice, Task, TaskType } from '../../packages/shared/src/index.ts'
 import { Board } from '../../packages/agent/src/board.ts'
+import type { GithubPort } from '../../packages/agent/src/github.ts'
 import type { PushOutcome, PushPort } from '../../packages/agent/src/push.ts'
 import { adminDb, waitForLog } from './app-logs-emulator.ts'
 
@@ -90,6 +91,18 @@ export function fakePush(): FakePush {
 
 const dbOf = (from: Board | Db): Db => (from instanceof Board ? from.db : from)
 
+// A GithubPort for suites that are not about PR checks: every PR stays pending, so a notifier started
+// by a shared helper never runs the real `gh`.
+export const idleGithub = (): GithubPort => ({
+  prStatus: () =>
+    Promise.resolve({
+      state: 'OPEN',
+      mergeable: 'UNKNOWN',
+      head: 'idle',
+      checks: [{ name: 'idle', status: 'PENDING', conclusion: '' }],
+    }),
+})
+
 export const clearDevices = (from: Board | Db) =>
   dbOf(from).recursiveDelete(dbOf(from).collection('devices'))
 
@@ -139,7 +152,7 @@ export function useNotifier(push: PushPort): () => Db {
     await clearDevices(db)
     // Imported here so suites that never run a notifier do not depend on it.
     const { startNotifier } = await import('../../packages/agent/src/notifier.ts')
-    notifier = await startNotifier({ db, push })
+    notifier = await startNotifier({ db, push, github: idleGithub() })
   })
   afterAll(async () => {
     await notifier?.stop()

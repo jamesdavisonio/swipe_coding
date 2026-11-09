@@ -5,6 +5,7 @@
 import {
   DECISION_LABEL,
   HEADLINE_MAX,
+  MERGE_LABEL,
   fitHeadline,
   questionDecision,
   specDecision,
@@ -44,7 +45,7 @@ export const KIND_ORDER: readonly CardKind[] = [
 // The card's type, written as a word as well as shown by its colour.
 export const KIND_LABEL: Record<CardKind, string> = {
   ...DECISION_LABEL,
-  merge: 'Merge',
+  merge: MERGE_LABEL,
   after_deploy: 'After deploy',
   summary: 'Done',
   next: 'Suggested next',

@@ -20,8 +20,9 @@ report in through an MCP server and receive James's replies through a background
 ```
 npm install
 npm run web                # Vite dev server; packages/web/.env holds the Firebase web config
-npm run notifier           # the notifier (node --watch): decision pushes, and starts the sessions James
-                           #   asks for from the deck (launch-session.md); `npm run notifier:install` once for a logon task
+npm run notifier           # the notifier (node --watch): decision pushes, starts the sessions James asks
+                           #   for from the deck (launch-session.md) and watches PRs' checks (pr-ready.md);
+                           #   `npm run notifier:install` once for a logon task
 ```
 
 ## How to run tests
@@ -53,6 +54,7 @@ npm run typecheck          # agent, web and the root tsconfig (tests/, packages/
 ## Gotchas
 
 - The desktop app is an MSIX package: its child processes see a virtualised `%APPDATA%`. The service-account key lives at `..\kanban-secrets\sa.json`, never in AppData.
+- A merge card appears only once the PR's checks pass: the notifier reads them with the PC's signed-in `gh` CLI (`packages/agent/src/github.ts`), never under `FIRESTORE_EMULATOR_HOST`; tests pass a fake `GithubPort`. Failed checks reach the session's watcher as `ci_failed` lines (`docs/features/pr-ready.md`).
 - James's replies reach a session only while it runs the watcher command from `kanban_create_task` / `kanban_start_task` as a background command; channel events (now only queued-task announcements) need `--dangerously-load-development-channels server:kanban` and never reach desktop-app or orchestrator-started sessions.
 - Claude Code currently spawns the agent twice per session (open issue, DESIGN.md Phase 1).
 - The Firestore emulator needs Java 21: on James's PC it is a zip install at `Documents\tools\jdk-21` (on the user PATH; older shells need it prefixed). Never run `KANBAN_TEST_LIVE=1` from an agent; use the emulator form above.

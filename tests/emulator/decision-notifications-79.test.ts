@@ -26,7 +26,7 @@ describe('decision-notifications 79: reports that stay silent', () => {
   it('a pull request ready to merge', async () => {
     const t = await taskAt(board(), 'feature', { stage: 'build' })
     await board().updateTask({ task_id: t.id, pr_url: 'https://github.com/x/y/pull/531' })
-    expect((await readTask(board(), t.id)).needs).toEqual({ kind: 'pr' })
+    expect((await readTask(board(), t.id)).needs).toBeNull() // waits on its checks (pr-ready 127)
     await settle(db(), push)
     expect(sentFor(push, t.id)).toHaveLength(0)
   })

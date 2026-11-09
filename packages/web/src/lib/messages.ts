@@ -2,6 +2,7 @@
 // message carries Read more, and how James's not-yet-confirmed replies join the saved ones.
 // No React, no Firestore.
 import {
+  DECISION_LABEL,
   TASK_TYPES,
   taskStages,
   type Comment,
@@ -17,6 +18,7 @@ const KIND_LABEL: Record<string, string> = {
   spec: 'Spec',
   question: 'Question',
   pr: 'PR ready',
+  ci_failed: DECISION_LABEL.ci_failed, // the notifier's report of a PR's failed checks
   after_deploy: 'After deploy',
   done: 'Done',
 }
@@ -30,7 +32,7 @@ export function messageShape(comment: Pick<Comment, 'author' | 'kind'>): Message
   return comment.kind === 'system' ? 'system' : 'session'
 }
 
-// "Spec", "Question", "PR ready", "After deploy", "Done"; "Session" for info or anything this
+// "Spec", "Question", "PR ready", "CI failed", "After deploy", "Done"; "Session" for info or anything this
 // app does not know (a kind from a newer session must still render).
 export const kindLabel = (kind: string): string => KIND_LABEL[kind] ?? OTHER_KIND_LABEL
 

@@ -34,6 +34,7 @@ import {
   type Task,
   type TaskNeed,
   type TaskPhase,
+  type TaskPr,
   type TaskType,
   type Todo,
 } from '@kanban/shared'
@@ -400,7 +401,7 @@ export class Board {
     const patch: Record<string, unknown> = { updatedAt: t }
     if (input.summary !== undefined) patch.summary = input.summary
     if (input.title) patch.title = input.title.trim()
-    if (input.pr_url !== undefined) Object.assign(patch, prPatch(task, input.pr_url))
+    if (input.pr_url !== undefined) Object.assign(patch, prPatch(task, input.pr_url, t))
     if (input.status === 'in_progress') patch.needs = null
     if (input.status === 'done' && !isDone(task)) {
       // Finishing: the Done message and the unread mark go in the same batch as the done patch.
@@ -649,14 +650,20 @@ export class Board {
   }
 }
 
-// A claimed reply (an answer, or any reply) settles the task's question only while the task still
-// asks one: an answer whose question the phone already settled leaves the current need alone (the
-// spec it brought back, say). Settling hands back what the question was asked over.
-function settlesQuestion(task: Task): boolean {
-  return task.needs?.kind === 'question'
+// A claimed reply of James's (an answer, or any reply) settles the task's question only while the
+// task still asks one: an answer whose question the phone already settled leaves the current need
+// alone (the spec it brought back, say). Settling hands back what the question was asked over. The
+// board's ci_failed reports never settle James's question.
+function settlesQuestion(c: Comment, task: Task): boolean {
+  return c.author === 'james' && task.needs?.kind === 'question'
 }
 
-// A watcher's claim on James's waiting replies, in one transaction: each reply whose deliveredAt
+// What a session's watcher prints: James's replies, and the notifier's report of a PR's failed
+// checks (kind ci_failed, docs/features/pr-ready.md) so the session can fix them.
+export const isWatcherReply = (c: Pick<Comment, 'author' | 'kind'>): boolean =>
+  c.author === 'james' || (c.author === 'agent' && c.kind === 'ci_failed')
+
+// A watcher's claim on James's waiting replies (and ci_failed reports), in one transaction: each reply whose deliveredAt
 // is still unset and that still belongs to `agentId` (kanban_start_task may have rerouted it) gets
 // marked received and its task's question settled (settlesQuestion); the rest were claimed by
 // another watcher or moved to another session and are left out. Returns the claimed replies,
@@ -669,14 +676,9 @@ export async function claimReplies(
   return db.runTransaction(async (tx) => {
     const snaps = await tx.getAll(...ids.map((id) => db.collection(C.comments).doc(id)))
     const claimed = snaps
-      .filter(
-        (s) =>
-          s.exists &&
-          s.get('deliveredAt') === null &&
-          s.get('author') === 'james' &&
-          s.get('agentId') === agentId
-      )
+      .filter((s) => s.exists)
       .map((s) => ({ ...(s.data() as Omit<Comment, 'id'>), id: s.id }))
+      .filter((c) => c.deliveredAt === null && isWatcherReply(c) && c.agentId === agentId)
       .sort((a, b) => a.createdAt - b.createdAt)
     const taskIds = [...new Set(claimed.map((c) => c.taskId))]
     const tasks = new Map<string, Task | null>()
@@ -689,7 +691,7 @@ export async function claimReplies(
     for (const c of claimed) {
       tx.update(db.collection(C.comments).doc(c.id), { deliveredAt: t })
       const task = tasks.get(c.taskId)
-      if (task && settlesQuestion(task)) settled.add(c.taskId)
+      if (task && settlesQuestion(c, task)) settled.add(c.taskId)
     }
     for (const [id, task] of tasks) {
       if (!task) continue
@@ -768,20 +770,27 @@ function donePatch(t: number): Record<string, unknown> {
 // The Done message's body when the session gives no summary.
 const DONE_BODY = 'Done.'
 
-// The stages in which a reported PR is the work's result, so the task then waits on James's
-// merge decision: build (fix for a bugfix, do for a chore) and pr itself.
+// The stages in which a reported PR is the work's result, so the task then waits on its checks
+// and then on James's merge: build (fix for a bugfix, do for a chore) and pr itself.
 const PR_READY_FROM: readonly Stage[] = ['build', 'fix', 'do', 'pr']
 
-// pr_url sets the PR (its number is the last number in the URL). From a build stage or pr it
-// also moves the task to pr and makes it wait on James's merge; at an earlier or later stage it
-// only records the PR. An empty url clears it.
-function prPatch(task: Task, url: string): Record<string, unknown> {
+// pr_url sets the PR (its number is the last number in the URL). From a build stage or pr, on a
+// task whose chain has a pr stage, it also moves the task to pr to wait on the PR's checks: the
+// notifier watches them and raises the merge need once they pass (docs/features/pr-ready.md).
+// At an earlier or later stage, or on a chain without pr, it only records the PR. An empty url
+// clears it.
+function prPatch(task: Task, url: string, t: number): Record<string, unknown> {
   if (!url) return { pr: null }
   const number = /(\d+)\/?(?:[?#].*)?$/.exec(url)?.[1]
   if (!number) throw new BoardError('pr_url must end in the pull request number')
-  const pr = { pr: { number: Number(number), url } }
+  const pr: TaskPr = { number: Number(number), url }
   const ready = PR_READY_FROM.includes(task.stage) && taskStages(task).includes('pr')
-  return ready ? { ...pr, stage: 'pr', needs: { kind: 'pr' } satisfies TaskNeed } : pr
+  if (!ready) return { pr }
+  return {
+    pr: { ...pr, checks: 'pending', pendingSince: t } satisfies TaskPr,
+    stage: 'pr',
+    needs: null,
+  }
 }
 
 // Moves the task past `stage`: to the next stage of its chain, clearing the need of any stage it
