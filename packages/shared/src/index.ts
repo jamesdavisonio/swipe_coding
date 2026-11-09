@@ -62,7 +62,15 @@ export interface TaskNeed {
   kind: NeedKind
   question?: string
   options?: { key: string; label: string }[]
+  // A question asked while the spec waited for approval: the spec need comes back once answered.
+  resume?: { kind: 'spec' }
 }
+
+// What a need leaves behind once James answers it: the spec it was asked over, otherwise nothing.
+// Read defensively, as the need comes from the database.
+export const needAfterAnswer = (
+  need: Pick<TaskNeed, 'resume'> | null | undefined
+): TaskNeed | null => (need?.resume?.kind === 'spec' ? { kind: 'spec' } : null)
 
 export interface TaskSpec {
   goal: string

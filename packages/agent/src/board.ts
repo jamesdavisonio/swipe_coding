@@ -19,6 +19,7 @@ import {
   isDone,
   isQueued,
   isTaskVisible,
+  needAfterAnswer,
   projectIdFor,
   projectNameFor,
   suggestedNext,
@@ -488,8 +489,9 @@ export class Board {
     return this.writeAgentComment(task, body, kind)
   }
 
-  // James answered a question in the session's own chat: the question closes, the thread says so,
-  // and his waiting board answers are marked so no watcher prints them. Plain comments still wait.
+  // James answered a question in the session's own chat: the question closes (back to the spec when
+  // it was asked over it), the thread says so, and his waiting board answers are marked so no
+  // watcher prints them. Plain comments still wait.
   async answeredInSession(taskId: string, answer: string): Promise<Comment> {
     const text = typeof answer === 'string' ? answer.trim() : ''
     if (text.length < 1 || text.length > ANSWER_MAX_CHARS)
@@ -507,7 +509,7 @@ export class Board {
       task,
       `James answered in the session: ${text}`,
       'info',
-      { needs: null },
+      { needs: needAfterAnswer(task.needs) },
       (batch) => {
         for (const d of waiting.docs)
           if (d.get('author') === 'james' && d.get('kind') === 'answer')
@@ -519,15 +521,21 @@ export class Board {
   }
 
   // Asks James on a task. Options are validated before anything is written; the deck offers them.
+  // A task waits on one thing at a time: a question asked while the spec waits (or over an earlier
+  // question that did) carries `resume`, so its answer brings the spec approval back.
   async ask(taskId: string, question: string, options?: string[]): Promise<Comment> {
     const choices = options === undefined ? undefined : AskOptions.safeParse(options)
     if (choices && !choices.success)
       throw new BoardError('invalid options: 2 to 6 labels, each 1 to 200 characters')
     const task = await this.getTask(taskId)
     this.assertMine(task)
-    const needs: TaskNeed = choices
-      ? { kind: 'question', question, options: choices.data }
-      : { kind: 'question', question }
+    const overSpec = task.needs?.kind === 'spec' || needAfterAnswer(task.needs) !== null
+    const needs: TaskNeed = {
+      kind: 'question',
+      question,
+      ...(choices ? { options: choices.data } : {}),
+      ...(overSpec ? { resume: { kind: 'spec' } } : {}),
+    }
     const c = await this.writeAgentComment(task, question, 'question', { needs })
     log(`asked on ${taskId}: ${question.slice(0, 80)}`)
     return c

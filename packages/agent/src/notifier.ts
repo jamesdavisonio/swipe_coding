@@ -64,6 +64,7 @@ const NeedDoc = z.object({
   kind: z.enum(NEED_KINDS),
   question: z.string().optional(),
   options: z.array(z.object({ key: z.string(), label: z.string() })).optional(),
+  resume: z.object({ kind: z.literal('spec') }).optional(),
 })
 const TaskDoc = z.object({
   projectId: z.string().min(1),
