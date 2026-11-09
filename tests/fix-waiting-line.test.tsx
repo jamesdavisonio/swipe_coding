@@ -47,7 +47,7 @@ describe('fix: the waiting line ends once the revised card arrives', () => {
   it('still ends after 10 minutes when the session never answers', () => {
     vi.useFakeTimers()
     const view = waitingAfterNote()
-    act(() => vi.advanceTimersByTime(REVISED_WAIT_MS + 1))
+    void act(() => vi.advanceTimersByTime(REVISED_WAIT_MS + 1))
     expect(view.result.current.waiting).toEqual([])
   })
 })
