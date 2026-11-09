@@ -1,6 +1,6 @@
 # Feature: Merge card only once the PR's checks have passed
 
-**Status:** Approved (James, board approve, 2026-11-09 11:14, comment r3pdCS6qhheEVVzvsOP4)
+**Status:** Built; approved (James, board approve, 2026-11-09 11:14, comment r3pdCS6qhheEVVzvsOP4)
 **Date:** 2026-11-09
 **Task class:** Medium (the notifier gains a PR watcher that calls GitHub; the merge need moves
 from the session agent to the notifier; criteria 127–134, numbering continues from
