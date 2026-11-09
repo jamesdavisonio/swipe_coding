@@ -126,7 +126,8 @@ function runGh(command: string, args: string[]): Promise<string> {
   })
 }
 
-// The real port: `command` (default `gh`) with `prefixArgs` before `pr view <url> --json …`.
+// The real port: `command` (default `gh`) with `prefixArgs` before `pr view <url> --json …`; a url
+// that is not https:// is refused (code bad_url) and gh is not run.
 // With no command given, under the Firestore emulator, it answers EMULATOR_STATUS and runs nothing.
 export function ghPort(opts: { command?: string; prefixArgs?: string[] } = {}): GithubPort {
   const prefixArgs = opts.prefixArgs ?? []
@@ -134,7 +135,13 @@ export function ghPort(opts: { command?: string; prefixArgs?: string[] } = {}): 
     return { prStatus: () => Promise.resolve({ ...EMULATOR_STATUS, checks: [] }) }
   const command = opts.command ?? 'gh'
   return {
-    prStatus: async (url) =>
-      parseAnswer(await runGh(command, [...prefixArgs, 'pr', 'view', url, '--json', GH_FIELDS])),
+    prStatus: async (url) => {
+      // Only an https:// url is a PR url; anything else (an option, a path) never reaches gh.
+      if (!url.startsWith('https://'))
+        throw new GithubError(`not an https PR url: ${url}`, 'bad_url')
+      return parseAnswer(
+        await runGh(command, [...prefixArgs, 'pr', 'view', url, '--json', GH_FIELDS])
+      )
+    },
   }
 }

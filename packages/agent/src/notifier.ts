@@ -102,7 +102,8 @@ const TaskDoc = z.object({
   stage: z.enum(STAGES),
   needs: NeedDoc.nullable(),
   notified: z.string().optional(),
-  pr: PrDoc.nullish(),
+  // Read leniently: a malformed pr only loses the merge card, never the other decisions.
+  pr: PrDoc.nullish().catch(null),
 })
 type NotifierTask = Pick<Task, 'id' | 'projectId' | 'title' | 'stage' | 'needs' | 'notified'> & {
   pr?: z.infer<typeof PrDoc> | null

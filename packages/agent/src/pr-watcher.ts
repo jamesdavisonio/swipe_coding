@@ -10,7 +10,7 @@
 //   comment the session's watcher prints; a failed PR stays watched, and a new run goes back to
 //   `pending`;
 // - closed unmerged: `closed` and a comment; a PR with no checks passes noChecksGraceMs after it
-//   started pending;
+//   started pending, or after its head commit was first seen when a push came while pending;
 // - reads that fail: one api_call_failed WARNING per task per hour, and after giveUpMs of
 //   consecutive failed reads `unread`, the merge card anyway and a note.
 //
@@ -155,15 +155,18 @@ const noteId = (task: WatchedTask, at: number, what: string, head = task.pr.head
 const remove = FieldValue.delete()
 
 // How a read moves a watched task on; null when nothing changes. A failed task's next run has no
-// grace of its own yet, so it goes back to pending first.
+// grace of its own yet, so it goes back to pending first. A pending run's no-checks grace starts
+// at pendingSince, or later when the head read (`headSeenAt`) was pushed while pending: a new
+// head whose checks have not registered yet must not pass as a PR with no checks.
 function transitionOf(
   task: WatchedTask,
   s: PrStatus,
   now: number,
+  headSeenAt: number,
   graceMs: number
 ): Transition | null {
   const { pr } = task
-  const since = pr.checks === 'pending' ? (pr.pendingSince ?? now) : now
+  const since = pr.checks === 'pending' ? Math.max(pr.pendingSince ?? now, headSeenAt) : now
   const verdict = verdictOf(s, since, now, graceMs)
   switch (verdict.kind) {
     case 'passed':
@@ -210,6 +213,17 @@ const runningNote = (task: WatchedTask): Note => ({
   body: `Checks running on PR #${task.pr.number}`,
 })
 
+// When the watch first saw `head`, read at `now`. The head the task records, or else the first
+// one read, counts from the start of the run (0, so pendingSince rules); any other head is a push
+// seen at the read that first shows it.
+function headSeenAt(watch: Watch, head: string, now: number): number {
+  if (watch.heads.size === 0) watch.heads.set(watch.task.pr.head ?? head, 0)
+  const seen = watch.heads.get(head)
+  if (seen !== undefined) return seen
+  watch.heads.set(head, now)
+  return now
+}
+
 // ---- the watcher ------------------------------------------------------------------------------
 
 export interface PrWatcher {
@@ -230,11 +244,13 @@ export interface PrWatcherOptions {
   giveUpMs: number
 }
 
-// A watched task as last seen, and its read failures since the last read that worked.
+// A watched task as last seen, its read failures since the last read that worked, and when each
+// head commit of its PR was first seen (in memory only: a restarted notifier starts again).
 interface Watch {
   task: WatchedTask
   failingSince: number | null
   warnedAt: number | null
+  heads: Map<string, number>
 }
 
 class TaskPrWatcher implements PrWatcher {
@@ -301,7 +317,7 @@ class TaskPrWatcher implements PrWatcher {
     }
     const known = this.watched.get(id)
     if (known) known.task = task
-    else this.watched.set(id, { task, failingSince: null, warnedAt: null })
+    else this.watched.set(id, { task, failingSince: null, warnedAt: null, heads: new Map() })
     if (task.pr.checks === 'pending') await this.announce(task)
     if (!known) await this.read(id)
   }
@@ -338,7 +354,9 @@ class TaskPrWatcher implements PrWatcher {
       return
     }
     watch.failingSince = null
-    const next = transitionOf(watch.task, status, this.opts.now(), this.opts.noChecksGraceMs)
+    const t = this.opts.now()
+    const seenAt = headSeenAt(watch, status.head, t)
+    const next = transitionOf(watch.task, status, t, seenAt, this.opts.noChecksGraceMs)
     if (next) await this.apply(watch, next)
   }
 
