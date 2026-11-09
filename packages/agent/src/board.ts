@@ -37,6 +37,7 @@ import {
   type Todo,
 } from '@kanban/shared'
 import { firestoreFailure, setLogIdentity } from './app-log.ts'
+import { projectFolderFor } from './checkout.ts'
 import { getDb, log } from './firestore.ts'
 import { readRemoteUrl } from './remote.ts'
 
@@ -142,7 +143,10 @@ export interface BoardIdentity {
   agentId: string
   projectId: string
   hostname: string
+  // The folder the agent runs in; hooks find the agent by hostname + this folder.
   cwd: string
+  // The project's folder: `cwd`, or the main checkout when `cwd` is a linked git worktree.
+  projectCwd: string
   pid: number
 }
 
@@ -156,11 +160,13 @@ export class Board {
   constructor(cwd = process.cwd()) {
     this.db = getDb()
     const hostname = osHostname()
+    const projectCwd = projectFolderFor(cwd)
     this.id = {
       agentId: this.db.collection(C.agents).doc().id,
-      projectId: projectIdFor(hostname, cwd),
+      projectId: projectIdFor(hostname, projectCwd),
       hostname,
       cwd,
+      projectCwd,
       pid: process.pid,
     }
   }
@@ -169,7 +175,7 @@ export class Board {
 
   async register(): Promise<void> {
     const t = now()
-    const { agentId, projectId, hostname, cwd, pid } = this.id
+    const { agentId, projectId, hostname, cwd, projectCwd, pid } = this.id
     const projectRef = this.db.collection(C.projects).doc(projectId)
     const forJamesRef = this.db.collection(C.tasks).doc(forJamesTaskId(projectId))
     const [projectSnap, forJamesSnap] = await this.db.getAll(projectRef, forJamesRef)
@@ -178,8 +184,8 @@ export class Board {
     if (!projectSnap.exists) {
       const project: Omit<Project, 'id'> = {
         hostname,
-        cwd,
-        name: projectNameFor(cwd),
+        cwd: projectCwd,
+        name: projectNameFor(projectCwd),
         createdAt: t,
         updatedAt: t,
       }
