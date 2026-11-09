@@ -8,12 +8,14 @@ import { Mic, Square } from '../../lib/icons.ts'
 import { MAX_DESCRIPTION_CHARS, MAX_TITLE_CHARS } from '../../lib/limits.ts'
 import type { QueueableType } from '../../lib/new-task.ts'
 import { recognizerClass } from '../../lib/speech.ts'
-import { sessionProjects, useNewSession, type NewSessionModel } from '../../lib/use-new-session.ts'
+import { sessionProjects, useNewSession } from '../../lib/use-new-session.ts'
+import ProjectSelect from '../ProjectSelect.tsx'
 import SaveError from '../SaveError.tsx'
 import { Button } from '../ui/button.tsx'
 import { Field } from '../ui/field.tsx'
-import { Input, Select, Textarea } from '../ui/input.tsx'
+import { Input, Textarea } from '../ui/input.tsx'
 import DeckSheet from './DeckSheet.tsx'
+import { useIdea, type IdeaModel } from './use-idea.ts'
 
 const TYPES: readonly { id: QueueableType; label: string }[] = [
   { id: 'feature', label: 'Feature' },
@@ -59,8 +61,25 @@ function TypeChoice({
   )
 }
 
+// What the session and its task are called (required).
+function NameField({ value, onChange }: { value: string; onChange: (name: string) => void }) {
+  const id = useId()
+  return (
+    <Field label="Name" htmlFor={id}>
+      <Input
+        id={id}
+        required
+        maxLength={MAX_TITLE_CHARS}
+        placeholder="What the session and its task are called"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </Field>
+  )
+}
+
 // The idea box with the microphone beside its label: Dictate, or Stop dictating while it listens.
-function IdeaField({ idea }: { idea: NewSessionModel['idea'] }) {
+function IdeaField({ idea }: { idea: IdeaModel }) {
   const id = useId()
   const canDictate = recognizerClass() !== null && !idea.refused
   return (
@@ -92,7 +111,7 @@ function IdeaField({ idea }: { idea: NewSessionModel['idea'] }) {
         rows={4}
         maxLength={MAX_DESCRIPTION_CHARS}
         placeholder="What should the session do? It writes the spec first."
-        value={idea.idea}
+        value={idea.text}
         onChange={(event) => idea.type(event.target.value)}
       />
     </div>
@@ -113,42 +132,26 @@ export default function NewSessionSheet({
   returnFocus: () => void
 }) {
   const form = useNewSession(initialProjectId, onStarted)
+  const idea = useIdea()
   const { values, set } = form
-  const ids = { project: useId(), name: useId() }
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    void form.start()
+    if (idea.listening) idea.stop()
+    void form.start(idea.text)
   }
 
   return (
     <DeckSheet title="New session" onClose={onClose} returnFocus={returnFocus}>
       <form onSubmit={submit} className="flex flex-col gap-4">
-        <Field label="Project" htmlFor={ids.project}>
-          <Select
-            id={ids.project}
-            value={values.projectId}
-            onChange={(event) => set.projectId(event.target.value)}
-          >
-            {sessionProjects(projects).map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </Select>
-        </Field>
+        <ProjectSelect
+          projects={sessionProjects(projects)}
+          value={values.projectId}
+          onChange={set.projectId}
+        />
         <TypeChoice value={values.type} onChange={set.type} />
-        <Field label="Name" htmlFor={ids.name}>
-          <Input
-            id={ids.name}
-            required
-            maxLength={MAX_TITLE_CHARS}
-            placeholder="What the session and its task are called"
-            value={values.name}
-            onChange={(event) => set.name(event.target.value)}
-          />
-        </Field>
-        <IdeaField idea={form.idea} />
+        <NameField value={values.name} onChange={set.name} />
+        <IdeaField idea={idea} />
         <SaveError failed={form.failed} message={REFUSED} />
         <Button type="submit" block disabled={!form.canStart}>
           Start session
