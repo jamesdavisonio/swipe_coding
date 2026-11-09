@@ -20,7 +20,7 @@ Today an idea needs the PC: the phone can queue a task, but nothing starts a ses
 
 ### What will change
 
-A button at the bottom right of the deck opens a short form: project, name, and the idea (typed or spoken). Send, and the notifier on the PC starts a session for it in that folder. It shows in the Claude app under that name, and its first card (usually a spec) reaches your deck.
+A button at the bottom right of the deck opens a short form: project (the board's projects, by their real names, such as data-trackers or workshop), name, and the idea (typed or spoken). Send, and the notifier on the PC starts a session for it in that folder. It shows in the Claude app under that name, and its first card (usually a spec) reaches your deck.
 
 ### Key assumptions
 
@@ -39,8 +39,10 @@ One build to a pull request; after you merge, pulling main is enough (the notifi
 On the deck, the empty bottom-right corner of the dock gets a **New session** button (a plus,
 56 px, same size as the to-do button). Tapping it opens a sheet:
 
-- **Project**: the board's projects, the one of the card on screen preselected (else the most
-  recently active).
+- **Project**: the projects the board knows, each by its real project name (its folder name, as
+  stored on the board: data-trackers, kanban, workshop, …), never a session's name; in
+  alphabetical order, the one of the card on screen preselected (else the most recently active).
+  (James chose "Board projects, real names" on the board, 2026-11-09.)
 - **Type**: Feature (default), Bugfix or Chore.
 - **Name**: what the session and its task are called.
 - **The idea**: a text box with the deck's microphone for dictation (the same recognition the
@@ -59,8 +61,10 @@ If the PC cannot start it, the task's thread says why ("Couldn't start a session
 116. The deck's dock shows a **New session** button at its bottom right, with that accessible
      name, a 44 px or larger target and the focus ring; tapping it, or Enter / Space on it, opens
      the New session sheet.
-117. The sheet's project list holds exactly the board's projects, with the project of the card on
-     screen preselected, else the most recently updated project; Type defaults to Feature.
+117. The sheet's project list holds exactly the board's projects, one entry each, labelled with the
+     project's `name` (never a session or agent name) and sorted alphabetically, with the project
+     of the card on screen preselected, else the most recently updated project; Type defaults to
+     Feature.
 118. Start session is disabled while the name is blank; while a save is pending a second tap
      writes nothing; a refused save keeps the sheet and its text and says it could not be sent.
 119. Start session writes one task, the same as the New task form's queued task (title, type,
