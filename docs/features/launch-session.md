@@ -100,8 +100,8 @@ If the PC cannot start it, the task's thread says why ("Couldn't start a session
 
 ## Out of scope
 
-- Resuming or restarting sessions after a subscription switch (separate feature; `claude --bg
-  --resume <session id>` and the board's stored session ids make it possible).
+- Resuming or restarting sessions after a subscription switch (separate feature;
+  `claude --bg --resume <session id>` and the board's stored session ids make it possible).
 - Creating a project for a folder the board does not know yet.
 - Choosing the model, effort or permission mode from the phone (the session uses James's
   Claude Code settings).
@@ -123,16 +123,16 @@ If the PC cannot start it, the task's thread says why ("Couldn't start a session
   snapshot order, `firestoreFailure` / `logFailure` for failures.
 - `projects/{id}` holds `hostname` and `cwd`; `firestore.rules` lets the owner write `tasks`
   freely today.
-- Claude Code 2.1.268 on this PC: `claude --bg --remote-control <name> -n <name> -w <name>
-  "<prompt>"` starts a background session with Remote Control (checked 2026-11-09 with a
+- Claude Code 2.1.268 on this PC:
+  `claude --bg --remote-control <name> -n <name> -w <name> "<prompt>"` starts a background
+  session with Remote Control (checked 2026-11-09 with a
   throwaway session: it printed its id, answered, showed a claude.ai/code link, and
   `claude agents --json` listed it as `kind: background`).
 
 **Selected new contract:**
 
-- `Task.launch?: { state: 'requested' | 'starting' | 'started' | 'failed'; requestedAt: number;
-  startedAt?: number; failedAt?: number; sessionId?: string; reason?: string }` in
-  `@kanban/shared`.
+- `Task.launch?: { state: 'requested' | 'starting' | 'started' | 'failed'; requestedAt: number; startedAt?: number; failedAt?: number; sessionId?: string; reason?: string }`
+  in `@kanban/shared`.
 - Web: `createTask` gains an optional `launch: true`; a `NewSessionSheet` in the deck, opened from
   a `NewSessionButton` in the dock's right column.
 - Agent: `packages/agent/src/launcher.ts` exporting `startLauncher({ db, spawn?, now? })`, called
@@ -210,10 +210,10 @@ scope):**
 
 ## Instrumentation
 
-| event_type        | severity | context keys                                     | audience |
-| ----------------- | -------- | ------------------------------------------------ | -------- |
-| `user_action`     | INFO     | `feature`, `action: start_session`, `target`     | internal |
-| `api_call_failed` | WARNING  | `target: claude`, `task_id`, `status`            | internal |
+| event_type        | severity | context keys                                 | audience |
+| ----------------- | -------- | -------------------------------------------- | -------- |
+| `user_action`     | INFO     | `feature`, `action: start_session`, `target` | internal |
+| `api_call_failed` | WARNING  | `target: claude`, `task_id`, `status`        | internal |
 
 ## Task class reasoning
 
