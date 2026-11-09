@@ -20,7 +20,8 @@ report in through an MCP server and receive James's replies through a background
 ```
 npm install
 npm run web                # Vite dev server; packages/web/.env holds the Firebase web config
-npm run notifier           # the decision notifier (node --watch); or `npm run notifier:install` once for a logon task
+npm run notifier           # the notifier (node --watch): decision pushes, and starts the sessions James
+                           #   asks for from the deck (launch-session.md); `npm run notifier:install` once for a logon task
 ```
 
 ## How to run tests
