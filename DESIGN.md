@@ -109,7 +109,7 @@ One process per Claude session, spawned by Claude Code from MCP config:
 On start it:
 
 1. Generates an `agent_id`, reads `cwd`, hostname, pid, initialises the Admin SDK and
-   upserts the **project** keyed by `(hostname, cwd)`; heartbeats `lastSeen` every 5 min (offline after 12 min; keeps always-on agents inside the free write quota)
+   upserts the **project** keyed by `(hostname, cwd)` (in a linked git worktree, `cwd` of the main checkout: `packages/agent/src/checkout.ts`); heartbeats `lastSeen` every 5 min (offline after 12 min; keeps always-on agents inside the free write quota)
    (presence = heartbeat freshness; no RTDB `onDisconnect`).
 2. Declares the channel capability and `instructions` telling Claude: what the tags
    mean, that what the watcher prints is me, and which tools to call at which point in a task
