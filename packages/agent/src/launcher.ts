@@ -21,6 +21,7 @@ import { z } from 'zod'
 import { COLLECTIONS as C, LAUNCH_STATES, type Comment, type LaunchState } from '@kanban/shared'
 import { firestoreFailure, logFailure } from './app-log.ts'
 import { log } from './firestore.ts'
+import { CodedError, lastLine } from './process-output.ts'
 
 export type LaunchRequest = { cwd: string; name: string; worktree: string | null; prompt: string }
 
@@ -52,21 +53,7 @@ const sessionIdIn = (output: string): string | undefined =>
 // A start that has printed no session id by then is given up (and the process stopped).
 export const LAUNCH_TIMEOUT_MS = 120_000
 
-class LaunchError extends Error {
-  readonly code: string
-  constructor(message: string, code: string) {
-    super(message)
-    this.name = 'LaunchError'
-    this.code = code
-  }
-}
-
-const lastLine = (text: string): string | undefined =>
-  text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line !== '')
-    .pop()
+class LaunchError extends CodedError {}
 
 // Why the process ended without a session: the last line of its error output, else its code.
 function exitError(code: number | null, signal: string | null, stderr: string): LaunchError {
