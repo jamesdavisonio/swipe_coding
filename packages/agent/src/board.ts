@@ -19,6 +19,7 @@ import {
   isDone,
   isQueued,
   isTaskVisible,
+  needAfterAnswer,
   projectIdFor,
   projectNameFor,
   suggestedNext,
@@ -494,8 +495,9 @@ export class Board {
     return this.writeAgentComment(task, body, kind)
   }
 
-  // James answered a question in the session's own chat: the question closes, the thread says so,
-  // and his waiting board answers are marked so no watcher prints them. Plain comments still wait.
+  // James answered a question in the session's own chat: the question closes (back to the spec when
+  // it was asked over it), the thread says so, and his waiting board answers are marked so no
+  // watcher prints them. Plain comments still wait.
   async answeredInSession(taskId: string, answer: string): Promise<Comment> {
     const text = typeof answer === 'string' ? answer.trim() : ''
     if (text.length < 1 || text.length > ANSWER_MAX_CHARS)
@@ -513,7 +515,7 @@ export class Board {
       task,
       `James answered in the session: ${text}`,
       'info',
-      { needs: null },
+      { needs: needAfterAnswer(task) },
       (batch) => {
         for (const d of waiting.docs)
           if (d.get('author') === 'james' && d.get('kind') === 'answer')
@@ -525,15 +527,21 @@ export class Board {
   }
 
   // Asks James on a task. Options are validated before anything is written; the deck offers them.
+  // A task waits on one thing at a time: a question asked while the spec waits (or over an earlier
+  // question that did) carries `resume`, so its answer brings the spec approval back.
   async ask(taskId: string, question: string, options?: string[]): Promise<Comment> {
     const choices = options === undefined ? undefined : AskOptions.safeParse(options)
     if (choices && !choices.success)
       throw new BoardError('invalid options: 2 to 6 labels, each 1 to 200 characters')
     const task = await this.getTask(taskId)
     this.assertMine(task)
-    const needs: TaskNeed = choices
-      ? { kind: 'question', question, options: choices.data }
-      : { kind: 'question', question }
+    const overSpec = task.needs?.kind === 'spec' || needAfterAnswer(task) !== null
+    const needs: TaskNeed = {
+      kind: 'question',
+      question,
+      ...(choices ? { options: choices.data } : {}),
+      ...(overSpec ? { resume: { kind: 'spec' } } : {}),
+    }
     const c = await this.writeAgentComment(task, question, 'question', { needs })
     log(`asked on ${taskId}: ${question.slice(0, 80)}`)
     return c
@@ -641,15 +649,18 @@ export class Board {
   }
 }
 
-// A reply clears the task's question when it answers it, or arrives while the task asks one.
-function clearsQuestion(c: Comment, task: Task): boolean {
-  return c.kind === 'answer' || task.needs?.kind === 'question'
+// A claimed reply (an answer, or any reply) settles the task's question only while the task still
+// asks one: an answer whose question the phone already settled leaves the current need alone (the
+// spec it brought back, say). Settling hands back what the question was asked over.
+function settlesQuestion(task: Task): boolean {
+  return task.needs?.kind === 'question'
 }
 
 // A watcher's claim on James's waiting replies, in one transaction: each reply whose deliveredAt
 // is still unset and that still belongs to `agentId` (kanban_start_task may have rerouted it) gets
-// marked received and its task's question settled; the rest were claimed by another watcher or
-// moved to another session and are left out. Returns the claimed replies, oldest first.
+// marked received and its task's question settled (settlesQuestion); the rest were claimed by
+// another watcher or moved to another session and are left out. Returns the claimed replies,
+// oldest first.
 export async function claimReplies(
   db: Firestore,
   agentId: string,
@@ -678,11 +689,13 @@ export async function claimReplies(
     for (const c of claimed) {
       tx.update(db.collection(C.comments).doc(c.id), { deliveredAt: t })
       const task = tasks.get(c.taskId)
-      if (task && clearsQuestion(c, task)) settled.add(c.taskId)
+      if (task && settlesQuestion(task)) settled.add(c.taskId)
     }
     for (const [id, task] of tasks) {
       if (!task) continue
-      const patch = settled.has(id) ? { updatedAt: t, needs: null } : { updatedAt: t }
+      const patch = settled.has(id)
+        ? { updatedAt: t, needs: needAfterAnswer(task) }
+        : { updatedAt: t }
       tx.update(db.collection(C.tasks).doc(id), patch)
     }
     return claimed
@@ -772,9 +785,10 @@ function prPatch(task: Task, url: string): Record<string, unknown> {
 }
 
 // Moves the task past `stage`: to the next stage of its chain, clearing the need of any stage it
-// passes on the way (its current stage through `stage`). A task already beyond `stage` is left
-// alone. Never finishes a task: that is kanban_update_task with status "done" and a summary, the
-// only call that posts the Done message, so the stage before done (and done itself) is refused.
+// passes on the way (its current stage through `stage`); a question asked over the spec stops
+// bringing it back once the spec stage is passed. A task already beyond `stage` is left alone.
+// Never finishes a task: that is kanban_update_task with status "done" and a summary, the only
+// call that posts the Done message, so the stage before done (and done itself) is refused.
 function advancePast(task: Task, stage: Stage): Record<string, unknown> {
   const chain = taskStages(task)
   const next = chain.at(chain.indexOf(stage) + 1)
@@ -784,9 +798,15 @@ function advancePast(task: Task, stage: Stage): Record<string, unknown> {
     )
   if (chain.indexOf(task.stage) > chain.indexOf(stage)) return {}
   const passed = chain.slice(Math.max(0, chain.indexOf(task.stage)), chain.indexOf(stage) + 1)
-  const needKind = task.needs?.kind
+  const need = task.needs
+  const needKind = need?.kind
   const stale = needKind !== undefined && passed.some((s) => NEED_OF_STAGE[s] === needKind)
-  return { stage: next, ...(stale ? { needs: null } : {}) }
+  if (stale) return { stage: next, needs: null }
+  if (need?.kind === 'question' && need.resume && passed.includes('spec')) {
+    const { resume: _resume, ...question } = need
+    return { stage: next, needs: question }
+  }
+  return { stage: next }
 }
 
 // What kanban_subtask changes on the task for each Phase 1 step status.

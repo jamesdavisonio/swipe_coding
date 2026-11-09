@@ -37,7 +37,9 @@ interface Ctx {
 }
 
 const FAILED = "Couldn't send that. The card is back."
-// The needs a note answers, so its own write leaves the task waiting on nothing (data.ts sendNote).
+// The needs a note answers (data.ts sendNote). Its own write leaves the task waiting on nothing,
+// except an answer to a question asked over the spec, which brings the spec need back
+// (needAfterAnswer): that spec card counts as the revised one, so the wait ends at once.
 const NOTE_CLEARS_NEED: readonly NeedKind[] = ['spec', 'question', 'pr']
 
 // The write a card's right swipe makes; null for the moves that open a sheet first.
