@@ -89,8 +89,11 @@ export function specDecision(task: Pick<Task, 'title'>, body: string | undefined
   return { kind: 'spec', headline: brief?.yes ?? `Start building: ${task.title}`, brief }
 }
 
+// What a notification is about: a decision, or a PR whose checks passed (docs/features/pr-ready.md).
+export type NoticeKind = DecisionKind | 'merge'
+
 export interface DecisionNotice {
-  kind: DecisionKind
+  kind: NoticeKind
   title: string
   body: string
   tag: string
@@ -111,9 +114,26 @@ function waitingDecision(
   return null
 }
 
-// The phone notification for the decision a task waits on: titled "<kind> · <project>", the
-// card's headline as its text, tagged per task (a later decision on the task replaces it) and
-// opening the deck on that task. Null when the task waits on no decision.
+// A notice titled "<label> · <project>" with `text` cut to fit, tagged per task (a later notice
+// on the task replaces it) and opening the deck on that task.
+function noticeFor(
+  task: Pick<Task, 'id'>,
+  kind: NoticeKind,
+  label: string,
+  projectName: string,
+  text: string
+): DecisionNotice {
+  return {
+    kind,
+    title: `${label}${TITLE_SEPARATOR}${projectName}`,
+    body: fitHeadline(text),
+    tag: `decision:${task.id}`,
+    url: `/?task=${encodeURIComponent(task.id)}`,
+  }
+}
+
+// The phone notification for the decision a task waits on: the card's kind and headline. Null
+// when the task waits on no decision.
 export function decisionNotice(
   task: Pick<Task, 'id' | 'title' | 'stage' | 'needs'>,
   projectName: string,
@@ -121,11 +141,18 @@ export function decisionNotice(
 ): DecisionNotice | null {
   const decision = waitingDecision(task, specBody)
   if (!decision) return null
-  return {
-    kind: decision.kind,
-    title: `${DECISION_LABEL[decision.kind]}${TITLE_SEPARATOR}${projectName}`,
-    body: fitHeadline(decision.headline),
-    tag: `decision:${task.id}`,
-    url: `/?task=${encodeURIComponent(task.id)}`,
-  }
+  return noticeFor(
+    task,
+    decision.kind,
+    DECISION_LABEL[decision.kind],
+    projectName,
+    decision.headline
+  )
 }
+
+export const MERGE_LABEL = 'Merge'
+
+// The phone notification for a merge card that appeared once the PR's checks passed: titled
+// "Merge · <project>", the task's title as its text, tagged and linked as a decision's.
+export const mergeNotice = (task: Pick<Task, 'id' | 'title'>, projectName: string) =>
+  noticeFor(task, 'merge', MERGE_LABEL, projectName, task.title)

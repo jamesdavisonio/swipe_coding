@@ -72,9 +72,24 @@ export interface TaskSpec {
   version: number
 }
 
+// Where the PR's checks stand (docs/features/pr-ready.md): the notifier watches a `pending` PR
+// and, once every check has passed, sets `passed` and the merge need; `failed` names the failed
+// checks; `closed` is a PR closed unmerged; `unread` is a PR whose checks could not be read for
+// githubGiveUpMs, shown to James anyway. A PR only recorded (before the build stage, or on a task
+// whose chain has no pr stage) has no `checks`.
+export const PR_CHECKS = ['pending', 'passed', 'failed', 'closed', 'unread'] as const
+export type PrChecks = (typeof PR_CHECKS)[number]
+// A merge need stands (the merge card shows) only on a PR whose checks passed or were given up on.
+export const isMergeReady = (checks: PrChecks | undefined): boolean =>
+  checks === 'passed' || checks === 'unread'
+
 export interface TaskPr {
   number: number
   url: string
+  checks?: PrChecks
+  failed?: string[] // the failed checks' names, sorted
+  head?: string // the PR's head commit the state refers to
+  pendingSince?: number // when the PR started waiting on this run of its checks
 }
 
 export type LogWho = 'james' | 'session' | 'system'
@@ -84,7 +99,8 @@ export interface LogEntry {
   text: string
 }
 
-// Comments split by author: James writes the first six kinds, the session the other seven.
+// Comments split by author: James writes the first six kinds, the session (or the notifier on
+// its behalf: ci_failed, a PR's failed checks) the other eight.
 export const JAMES_COMMENT_KINDS = [
   'comment',
   'answer',
@@ -102,6 +118,7 @@ export const SESSION_COMMENT_KINDS = [
   'done',
   'info',
   'system',
+  'ci_failed',
 ] as const
 export type SessionCommentKind = (typeof SESSION_COMMENT_KINDS)[number]
 export type CommentKind = JamesCommentKind | SessionCommentKind
