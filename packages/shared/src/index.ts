@@ -160,6 +160,22 @@ export interface Task {
   log: LogEntry[] // decision history, append-only, capped at LOG_CAP (see appendLog)
   retiredNext?: number[] // Suggested next indices a later session retired as done
   notified?: string // the decision the notifier last sent ('spec:<comment id>', 'question:<text>')
+  launch?: TaskLaunch // a session James asked the PC to start for this task (docs/features/launch-session.md)
+}
+
+// A request to start a session for a task: the phone writes it as `requested`; only the PC's
+// notifier (Admin SDK) moves it on, claiming it (`starting`) before it runs Claude Code, then
+// `started` with the background session's id, or `failed` with the reason. requestedAt never
+// changes once written.
+export const LAUNCH_STATES = ['requested', 'starting', 'started', 'failed'] as const
+export type LaunchState = (typeof LAUNCH_STATES)[number]
+export interface TaskLaunch {
+  state: LaunchState
+  requestedAt: number
+  startedAt?: number
+  failedAt?: number
+  sessionId?: string
+  reason?: string
 }
 
 export interface Comment {

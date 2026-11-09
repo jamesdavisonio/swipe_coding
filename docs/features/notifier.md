@@ -45,6 +45,14 @@ existed. James starts it once with `npm run notifier`, or has it start at login 
 `npm run notifier:install` once (a Windows logon task); it restarts itself when the agent's code
 changes on disk, so pulling main is enough.
 
+**Also starts sessions** (`launch-session.md`, criteria 116–126): while it holds the lease, the
+notifier hands every task change to the launcher (`packages/agent/src/launcher.ts`). A task the
+phone wrote with `launch: { state: 'requested' }` whose project's `hostname` is this PC is claimed
+(`starting`) and started as a Claude Code background session with Remote Control in the project's
+folder (a `launch-<task id>` worktree when it is a git repository), then marked `started` with the
+session id, or `failed` with a comment and an `api_call_failed` WARNING (`target: claude`).
+`startNotifier` takes `launch?: LaunchPort` (default: the `claude` executable).
+
 ## Acceptance criteria
 
 107. Given the notifier runs and devices are registered, when a task's need becomes a spec
@@ -171,10 +179,11 @@ brief>` (or `spec:none`), `question:<the question text>`; it sends when the key 
 
 ## Instrumentation
 
-| event_type        | severity | context keys                                                   | audience |
-| ----------------- | -------- | -------------------------------------------------------------- | -------- |
-| `api_call_failed` | WARNING  | `target: fcm`, `status`, `task_id`, `device_count`, `removed`  | internal |
-| `api_call_failed` | ERROR    | `target: firestore`, `status` (the listener died; it restarts) | internal |
+| event_type        | severity | context keys                                                    | audience |
+| ----------------- | -------- | --------------------------------------------------------------- | -------- |
+| `api_call_failed` | WARNING  | `target: fcm`, `status`, `task_id`, `device_count`, `removed`   | internal |
+| `api_call_failed` | ERROR    | `target: firestore`, `status` (the listener died; it restarts)  | internal |
+| `api_call_failed` | WARNING  | `target: claude`, `task_id`, `status` (a session did not start) | internal |
 
 ## Task class reasoning
 

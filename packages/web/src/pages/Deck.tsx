@@ -2,12 +2,14 @@
 // card says, left for later, up for the details, down for the overview; the microphone changes
 // the decision in his own words and the speaker reads the card aloud. Every move also has a
 // button and a key. The design is docs/features/swipe-deck-prototype.html.
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import CardStage from '../components/deck/CardStage.tsx'
 import DeckDock from '../components/deck/DeckDock.tsx'
 import DeckSheets from '../components/deck/DeckSheets.tsx'
 import DeckTopBar from '../components/deck/DeckTopBar.tsx'
 import EmptyDeck from '../components/deck/EmptyDeck.tsx'
+import NewSessionButton from '../components/deck/NewSessionButton.tsx'
+import NewSessionSheet from '../components/deck/NewSessionSheet.tsx'
 import SpecBodies from '../components/deck/SpecBodies.tsx'
 import TodoButton from '../components/deck/TodoButton.tsx'
 import TodoDrawer from '../components/deck/TodoDrawer.tsx'
@@ -21,6 +23,7 @@ import type { Drag, Release } from '../components/deck/use-swipe.ts'
 import { useTodoDrawer } from '../components/deck/use-todo-drawer.ts'
 import { useToast } from '../components/deck/use-toast.ts'
 import { refreshPush } from '../lib/push.ts'
+import { defaultProjectId } from '../lib/use-new-session.ts'
 
 export default function Deck() {
   const deck = useDeck()
@@ -28,6 +31,9 @@ export default function Deck() {
   const sheets = useDeckSheet(deck.cards)
   const todos = useTodoDrawer(deck.tasks, deck.projects)
   const todoButton = useRef<HTMLButtonElement>(null)
+  // The project the New session sheet opened with (null: closed).
+  const [newSession, setNewSession] = useState<string | null>(null)
+  const newSessionButton = useRef<HTMLButtonElement>(null)
   const { ghost, fly, landed } = useGhost()
   const actions = useDeckActions(deck, {
     fly,
@@ -48,7 +54,15 @@ export default function Deck() {
     else if (m === 'change') sheets.startNote(top)
     else if (m === 'listen' && sheets.canListen) sheets.toggleListen(top)
   }
-  useDeckKeys(!sheets.modal && !todos.open, move)
+  useDeckKeys(!sheets.modal && !todos.open && newSession === null, move)
+
+  const openNewSession = () =>
+    setNewSession(defaultProjectId(deck.projects, top?.projectId ?? null))
+  function sessionStarted(name: string) {
+    setNewSession(null)
+    toast.show(`Starting a session for ${name}`)
+    newSessionButton.current?.focus()
+  }
 
   function onRelease(release: Release | null, drag: Drag) {
     if (!top || !release) return
@@ -88,6 +102,7 @@ export default function Deck() {
       </main>
       <DeckDock
         start={<TodoButton ref={todoButton} open={todos.summary.open} onOpen={todos.show} />}
+        end={<NewSessionButton ref={newSessionButton} onOpen={openNewSession} />}
         hasCard={top !== null}
         canChange={top !== null}
         onLater={() => move('later')}
@@ -96,6 +111,7 @@ export default function Deck() {
       />
       <p
         role="status"
+        aria-live="polite"
         className="pointer-events-none fixed inset-x-4 bottom-36 z-(--z-toast) mx-auto w-max max-w-[calc(100%-2rem)] rounded-lg bg-foreground px-4 py-2.5 text-center text-sm font-medium text-background empty:hidden"
       >
         {toast.message}
@@ -112,6 +128,15 @@ export default function Deck() {
       />
       {todos.open ? (
         <TodoDrawer drawer={todos} now={deck.now} returnFocus={() => todoButton.current?.focus()} />
+      ) : null}
+      {newSession !== null ? (
+        <NewSessionSheet
+          projects={deck.projects}
+          initialProjectId={newSession}
+          onStarted={sessionStarted}
+          onClose={() => setNewSession(null)}
+          returnFocus={() => newSessionButton.current?.focus()}
+        />
       ) : null}
     </div>
   )

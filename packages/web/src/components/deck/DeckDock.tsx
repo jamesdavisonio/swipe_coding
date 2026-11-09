@@ -1,5 +1,6 @@
 // The bottom dock: the big microphone ("Change it") in the middle, as on the screen James approved,
-// and the to-do button (`start`) at its left; a swipe's stamp is the only other sign of a move. Later and Agree are still buttons for the
+// the to-do button (`start`) at its left and the New session button (`end`) at its right; a swipe's
+// stamp is the only other sign of a move. Later and Agree are still buttons for the
 // keyboard, switch access and screen readers: visually hidden until they take keyboard focus,
 // then shown beside the mic with the focus ring.
 import type { ReactNode } from 'react'
@@ -37,6 +38,7 @@ function HiddenMove({
 
 export default function DeckDock({
   start,
+  end,
   hasCard,
   canChange,
   onLater,
@@ -44,6 +46,7 @@ export default function DeckDock({
   onChange,
 }: {
   start: ReactNode
+  end: ReactNode
   hasCard: boolean
   canChange: boolean
   onLater: () => void
@@ -71,6 +74,7 @@ export default function DeckDock({
         </div>
         <HiddenMove label="Agree" Icon={Check} disabled={!hasCard} onClick={onAgree} />
       </div>
+      <div className="justify-self-end">{end}</div>
     </div>
   )
 }

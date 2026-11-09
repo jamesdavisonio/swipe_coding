@@ -21,6 +21,7 @@ export {
   MessageSquare,
   Mic,
   Plus,
+  Square,
   RotateCcw,
   Send,
   Volume2,

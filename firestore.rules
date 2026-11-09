@@ -24,8 +24,27 @@ service cloud.firestore {
 
     match /projects/{id}  { allow read, write: if isOwner(); }
     match /agents/{id}    { allow read: if isOwner(); allow write: if false; }
+    // A request for the PC to start a session (docs/features/launch-session.md): the phone may
+    // create a task with launch only as { state: 'requested', requestedAt: <number> }.
+    function validNewLaunch() {
+      let d = request.resource.data;
+      return !('launch' in d)
+        || (d.launch is map
+          && d.launch.keys().hasOnly(['state', 'requestedAt'])
+          && d.launch.keys().hasAll(['state', 'requestedAt'])
+          && d.launch.state == 'requested'
+          && d.launch.requestedAt is number);
+    }
+
+    // Once written, launch is the PC's (Admin SDK): the UI never adds, changes or removes it.
+    function launchUnchanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['launch']);
+    }
+
     match /tasks/{id} {
-      allow read, write: if isOwner();
+      allow read, delete: if isOwner();
+      allow create: if isOwner() && validNewLaunch();
+      allow update: if isOwner() && launchUnchanged();
       // Overflow of the task's decision log (appendLog moves the oldest entries here).
       match /log_archive/{entry} { allow read, write: if isOwner(); }
     }

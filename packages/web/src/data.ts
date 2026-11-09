@@ -28,6 +28,7 @@ import {
   type LogEntry,
   type Project,
   type Task,
+  type TaskLaunch,
   type TaskType,
   type Todo,
 } from '@kanban/shared'
@@ -215,6 +216,8 @@ export interface NewTaskInput {
   title: string
   description: string
   afterDeploy: string[]
+  // Ask the PC to start a session for the task (docs/features/launch-session.md).
+  launch?: boolean
 }
 
 // "Queued: <title>", plus the number of after-deploy steps when there are any.
@@ -226,7 +229,8 @@ function queuedEntry(title: string, steps: number): string {
 // James queues a task for the next session in a project: the shared initial shape (first stage of
 // its chain, bound to no agent), his text trimmed and capped, one history line by him, and the
 // project touched so it moves up the list. One batch, so the task and the touch land together
-// (or, offline, are queued together). A blank title writes nothing and rejects. Returns the id.
+// (or, offline, are queued together). A blank title writes nothing and rejects. With `launch`, the
+// task also carries the request for the PC to start its session. Returns the id.
 export async function createTask(projectId: string, input: NewTaskInput): Promise<string> {
   const title = cleanText(input.title, MAX_TITLE_CHARS)
   if (title === '') throw new Error('A task needs a title')
@@ -247,7 +251,8 @@ export async function createTask(projectId: string, input: NewTaskInput): Promis
   })
   const entry: LogEntry = { at: t, who: 'james', text: queuedEntry(title, steps.length) }
   const batch = writeBatch(db)
-  batch.set(ref, { ...task, log: [entry] })
+  const launch: TaskLaunch = { state: 'requested', requestedAt: t }
+  batch.set(ref, { ...task, log: [entry], ...(input.launch ? { launch } : {}) })
   batch.update(doc(db, COLLECTIONS.projects, projectId), { updatedAt: t })
   await batch.commit()
   return ref.id
