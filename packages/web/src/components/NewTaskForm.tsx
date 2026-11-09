@@ -4,37 +4,14 @@ import { MAX_DESCRIPTION_CHARS, MAX_TITLE_CHARS } from '../lib/limits.ts'
 import { QUEUEABLE_TYPES, stagePreview } from '../lib/new-task.ts'
 import { useNewTaskForm } from '../lib/use-new-task-form.ts'
 import AfterDeployFields from './AfterDeployFields.tsx'
+import ProjectSelect from './ProjectSelect.tsx'
 import SaveError from './SaveError.tsx'
 import { Button } from './ui/button.tsx'
 import { Field } from './ui/field.tsx'
-import { Input, Select, Textarea } from './ui/input.tsx'
+import { Input, Textarea } from './ui/input.tsx'
 import { Segmented } from './ui/segmented.tsx'
 
 const TYPE_OPTIONS = QUEUEABLE_TYPES.map((id) => ({ id, label: TASK_TYPE_LABELS[id] }))
-
-// Which project the task is for.
-function ProjectSelect({
-  projects,
-  value,
-  onChange,
-}: {
-  projects: readonly Pick<Project, 'id' | 'name'>[]
-  value: string
-  onChange: (projectId: string) => void
-}) {
-  const id = useId()
-  return (
-    <Field label="Project" htmlFor={id}>
-      <Select id={id} value={value} onChange={(event) => onChange(event.target.value)}>
-        {projects.map((project) => (
-          <option key={project.id} value={project.id}>
-            {project.name}
-          </option>
-        ))}
-      </Select>
-    </Field>
-  )
-}
 
 // The title (required) and the description the session reads before it writes the spec.
 function TitleAndDescription({
