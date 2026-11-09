@@ -170,6 +170,18 @@ export function firstMessage(task: Pick<LaunchTask, 'id' | 'title' | 'descriptio
   ].join('\n')
 }
 
+interface Failure {
+  reason: string
+  status: string
+}
+
+// `claude` would read a name starting with "-" as an option (`--remote-control [name]` takes no
+// value that starts with "-"), so such a title is refused before anything is claimed or started.
+function nameFailure(title: string): Failure | null {
+  if (!title.trim().startsWith('-')) return null
+  return { reason: 'invalid name: a session name cannot start with "-"', status: 'invalid_name' }
+}
+
 const isFolder = (path: string) => statSync(path, { throwIfNoEntry: false })?.isDirectory() ?? false
 
 // What Claude Code is asked to do for the task in the project's folder.
@@ -180,11 +192,6 @@ function launchRequest(task: LaunchTask, cwd: string): LaunchRequest {
     worktree: existsSync(join(cwd, '.git')) ? `launch-${task.id}` : null,
     prompt: firstMessage(task),
   }
-}
-
-interface Failure {
-  reason: string
-  status: string
 }
 
 // Why a start failed, from what the port rejected with: the reason is the error's message, the
@@ -263,6 +270,11 @@ class TaskLauncher implements Launcher {
       await this.fail(task, { reason: 'interrupted', status: 'interrupted' })
       return
     }
+    const invalid = nameFailure(task.title)
+    if (invalid) {
+      await this.fail(task, invalid, 'requested')
+      return
+    }
     if (!(await this.transition(task, 'requested', { 'launch.state': 'starting' }))) return
     this.claimed.add(task.id)
     await this.launch(task, project)
@@ -301,12 +313,17 @@ class TaskLauncher implements Launcher {
     log(`launcher: task ${task.id} runs in session ${sessionId}`)
   }
 
-  // Moves a claim to `failed` with its comment, then logs the warning; once, whoever calls.
-  private async fail(task: LaunchTask, failure: Failure): Promise<void> {
+  // Moves a claim (or, from `from`, a request) to `failed` with its comment, then logs the
+  // warning; once, whoever calls.
+  private async fail(
+    task: LaunchTask,
+    failure: Failure,
+    from: LaunchState = 'starting'
+  ): Promise<void> {
     const t = this.now()
     const failed = await this.transition(
       task,
-      'starting',
+      from,
       {
         'launch.state': 'failed',
         'launch.failedAt': t,

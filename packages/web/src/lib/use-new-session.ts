@@ -38,13 +38,14 @@ export function useNewSession(
   const [type, setType] = useState<QueueableType>('feature')
   const [name, setName] = useState('')
   const { pending, failed, save } = useTaskSave(LAUNCH_FEATURE, START_SESSION)
-  const canStart = name.trim() !== '' && projectId !== '' && !pending
+  // The PC refuses a name starting with "-" (`claude` would read it as an option); so does this.
+  const title = name.trim()
+  const canStart = title !== '' && !title.startsWith('-') && projectId !== '' && !pending
 
   // Writes the task once (a tap while the save is pending writes nothing); a refused save keeps
   // everything as it was and sets `failed`.
   async function start(idea: string) {
     if (!canStart) return
-    const title = name.trim()
     const saved = await save(projectId, {
       type,
       title,
