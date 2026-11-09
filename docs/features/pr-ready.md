@@ -1,6 +1,6 @@
 # Feature: Merge card only once the PR's checks have passed
 
-**Status:** Draft (awaiting James's approval on the board)
+**Status:** Approved (James, board approve, 2026-11-09 11:14, comment r3pdCS6qhheEVVzvsOP4)
 **Date:** 2026-11-09
 **Task class:** Medium (the notifier gains a PR watcher that calls GitHub; the merge need moves
 from the session agent to the notifier; criteria 127–134, numbering continues from
@@ -92,7 +92,50 @@ for a PR that is still running checks or has failed ones.
   `fast-feedback IN_PROGRESS`, `mergeable: MERGEABLE`).
 - The web shows a merge card for `needs.kind === 'pr'` (`packages/web/src/lib/deck.ts`).
 
-**Selected new contract:** decided before the tests.
+**Selected new contract** (planner decisions within the approved scope, before the tests):
+
+- `@kanban/shared`: `Task.pr` gains optional `checks?: 'pending' | 'passed' | 'failed' | 'closed'`,
+  `failed?: string[]` (names of the failed checks, sorted), `head?: string` (the PR's head commit
+  the state refers to) and `pendingSince?: number`. `CommentKind` (session kinds) gains `ci_failed`.
+- Agent `prPatch` (board.ts), from `build`/`fix`/`do`/`pr`: `pr: { number, url, checks: 'pending',
+pendingSince: <now> }`, `stage: 'pr'`, `needs: null`. Other stages unchanged (records the PR only).
+- `packages/agent/src/github.ts` exports
+  `interface GithubPort { prStatus(url: string): Promise<PrStatus> }` with
+  `PrStatus = { state: 'OPEN' | 'MERGED' | 'CLOSED'; mergeable: 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN'; head: string; checks: { name: string; status: 'COMPLETED' | 'PENDING'; conclusion: string }[] }`,
+  and `ghPort(opts?: { command?: string; prefixArgs?: string[] }): GithubPort` (default command
+  `gh`): runs `[...prefixArgs, 'pr', 'view', url, '--json', 'state,mergeable,headRefOid,statusCheckRollup']`
+  with an argument array, no shell, and maps `statusCheckRollup` items: a CheckRun
+  (`name`, `status`, `conclusion`) keeps its name; a StatusContext (`context`, `state`) becomes
+  `name: context`, `status` `PENDING` for state PENDING or EXPECTED else `COMPLETED`, `conclusion`
+  = state (SUCCESS, FAILURE, ERROR). A CheckRun whose status is not COMPLETED is `PENDING`.
+  A failed or non-zero `gh` rejects with an Error whose `code` is the spawn code (`ENOENT`) or
+  `exit_<n>`.
+- `startNotifier` options gain `github?: GithubPort` (default `ghPort()`), `prPollMs?` (default
+  60 000), `noChecksGraceMs?` (default 120 000) and `githubGiveUpMs?` (default 1 800 000). The
+  notifier checks each watched PR every `prPollMs` (and once at once when a task starts being
+  watched), only while it holds the lease.
+- Passed: at least one check, every check `COMPLETED` with conclusion SUCCESS, SKIPPED or NEUTRAL,
+  and `mergeable: 'MERGEABLE'`; `mergeable: 'UNKNOWN'` keeps it pending. Failed: any `COMPLETED`
+  check with conclusion FAILURE, ERROR, CANCELLED, TIMED_OUT, ACTION_REQUIRED or STARTUP_FAILURE,
+  or `mergeable: 'CONFLICTING'` (reported as the name `merge conflict`).
+- On passed: `pr.checks: 'passed'`, `pr.head`, need `{ kind: 'pr' }`. On failed: `pr.checks:
+'failed'`, `pr.failed`, `pr.head`, no need, and one comment `{ author: 'agent', kind: 'ci_failed',
+body: "Checks failed on PR #<n>: <names joined by ', '>" }` per head commit. A failed task stays
+  watched; a new head commit puts it back to `pending` (`pendingSince` reset).
+- When watching starts for a head commit, one comment `{ author: 'agent', kind: 'comment', body:
+"Checks running on PR #<n>" }`.
+- No checks: passed once `now - pendingSince >= noChecksGraceMs` (and mergeable). MERGED: passed
+  (need `pr`). CLOSED: `pr.checks: 'closed'`, no need, comment "PR #<n> was closed".
+- Read failure: one `api_call_failed` WARNING (`target: 'github'`, `task_id`, `status` = the
+  error's code) per task per hour at most; after `githubGiveUpMs` since `pendingSince` with no
+  successful read, need `{ kind: 'pr' }` and a comment "Couldn't read the checks of PR #<n>;
+  showing the merge card anyway".
+- An older session's direct `needs: { kind: 'pr' }` on a task whose `pr.checks` is not `'passed'`
+  is turned into watching (need cleared, `checks: 'pending'`, `pendingSince` now).
+- Notification: when the need `pr` appears, each device gets one push per PR head with title
+  "Merge · <project name>" and body the task's title (tag and link as for decision cards).
+- `wait.ts` prints a `ci_failed` comment of a task bound to the agent like a reply:
+  `{ task, kind: 'ci_failed', id, from: 'board', text }`, and claims it the same way.
 
 ## Instrumentation
 
