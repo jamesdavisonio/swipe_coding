@@ -53,6 +53,21 @@ folder (a `launch-<task id>` worktree when it is a git repository), then marked 
 session id, or `failed` with a comment and an `api_call_failed` WARNING (`target: claude`).
 `startNotifier` takes `launch?: LaunchPort` (default: the `claude` executable).
 
+**Also watches PRs' checks** (`pr-ready.md`, criteria 127–134): while it holds the lease, the
+notifier hands every task change to the PR watcher (`packages/agent/src/pr-watcher.ts`, its own
+queue, halted with the notifier). A session's `pr_url` now puts the task at `pr` with
+`pr.checks: 'pending'` and no need; the watcher reads the PR through a `GithubPort`
+(`packages/agent/src/github.ts`: `gh pr view <url> --json state,mergeable,headRefOid,statusCheckRollup`,
+an argument array, no shell; never run under the emulator) at once and every `prPollMs`. When every
+check passed and GitHub says mergeable it sets `passed` and the need `{ kind: 'pr' }`, and the
+notifier sends "Merge · <project>" (the task's title) once per PR head (decision key
+`merge:<number>:<head>`). A failed check sets `failed`, writes a `ci_failed` comment the session's
+watcher prints, and keeps watching for the next run; a closed PR is `closed`; reads that fail log
+one `api_call_failed` WARNING (`target: github`) per task per hour and, after `githubGiveUpMs`, show
+the merge card anyway (`unread`). An older session's direct merge need is turned into watching.
+`startNotifier` takes `github?: GithubPort` (default `ghPort()`), `prPollMs` (60 000),
+`noChecksGraceMs` (120 000) and `githubGiveUpMs` (1 800 000).
+
 ## Acceptance criteria
 
 107. Given the notifier runs and devices are registered, when a task's need becomes a spec
@@ -68,7 +83,9 @@ session id, or `failed` with a comment and an `api_call_failed` WARNING (`target
      question on the same task notifies again, under the same tag. Any other change to the task
      while its decision is unchanged (comments, stage, `updatedAt`, `working`, `lastCommentAt`)
      sends nothing.
-110. A need of `pr`, `after_deploy` or none sends nothing.
+110. A need of `pr`, `after_deploy` or none sends nothing. (Since `pr-ready.md` 134, a merge card
+     the PR watcher raised once the checks passed notifies "Merge · <project>", once per PR head; a
+     `pr` need without such checks still sends nothing.)
 111. A decision is notified once: after the notifier restarts it does not send decisions it already
      sent, and a decision that appeared while it was not running is sent when it starts.
 112. Sending failures and dead tokens are handled as in 82–83: one `api_call_failed` WARNING
@@ -184,6 +201,7 @@ brief>` (or `spec:none`), `question:<the question text>`; it sends when the key 
 | `api_call_failed` | WARNING  | `target: fcm`, `status`, `task_id`, `device_count`, `removed`   | internal |
 | `api_call_failed` | ERROR    | `target: firestore`, `status` (the listener died; it restarts)  | internal |
 | `api_call_failed` | WARNING  | `target: claude`, `task_id`, `status` (a session did not start) | internal |
+| `api_call_failed` | WARNING  | `target: github`, `task_id`, `status` (a PR's checks unread)    | internal |
 
 ## Task class reasoning
 
