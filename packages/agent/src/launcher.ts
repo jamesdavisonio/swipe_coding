@@ -169,10 +169,20 @@ function launchRequest(task: LaunchTask, cwd: string): LaunchRequest {
   }
 }
 
-// The api_call_failed status: the error's own code when it has one, else 'unknown'.
-function errorCode(err: unknown): string {
+interface Failure {
+  reason: string
+  status: string
+}
+
+// Why a start failed, from what the port rejected with: the reason is the error's message, the
+// api_call_failed status its code when that is a non-empty string (ENOENT, exit_<n>), else
+// 'unknown'. (app-log's errorStatus also passes numeric codes on, as Firestore's are.)
+function failureOf(err: unknown): Failure {
   const code = (err as { code?: unknown } | null)?.code
-  return typeof code === 'string' && code !== '' ? code : 'unknown'
+  return {
+    reason: err instanceof Error ? err.message : String(err),
+    status: typeof code === 'string' && code !== '' ? code : 'unknown',
+  }
 }
 
 // ---- the launcher -----------------------------------------------------------------------------
@@ -190,11 +200,6 @@ export interface LauncherOptions {
   db: Firestore
   spawn?: LaunchPort
   now?: () => number
-}
-
-interface Failure {
-  reason: string
-  status: string
 }
 
 class TaskLauncher implements Launcher {
@@ -245,7 +250,7 @@ class TaskLauncher implements Launcher {
       await this.fail(task, { reason: 'interrupted', status: 'interrupted' })
       return
     }
-    if (!(await this.move(task, 'requested', { 'launch.state': 'starting' }))) return
+    if (!(await this.transition(task, 'requested', { 'launch.state': 'starting' }))) return
     this.claimed.add(task.id)
     await this.launch(task, project)
   }
@@ -272,10 +277,10 @@ class TaskLauncher implements Launcher {
     try {
       sessionId = (await this.port.start(launchRequest(task, project.cwd))).sessionId
     } catch (err) {
-      await this.fail(task, { reason: (err as Error).message, status: errorCode(err) })
+      await this.fail(task, failureOf(err))
       return
     }
-    await this.move(task, 'starting', {
+    await this.transition(task, 'starting', {
       'launch.state': 'started',
       'launch.startedAt': this.now(),
       'launch.sessionId': sessionId,
@@ -286,7 +291,7 @@ class TaskLauncher implements Launcher {
   // Moves a claim to `failed` with its comment, then logs the warning; once, whoever calls.
   private async fail(task: LaunchTask, failure: Failure): Promise<void> {
     const t = this.now()
-    const failed = await this.move(
+    const failed = await this.transition(
       task,
       'starting',
       {
@@ -310,7 +315,7 @@ class TaskLauncher implements Launcher {
 
   // In one transaction: when the task's launch is still `from`, applies `patch` (and adds the
   // agent comment, if any). False when the launch had moved on, so nothing was written.
-  private move(
+  private transition(
     task: LaunchTask,
     from: LaunchState,
     patch: UpdateData<Record<string, unknown>>,
