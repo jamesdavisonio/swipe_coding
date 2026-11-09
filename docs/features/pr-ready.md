@@ -156,6 +156,10 @@ body: "Checks failed on PR #<n>: <names joined by ', '>" }` per head commit. A f
 - Existing suites that assert the replaced behaviour (`needs: { kind: 'pr' }` and `pr` equal to
   `{ number, url }` right after `pr_url`) are updated to this contract, and the shared notifier
   helpers start notifiers with a fake `GithubPort` by default, so no test reaches the real `gh`.
+- Like `fcmPush()` under the emulator, the default `ghPort()` (no `command` given) never runs
+  `gh` while `FIRESTORE_EMULATOR_HOST` is set: it answers every PR as
+  `{ state: 'OPEN', mergeable: 'UNKNOWN', head: '', checks: [] }`, so the PR stays pending. Suites
+  that start a notifier without a port, or the notifier CLI, never reach GitHub.
 
 ## Instrumentation
 
