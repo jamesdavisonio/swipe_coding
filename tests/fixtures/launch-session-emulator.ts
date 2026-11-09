@@ -11,7 +11,7 @@ import type { Task } from '../../packages/shared/src/index.ts'
 import type { LaunchPort, LaunchRequest } from '../../packages/agent/src/launcher.ts'
 import { startNotifier, type Notifier } from '../../packages/agent/src/notifier.ts'
 import { adminDb } from './app-logs-emulator.ts'
-import { fakePush, putTask, waitFor } from './board-briefs-b7-emulator.ts'
+import { fakePush, idleGithub, putTask, waitFor } from './board-briefs-b7-emulator.ts'
 
 export type Db = Awaited<ReturnType<typeof adminDb>>
 export { adminDb, waitFor }
@@ -138,7 +138,7 @@ const running: Notifier[] = []
 
 // Starts a notifier with the fake push and `launch`; stopAll() stops every one this file started.
 export async function startWith(db: Db, launch: LaunchPort, extra: Record<string, unknown> = {}) {
-  const n = await startNotifier({ db, push, launch, ...extra })
+  const n = await startNotifier({ db, push, launch, github: idleGithub(), ...extra })
   running.push(n)
   return n
 }

@@ -1,6 +1,6 @@
 // board-briefs B7, criterion 34 (the agent half): kanban_update_task with a pr_url (Board.updateTask)
 // on a task at its build or fix stage, or already at pr, moves it to stage pr and makes it wait on
-// James's merge decision (needs { kind: 'pr' }) besides recording the PR. At an earlier stage it
+// its PR's checks (pr.checks 'pending', no need; pr-ready 127) besides recording the PR. At an earlier stage it
 // records the PR only; at merged or later it records the PR only and leaves the need as it is.
 // Runs the real Board against the Firestore emulator (`npm run test:rules`).
 import { describe, expect, it } from 'vitest'
@@ -27,14 +27,14 @@ describe('B7-34 a reported pull request raises the merge decision', () => {
     ],
     ['a bugfix at pr whose need was cleared', 'bugfix', { stage: 'pr', needs: null }],
   ] as [string, TaskType, Partial<Task>][])(
-    '%s: stage pr, waiting on the merge, PR recorded',
+    '%s: stage pr, waiting on the checks, PR recorded',
     async (_name, type, fields) => {
       const task = await taskAt(board(), type, fields)
       await board().updateTask({ task_id: task.id, pr_url: URL })
       const stored = await readTask(board(), task.id)
       expect(stored.stage).toBe('pr')
-      expect(stored.needs).toEqual({ kind: 'pr' })
-      expect(stored.pr).toEqual(PR)
+      expect(stored.needs).toBeNull()
+      expect(stored.pr).toMatchObject({ ...PR, checks: 'pending' })
     }
   )
 })
