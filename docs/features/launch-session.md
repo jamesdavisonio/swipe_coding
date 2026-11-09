@@ -1,6 +1,6 @@
 # Feature: Start a new session from the phone
 
-**Status:** Draft (awaiting James's approval on the board)
+**Status:** Approved (James, board approve, 2026-11-09 07:13, comment oH2tOFtkZjJHSDISLVDC)
 **Date:** 2026-11-09
 **Task class:** Medium+ (a new phone form, a new write the phone makes, and the PC starting
 processes from it: a new input boundary and a new write path, so full ceremony; criteria 116–126,
@@ -140,6 +140,32 @@ If the PC cannot start it, the task's thread says why ("Couldn't start a session
   (`LaunchPort.start({ cwd, name, worktree, prompt }): Promise<{ sessionId }>`) so tests never
   start a real session; the real port runs the `claude` executable with an argument array.
 - Worktree name: `launch-<task id>` (unique, no characters from the title).
+
+**Contract details pinned before the tests (2026-11-09, planner decisions within the approved
+scope):**
+
+- Agent: `packages/agent/src/launcher.ts` exports
+  `type LaunchRequest = { cwd: string; name: string; worktree: string | null; prompt: string }`,
+  `interface LaunchPort { start(req: LaunchRequest): Promise<{ sessionId: string }> }`,
+  `claudeArgs(req: LaunchRequest): string[]` (the exact argument array the real port passes to the
+  `claude` executable: `--bg`, `--remote-control`, name, `-n`, name, then `-w`, worktree when
+  there is one, then the prompt as the last element) and `claudeLaunchPort(): LaunchPort`.
+- `startNotifier` options gain `launch?: LaunchPort` (default `claudeLaunchPort()`); the notifier
+  starts launches only while it holds the lease and through that port. `worktree` is
+  `launch-<task id>` when the project folder is a git repository (has `.git`), else `null`.
+- The first message (`prompt`) contains the task id, the words `kanban_start_task`, the task's
+  title and its description.
+- A folder that does not exist fails with reason `folder not found: <cwd>`, and the port is not
+  called. A port that rejects fails with the error's message as the reason.
+- The failure comment: `comments` document with `taskId`, `projectId`, `author: 'agent'`,
+  `kind: 'comment'`, `body: "Couldn't start a session: <reason>"`.
+- Web: `NewTaskInput` gains `launch?: boolean`; `createTask` with `launch: true` adds
+  `launch: { state: 'requested', requestedAt }` in the same batch.
+- Web labels: dock button "New session"; sheet title "New session"; a select labelled "Project"
+  (option text = project name); a radio group "Type" (Feature, Bugfix, Chore); a text field
+  "Name"; a text box "The idea"; a mic button "Dictate" (while listening: "Stop dictating");
+  button "Start session"; refused save: "Couldn't start it. Try again."; toast
+  "Starting a session for <name>".
 
 **Unresolved:** none.
 
