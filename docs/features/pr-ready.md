@@ -94,7 +94,7 @@ for a PR that is still running checks or has failed ones.
 
 **Selected new contract** (planner decisions within the approved scope, before the tests):
 
-- `@kanban/shared`: `Task.pr` gains optional `checks?: 'pending' | 'passed' | 'failed' | 'closed'`,
+- `@kanban/shared`: `Task.pr` gains optional `checks?: 'pending' | 'passed' | 'failed' | 'closed' | 'unread'`,
   `failed?: string[]` (names of the failed checks, sorted), `head?: string` (the PR's head commit
   the state refers to) and `pendingSince?: number`. `CommentKind` (session kinds) gains `ci_failed`.
 - Agent `prPatch` (board.ts), from `build`/`fix`/`do`/`pr`: `pr: { number, url, checks: 'pending',
@@ -136,6 +136,26 @@ body: "Checks failed on PR #<n>: <names joined by ', '>" }` per head commit. A f
   "Merge · <project name>" and body the task's title (tag and link as for decision cards).
 - `wait.ts` prints a `ci_failed` comment of a task bound to the agent like a reply:
   `{ task, kind: 'ci_failed', id, from: 'board', text }`, and claims it the same way.
+
+**Contract decisions added after the first fidelity check (2026-11-09, before the repair):**
+
+- A chore at `do` (its chain has no `pr` stage) only records the PR, as today: no `checks`, no
+  watching. The same for any task whose chain has no `pr`.
+- Giving up (133) counts 30 minutes of consecutive failed reads: from the first failed read after
+  the last successful one (or after `pendingSince` if no read ever worked). A successful read ends
+  the count. Reads that work but show running checks never give up.
+- After giving up: `pr.checks: 'unread'` (a new value), need `{ kind: 'pr' }`, exactly one note,
+  and the PR is no longer read. The 129 rule clears a `pr` need only when `pr.checks` is neither
+  `'passed'` nor `'unread'`.
+- A `pr` need on a task with no PR (`pr` null or without a url) is left alone and nothing is read.
+- A merged PR (state MERGED) counts as passed whatever its checks or mergeable say.
+- A failure is reported each time the task enters `failed`; reading the same failed state again
+  repeats nothing. A failed task whose checks run again (any check PENDING, no failure), on the
+  same head or a new one, goes back to `pending` (`pendingSince` reset, "Checks running" again),
+  and is then handled as in 128 or 130.
+- Existing suites that assert the replaced behaviour (`needs: { kind: 'pr' }` and `pr` equal to
+  `{ number, url }` right after `pr_url`) are updated to this contract, and the shared notifier
+  helpers start notifiers with a fake `GithubPort` by default, so no test reaches the real `gh`.
 
 ## Instrumentation
 
