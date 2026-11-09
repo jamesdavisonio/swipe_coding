@@ -3,10 +3,13 @@
 // arrived the wait is over for good: whatever James then does with that card (an answer clears
 // the need again), the line does not come back.
 //
-// "Again" must never be the note's own write. Each wait carries `after`: the task counts as
-// revised once it has a need and an updatedAt beyond it.
-// - A note that clears the need (spec, question, PR) passes the task's updatedAt at note time:
-//   its own write leaves no need, so a need newer than that can only come from the session.
+// "Again" is never the note's own write, but for one exception (below). Each wait carries
+// `after`: the task counts as revised once it has a need and an updatedAt beyond it.
+// - A note that settles the need (spec, question, PR) passes the task's updatedAt at note time:
+//   its own write leaves no need, so a need newer than that comes from the session. The one
+//   exception is an answer to a question asked over the spec: its own write brings the spec need
+//   back (needAfterAnswer), which counts as the revised card at once, so the spec card returns
+//   without a wait.
 // - A note that leaves the need in place (a comment, e.g. on after-deploy steps) bumps updatedAt
 //   itself, so `after` stays unknown (nothing counts) until the write has gone through, and is
 //   then set to that moment (`settle`): only a later change from the session counts.

@@ -21,6 +21,7 @@ import {
   appendLog,
   forJamesTaskId,
   initialTaskFields,
+  needAfterAnswer,
   type AgentDoc,
   type Comment,
   type CommentKind,
@@ -316,8 +317,9 @@ export const newCommentId = (): string => doc(collection(db, COLLECTIONS.comment
 
 // James's reply from the composer. The comment is written under `id`, trimmed and capped. When
 // the task is waiting on a question the comment is the answer (kind `answer`) and the need is
-// cleared in the same write; otherwise it is a plain `comment` and the need stays. A batch, not
-// a transaction: a transaction cannot run offline, a batch is queued and committed on return.
+// cleared in the same write (back to the spec when the question was asked over it); otherwise it
+// is a plain `comment` and the need stays. A batch, not a transaction: a transaction cannot run
+// offline, a batch is queued and committed on return.
 export async function sendReply(task: Task, reply: { id: string; body: string }) {
   const kind = replyKind(task)
   const t = now()
@@ -329,7 +331,7 @@ export async function sendReply(task: Task, reply: { id: string; body: string })
   batch.update(doc(db, COLLECTIONS.tasks, task.id), {
     lastCommentAt: t,
     updatedAt: t,
-    ...(kind === 'answer' ? { needs: null } : {}),
+    ...(kind === 'answer' ? { needs: needAfterAnswer(task) } : {}),
   })
   await batch.commit()
 }
@@ -364,8 +366,9 @@ export async function requestChange(task: Task, text: string) {
 }
 
 // An answer: an option (its key must still be on offer) or James's own words (label only). His
-// message carries the label and the need is cleared; only while the task still waits on a
-// question, so a double tap or a stale option writes nothing.
+// message carries the label and the need is cleared (back to the spec when the question was asked
+// over it); only while the task still waits on a question, so a double tap or a stale option
+// writes nothing.
 export async function answerQuestion(task: Task, answer: { key?: string; label: string }) {
   const label = cleanText(answer.label)
   if (label === '') return
@@ -374,7 +377,7 @@ export async function answerQuestion(task: Task, answer: { key?: string; label: 
     if (need?.kind !== 'question') return null
     if (answer.key !== undefined && !need.options?.some((o) => o.key === answer.key)) return null
     return {
-      patch: { needs: null },
+      patch: { needs: needAfterAnswer(cur) },
       history: need.question ? `Answered ${need.question}: ${label}` : `Answered: ${label}`,
       comment: { kind: 'answer', body: label },
     }
