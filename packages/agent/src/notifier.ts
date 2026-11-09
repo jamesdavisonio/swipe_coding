@@ -7,6 +7,8 @@
 // When the key differs from the task's stored `notified`, it sends the notice (notifyDecision) and
 // stores the key; when the need stops being a decision, it removes `notified`. Changes are handled
 // one at a time, in snapshot order. A lease (notifier/lease) makes sure only one notifier sends.
+// While it holds the lease it also starts the sessions James asks for from the phone: every task
+// change goes to the launcher too (launcher.ts, docs/features/launch-session.md).
 //
 // Command line: `node packages/agent/src/notifier.ts` (`npm run notifier`, with --watch). It logs
 // to stderr / agent.log only; when another notifier holds the lease it says so and exits 1.
@@ -22,6 +24,7 @@ import { z } from 'zod'
 import { COLLECTIONS as C, NEED_KINDS, STAGES, latestBrief, type Task } from '@kanban/shared'
 import { firestoreFailure } from './app-log.ts'
 import { boardStatus, getDb, log } from './firestore.ts'
+import { claudeLaunchPort, startLauncher, type LaunchPort, type Launcher } from './launcher.ts'
 import { fcmPush, notifyDecision, type PushPort } from './push.ts'
 
 export interface Notifier {
@@ -31,6 +34,8 @@ export interface Notifier {
 export interface NotifierOptions {
   db?: Firestore
   push?: PushPort
+  // How sessions are started (default: the `claude` executable).
+  launch?: LaunchPort
   now?: () => number
   leaseMs?: number
   heartbeatMs?: number
@@ -175,6 +180,7 @@ async function decisionOf(db: Firestore, task: NotifierTask): Promise<Decision |
 interface Settings {
   db: Firestore
   push: PushPort
+  launch: LaunchPort
   now: () => number
   leaseMs: number
   heartbeatMs: number
@@ -188,6 +194,8 @@ class TaskNotifier implements Notifier {
   // write still carries the old stored value; this map holds what was written since.
   private readonly handled = new Map<string, string | null>()
   private queue: Promise<void> = Promise.resolve()
+  // Starts the sessions James asks for; exists only while this notifier holds the lease.
+  private launcher: Launcher | null = null
   private unsubscribe: (() => void) | null = null
   private heartbeat: NodeJS.Timeout | null = null
   private retry: NodeJS.Timeout | null = null
@@ -204,6 +212,7 @@ class TaskNotifier implements Notifier {
   async start(): Promise<void> {
     await claimLease(this.lease, this.opts.now(), this.opts.leaseMs)
     log(`notifier started: holds the lease (pid ${process.pid} on ${osHostname()})`)
+    this.launcher = startLauncher({ db: this.opts.db, spawn: this.opts.launch, now: this.opts.now })
     this.heartbeat = setInterval(() => void this.beat(), this.opts.heartbeatMs)
     this.listen()
     await this.ready
@@ -213,6 +222,7 @@ class TaskNotifier implements Notifier {
     if (this.stopped) return
     this.halt()
     await this.queue
+    await this.launcher?.stop()
     await releaseLease(this.lease)
     log('notifier stopped: lease released')
   }
@@ -220,6 +230,7 @@ class TaskNotifier implements Notifier {
   // Stops listening and the timers; whatever is still queued is skipped.
   private halt(): void {
     this.stopped = true
+    this.launcher?.halt()
     this.unsubscribe?.()
     this.unsubscribe = null
     if (this.heartbeat) clearInterval(this.heartbeat)
@@ -256,8 +267,11 @@ class TaskNotifier implements Notifier {
   }
 
   private enqueue(snap: QuerySnapshot): void {
-    for (const change of snap.docChanges())
-      if (change.type !== 'removed') this.queue = this.queue.then(() => this.handleChange(change))
+    for (const change of snap.docChanges()) {
+      if (change.type === 'removed') continue
+      this.queue = this.queue.then(() => this.handleChange(change))
+      this.launcher?.enqueue(change)
+    }
     this.queue = this.queue.then(() => this.markReady())
   }
 
@@ -297,6 +311,7 @@ export async function startNotifier(opts: NotifierOptions = {}): Promise<Notifie
   const notifier = new TaskNotifier({
     db: opts.db ?? getDb(),
     push: opts.push ?? fcmPush(),
+    launch: opts.launch ?? claudeLaunchPort(),
     now: opts.now ?? Date.now,
     leaseMs: opts.leaseMs ?? LEASE_MS,
     heartbeatMs: opts.heartbeatMs ?? HEARTBEAT_MS,
