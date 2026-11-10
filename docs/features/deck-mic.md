@@ -139,11 +139,33 @@ Numbering follows `pr-ready.md` (134).
   refused }`; the idea box's button is "Dictate" / "Stop dictating". Tests: `tests/swipe-deck-54*`,
   `tests/voice-notes-*`, and the launch-session idea tests (criterion 120) use those names and
   a shared `FakeRecognition`.
-- **Selected new contract (planner's choice):** the names in 137, 139, 140 and 144 replace
-  "Record more", "Dictate" and "Stop dictating"; tests that used the old names are updated to the
-  new ones. The recognition hook may expose the words heard in the current listening as a
-  separate part so the grey part can be told apart; how is the builder's choice. The hold
-  timings are 300 ms (tap limit) and 2 000 ms (clear), exported so tests can use them.
+- **Selected new contract (planner's choice, recorded before the tests were written):**
+  - Names (accessible names, exact): the microphone button "Start talking" / "Add more" /
+    "Stop listening"; while listening, the text is a button "Stop and edit the text"; otherwise
+    the box is a textbox named "Your note" (note sheet) or "The idea" (New session, its label
+    as today); the hidden clear button "Start over"; the arrow "Send". These replace "Record
+    more", "Dictate" and "Stop dictating"; existing tests and fixture helpers that used the old
+    names (`tests/fixtures/fake-recognition.ts` `micStopped`/`sheetWords`, `swipe-deck-54`,
+    `voice-notes-94`–`97`, `launch-session-120`) are updated to the new names before the red
+    checkpoint, their assertions otherwise unchanged.
+  - The words heard in the current listening are inside one element with the attribute
+    `data-heard` and the classes `italic` and `text-muted-foreground`; the earlier words are not
+    inside it. When not listening there is no `data-heard` element.
+  - The status line is an element with `data-testid="mic-status"` and `aria-live="polite"`
+    (not `role="status"`, which the deck's toasts use). The hint is the element the microphone
+    button's `aria-describedby` points to.
+  - The hold: `packages/web/src/components/deck/use-hold.ts` exports `TAP_MS = 300` and
+    `CLEAR_HOLD_MS = 2000` (from the press). The press is `pointerdown` on the microphone
+    button; `pointerup`, `pointerleave` and `pointercancel` end it. A tap is the `click` event
+    (a real tap fires pointerdown, pointerup, click; keyboard Enter/Space fires click alone).
+    The click that follows a press longer than `TAP_MS` does nothing. The red layer is
+    `data-testid="clear-layer"` (aria-hidden), present only while it shows.
+  - The microphone button has the classes `touch-none` and `select-none` and its
+    `contextmenu` event is cancelled.
+  - "Start over" is rendered only when the box has text (absent otherwise), visually hidden
+    (`sr-only`) until focused.
+  - The recognition hook may expose the words heard in the current listening as a separate
+    part; how is the builder's choice.
 - **Unresolved:** none.
 
 ## Files & modules affected
