@@ -59,6 +59,46 @@ function MicButton({ voice }: { voice: Recognition }) {
   )
 }
 
+// While listening the words are one button: the text before, then the newly heard words in grey.
+function ListeningText({ voice, onTap }: { voice: Recognition; onTap: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-label="Stop and edit the text"
+      onClick={onTap}
+      className="min-h-24 w-full rounded-md bg-muted px-3 py-2.5 text-left text-lg leading-snug"
+    >
+      {voice.before.trimEnd()}
+      {voice.heardNow === '' ? null : (
+        <span data-heard className="text-muted-foreground italic">
+          {voice.before === '' ? '' : ' '}
+          {voice.heardNow}
+        </span>
+      )}
+    </button>
+  )
+}
+
+// A tap on the text stops listening; once the box is editable it takes the focus, the caret at the end.
+function useStopAndEdit(voice: Recognition) {
+  const box = useRef<HTMLTextAreaElement>(null)
+  const focusBox = useRef(false)
+
+  useEffect(() => {
+    const el = box.current
+    if (voice.listening || !focusBox.current || !el) return
+    focusBox.current = false
+    el.focus()
+    el.setSelectionRange(el.value.length, el.value.length)
+  }, [voice.listening])
+
+  const stopAndEdit = () => {
+    focusBox.current = true
+    voice.stop()
+  }
+  return { box, stopAndEdit }
+}
+
 export default function VoiceComposer({
   voice,
   canRecord,
@@ -78,26 +118,11 @@ export default function VoiceComposer({
   rows?: number
   // Right of the microphone button: the note sheet's send arrow.
   action?: ReactNode
+  // Set when a visible <label> names the box.
   boxId?: string
 }) {
   const ownId = useId()
-  const box = useRef<HTMLTextAreaElement>(null)
-  // Set by a tap on the text: the box takes the focus once it is editable.
-  const focusBox = useRef(false)
-  const typing = !canRecord || voice.refused
-
-  useEffect(() => {
-    const el = box.current
-    if (voice.listening || !focusBox.current || !el) return
-    focusBox.current = false
-    el.focus()
-    el.setSelectionRange(el.value.length, el.value.length)
-  }, [voice.listening])
-
-  function stopAndEdit() {
-    focusBox.current = true
-    voice.stop()
-  }
+  const { box, stopAndEdit } = useStopAndEdit(voice)
 
   const textarea = (
     <Textarea
@@ -112,7 +137,8 @@ export default function VoiceComposer({
       className="bg-muted text-lg"
     />
   )
-  if (typing) {
+  // Typing only: no recognition here, or the microphone was refused.
+  if (!canRecord || voice.refused) {
     return (
       <>
         {textarea}
@@ -122,24 +148,7 @@ export default function VoiceComposer({
   }
   return (
     <div className="flex flex-col gap-2">
-      {voice.listening ? (
-        <button
-          type="button"
-          aria-label="Stop and edit the text"
-          onClick={stopAndEdit}
-          className="min-h-24 w-full rounded-md bg-muted px-3 py-2.5 text-left text-lg leading-snug"
-        >
-          {voice.before}
-          {voice.heardNow === '' ? null : (
-            <span data-heard className="text-muted-foreground italic">
-              {voice.before === '' ? '' : ' '}
-              {voice.heardNow}
-            </span>
-          )}
-        </button>
-      ) : (
-        textarea
-      )}
+      {voice.listening ? <ListeningText voice={voice} onTap={stopAndEdit} /> : textarea}
       <StatusLine voice={voice} />
       <div className="flex items-center justify-between gap-4">
         <MicButton voice={voice} />

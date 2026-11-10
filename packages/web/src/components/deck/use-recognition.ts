@@ -20,7 +20,7 @@ const NO_MICROPHONE = ['not-allowed', 'service-not-allowed', 'audio-capture']
 type Timer = ReturnType<typeof setTimeout>
 
 // Words follow the words before them after one space.
-export const joinWords = (before: string, words: string) =>
+const joinWords = (before: string, words: string) =>
   words === '' ? before : [before.trimEnd(), words].filter((s) => s !== '').join(' ')
 
 // The words of one run. Android repeats the whole stretch heard so far in each result ("I'll
