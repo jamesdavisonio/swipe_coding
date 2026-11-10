@@ -163,7 +163,8 @@ scope):**
   `launch: { state: 'requested', requestedAt }` in the same batch.
 - Web labels: dock button "New session"; sheet title "New session"; a select labelled "Project"
   (option text = project name); a radio group "Type" (Feature, Bugfix, Chore); a text field
-  "Name"; a text box "The idea"; a mic button "Dictate" (while listening: "Stop dictating");
+  "Name"; a text box "The idea"; a mic button "Dictate" (while listening: "Stop dictating";
+  since `deck-mic.md` 144 the deck's shared mic: "Start talking" / "Add more" / "Stop listening");
   button "Start session"; refused save: "Couldn't start it. Try again."; toast
   "Starting a session for <name>".
 
