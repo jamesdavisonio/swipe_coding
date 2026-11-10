@@ -119,7 +119,7 @@ describe('voice-notes 96 when listening ends', () => {
     r.say('before', true)
     wait(SILENCE_MS + 100)
     expect(micStopped()).toBe(true)
-    fireEvent.click(screen.getByRole('button', { name: 'Record more' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add more' }))
     expect(FakeRecognition.starts()).toBe(2)
     expect(micStopped()).toBe(false)
     FakeRecognition.current().say('after', true)

@@ -1,7 +1,7 @@
 // A browser speech recognizer for tests. Install with installRecognition(); then drive it the way
 // browsers do: say() delivers one result, sayResults() a whole results list (Android sends several
 // results in one event), endByItself() ends the run without James stopping it, fail() is an error.
-import { act, screen } from '@testing-library/react'
+import { act, screen, within } from '@testing-library/react'
 import { vi } from 'vitest'
 
 export class FakeRecognition extends EventTarget {
@@ -71,8 +71,48 @@ export function uninstallRecognition() {
   delete win.webkitSpeechRecognition
 }
 
-// What James sees in the voice sheet: the words (or the placeholder), and whether the microphone
-// is listening (the "Record more" button only shows once it has stopped).
-export const sheetWords = () =>
-  screen.getByRole('dialog').querySelector('[aria-live]')?.textContent ?? ''
-export const micStopped = () => screen.queryByRole('button', { name: 'Record more' }) !== null
+// What James sees in the open sheet (the note sheet or the New session sheet): the words, and
+// whether the microphone is listening. While it listens the words are the "Stop and edit the
+// text" button; otherwise they are the text box ("Your note", or "The idea"). The microphone
+// shows "Start talking" or "Add more" only once it has stopped (docs/features/deck-mic.md).
+const openDialog = () => screen.getByRole('dialog')
+export const editTextButton = () =>
+  within(openDialog()).queryByRole('button', { name: 'Stop and edit the text' })
+export const sheetBox = () =>
+  within(openDialog()).queryByRole<HTMLTextAreaElement>('textbox', {
+    name: /^(Your note|The idea)$/,
+  })
+export const sheetWords = () => {
+  const edit = editTextButton()
+  if (edit) return (edit.textContent ?? '').trim()
+  return sheetBox()?.value ?? ''
+}
+export const micStopped = () =>
+  within(openDialog()).queryByRole('button', { name: /^(Start talking|Add more)$/ }) !== null
+// The words heard since the microphone was last tapped (grey italics), or null when there are none.
+export const heardNow = () => openDialog().querySelector<HTMLElement>('[data-heard]')
+// The status line under the box.
+export const micStatus = () =>
+  (within(openDialog()).queryByTestId('mic-status')?.textContent ?? '').replace(/\s+/g, ' ').trim()
+export const LISTENING_LINE = 'Listening. Tap the text to fix a word.'
+export const STOPPED_LINE = 'Tap the text to edit it, or the mic to add more.'
+export const EMPTY_LINE = 'Tap the mic and talk.'
+// The words before the heard part (outside [data-heard]), and whether any of them is grey or italic.
+export function earlierWords(): { text: string; styled: boolean } {
+  const root = editTextButton()
+  if (!root) return { text: '', styled: false }
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  let text = ''
+  let styled = false
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    const el = n.parentElement
+    if (!el || el.closest('[data-heard]')) continue
+    text += n.textContent ?? ''
+    const look = el.closest('.italic, .text-muted-foreground')
+    if ((n.textContent ?? '').trim() !== '' && look && root.contains(look)) styled = true
+  }
+  return { text: text.trim(), styled }
+}
+// Whether a comes before b in the page (top to bottom, left to right).
+export const precedes = (a: Node, b: Node) =>
+  Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)

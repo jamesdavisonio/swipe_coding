@@ -8,6 +8,7 @@ import { NOW, specTask } from './fixtures/web-threads-b2.tsx'
 import {
   FakeRecognition,
   installRecognition,
+  sheetWords,
   uninstallRecognition,
 } from './fixtures/fake-recognition.ts'
 import {
@@ -42,17 +43,18 @@ const wait = (ms: number) => act(() => void vi.advanceTimersByTime(ms))
 const dictate = () => {
   renderDeck([specTask({ projectId: 'p-workshop' })])
   openSheet()
-  fireEvent.click(screen.getByRole('button', { name: 'Dictate' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Start talking' }))
   return FakeRecognition.current()
 }
-const idea = () => squash(ideaField().value)
+// While listening the idea is the "Stop and edit the text" button; otherwise the text box.
+const idea = () => squash(sheetWords())
 
 describe('launch-session 120: dictating the idea', () => {
-  it('the Dictate button starts listening and becomes Stop dictating', () => {
+  it('the Start talking button starts listening and becomes Stop listening', () => {
     const r = dictate()
     expect(r.start).toHaveBeenCalledTimes(1)
-    expect(screen.getByRole('button', { name: 'Stop dictating' })).toBeTruthy()
-    expect(screen.queryByRole('button', { name: 'Dictate' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Stop listening' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Start talking' })).toBeNull()
   })
 
   it('puts what James says in the idea box', () => {
@@ -65,7 +67,7 @@ describe('launch-session 120: dictating the idea', () => {
     renderDeck([specTask({ projectId: 'p-workshop' })])
     openSheet()
     typeIdea('Add a search page.')
-    fireEvent.click(screen.getByRole('button', { name: 'Dictate' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add more' }))
     FakeRecognition.current().say('It should be fast', true)
     expect(idea()).toBe('Add a search page. It should be fast')
   })
@@ -98,21 +100,21 @@ describe('launch-session 120: dictating the idea', () => {
     const r = dictate()
     r.say('search by title', true)
     r.endByItself()
-    expect(screen.getByRole('button', { name: 'Stop dictating' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Stop listening' })).toBeTruthy()
     wait(1000)
     expect(FakeRecognition.starts()).toBe(2)
     FakeRecognition.current().say('and by project', true)
     expect(idea()).toBe('search by title and by project')
   })
 
-  it('tapping Stop dictating stops it for good and keeps the words', () => {
+  it('tapping Stop listening stops it for good and keeps the words', () => {
     const r = dictate()
     r.say('search by title', true)
-    fireEvent.click(screen.getByRole('button', { name: 'Stop dictating' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Stop listening' }))
     expect(
       FakeRecognition.all.some((x) => x.stop.mock.calls.length + x.abort.mock.calls.length > 0)
     ).toBe(true)
-    expect(screen.getByRole('button', { name: 'Dictate' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Add more' })).toBeTruthy()
     wait(60_000)
     expect(FakeRecognition.starts()).toBe(1)
     expect(idea()).toBe('search by title')
@@ -121,13 +123,13 @@ describe('launch-session 120: dictating the idea', () => {
   it('dictating again after a stop keeps the earlier phrase exactly once', () => {
     const r = dictate()
     r.say('search by title', true)
-    fireEvent.click(screen.getByRole('button', { name: 'Stop dictating' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Dictate' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Stop listening' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add more' }))
     FakeRecognition.current().say('and by project', true)
     expect(idea()).toBe('search by title and by project')
-    fireEvent.click(screen.getByRole('button', { name: 'Stop dictating' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Stop listening' }))
     typeIdea(ideaField().value + ' please')
-    fireEvent.click(screen.getByRole('button', { name: 'Dictate' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add more' }))
     FakeRecognition.current().sayResults([
       ['now', false],
       ['now quickly', false],
@@ -138,7 +140,7 @@ describe('launch-session 120: dictating the idea', () => {
   it('the words stay editable: typing after dictating changes the box', () => {
     const r = dictate()
     r.say('search by title', true)
-    fireEvent.click(screen.getByRole('button', { name: 'Stop dictating' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Stop listening' }))
     typeIdea('search by title, then project')
     expect(ideaField().value).toBe('search by title, then project')
   })
