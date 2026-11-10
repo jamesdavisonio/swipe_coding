@@ -1,5 +1,7 @@
 // The microphone: the browser's speech recognition (standard or webkit-prefixed), the words shown
-// as they come (interim results). It listens until James stops it, 15 s pass with no new words,
+// as they come (interim results). The words are in two parts: the text from before the current
+// listening (typed or edited, or heard earlier) and the words heard since the microphone was last
+// tapped. It listens until James stops it, 15 s pass with no new words,
 // or 3 minutes pass; a run the browser ends by itself (Android, after a pause) starts again. A
 // refused microphone falls back to the text box, like a browser without recognition.
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -16,6 +18,10 @@ const RECOGNITION_LANG = 'en-GB'
 // Errors that mean the microphone will not work here: type instead.
 const NO_MICROPHONE = ['not-allowed', 'service-not-allowed', 'audio-capture']
 type Timer = ReturnType<typeof setTimeout>
+
+// Words follow the words before them after one space.
+export const joinWords = (before: string, words: string) =>
+  words === '' ? before : [before.trimEnd(), words].filter((s) => s !== '').join(' ')
 
 // The words of one run. Android repeats the whole stretch heard so far in each result ("I'll
 // merge", "I'll merge your"): a result that extends the one before it replaces it. Desktop sends
@@ -38,15 +44,30 @@ export function useRecognition() {
   const silence = useRef<Timer>(undefined)
   const cap = useRef<Timer>(undefined)
   const restart = useRef<Timer>(undefined)
+  // The part before the current listening, and the words heard in it, across restarts.
+  const earlier = useRef('')
   const said = useRef('')
-  const [text, setText] = useState('')
+  const [before, setBefore] = useState('')
+  const [heardNow, setHeardNow] = useState('')
   const [listening, setListening] = useState(false)
   const [refused, setRefused] = useState(false)
 
-  const show = useCallback((words: string) => {
+  const showHeard = useCallback((words: string) => {
     said.current = words
-    setText(words)
+    setHeardNow(words)
   }, [])
+
+  // The text before the next listening: typed, edited or cleared, or what was heard.
+  const setEarlier = useCallback((words: string) => {
+    earlier.current = words
+    setBefore(words)
+  }, [])
+
+  // What was heard joins the text before it, and the next listening starts with nothing heard.
+  const commit = useCallback(() => {
+    setEarlier(joinWords(earlier.current, said.current))
+    showHeard('')
+  }, [setEarlier, showHeard])
 
   // No longer wanted, nothing pending: no restart, no silence or cap timer.
   const quiet = useCallback(() => {
@@ -57,16 +78,17 @@ export function useRecognition() {
   // Stopped (by James, the silence or the cap): the words stay, nothing restarts.
   const stop = useCallback(() => {
     quiet()
+    commit()
     setListening(false)
     recognizer.current?.stop()
-  }, [quiet])
+  }, [quiet, commit])
 
   const armSilence = useCallback(() => {
     clearTimeout(silence.current)
     silence.current = setTimeout(stop, SILENCE_MS)
   }, [stop])
 
-  // One recognition run; what was said before it stays, and its words follow after one space.
+  // One recognition run; what was heard before it in this listening stays, and its words follow.
   const run = useCallback(() => {
     const Recognition = recognizerClass()
     if (!Recognition) return
@@ -74,14 +96,15 @@ export function useRecognition() {
     r.continuous = true
     r.interimResults = true
     r.lang = RECOGNITION_LANG
-    const before = said.current
+    const base = said.current
     r.onresult = (e) => {
-      show([before, heard(e)].filter((s) => s !== '').join(' '))
+      showHeard(joinWords(base, heard(e)))
       if (active.current) armSilence()
     }
     r.onerror = (e) => {
       if (!NO_MICROPHONE.includes(e.error ?? '')) return
       quiet()
+      commit()
       setRefused(true)
     }
     r.onend = () => {
@@ -92,7 +115,7 @@ export function useRecognition() {
     }
     recognizer.current = r
     r.start()
-  }, [show, armSilence, quiet])
+  }, [showHeard, armSilence, quiet, commit])
 
   const start = useCallback(() => {
     if (!recognizerClass() || active.current || recognizer.current) return
@@ -119,13 +142,15 @@ export function useRecognition() {
   const reset = useCallback(() => {
     shutdown()
     setListening(false)
-    show('')
+    showHeard('')
+    setEarlier('')
     setRefused(false)
-  }, [shutdown, show])
+  }, [shutdown, showHeard, setEarlier])
 
   useEffect(() => shutdown, [shutdown])
 
-  return { text, listening, refused, start, stop, reset }
+  const text = joinWords(before, heardNow)
+  return { text, before, heardNow, listening, refused, start, stop, reset, edit: setEarlier }
 }
 
 export type Recognition = ReturnType<typeof useRecognition>

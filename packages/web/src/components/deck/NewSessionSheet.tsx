@@ -4,7 +4,6 @@
 import { useId, type FormEvent } from 'react'
 import type { Project } from '@kanban/shared'
 import { cn } from '../../lib/cn.ts'
-import { Mic, Square } from '../../lib/icons.ts'
 import { MAX_DESCRIPTION_CHARS, MAX_TITLE_CHARS } from '../../lib/limits.ts'
 import type { QueueableType } from '../../lib/new-task.ts'
 import { recognizerClass } from '../../lib/speech.ts'
@@ -13,9 +12,10 @@ import ProjectSelect from '../ProjectSelect.tsx'
 import SaveError from '../SaveError.tsx'
 import { Button } from '../ui/button.tsx'
 import { Field } from '../ui/field.tsx'
-import { Input, Textarea } from '../ui/input.tsx'
+import { Input } from '../ui/input.tsx'
 import DeckSheet from './DeckSheet.tsx'
-import { useIdea, type IdeaModel } from './use-idea.ts'
+import { useRecognition, type Recognition } from './use-recognition.ts'
+import VoiceComposer from './VoiceComposer.tsx'
 
 const TYPES: readonly { id: QueueableType; label: string }[] = [
   { id: 'feature', label: 'Feature' },
@@ -78,41 +78,22 @@ function NameField({ value, onChange }: { value: string; onChange: (name: string
   )
 }
 
-// The idea box with the microphone beside its label: Dictate, or Stop dictating while it listens.
-function IdeaField({ idea }: { idea: IdeaModel }) {
+// The idea box with the deck's microphone under it.
+function IdeaField({ voice }: { voice: Recognition }) {
   const id = useId()
-  const canDictate = recognizerClass() !== null && !idea.refused
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex items-end justify-between gap-3">
-        <label htmlFor={id} className="text-sm font-semibold text-foreground">
-          The idea
-        </label>
-        {canDictate ? (
-          <button
-            type="button"
-            aria-label={idea.listening ? 'Stop dictating' : 'Dictate'}
-            onClick={idea.listening ? idea.stop : idea.dictate}
-            className={cn(
-              'grid size-11 shrink-0 place-items-center rounded-full border border-border',
-              idea.listening && 'border-rec text-rec'
-            )}
-          >
-            {idea.listening ? (
-              <Square aria-hidden="true" className="size-4" />
-            ) : (
-              <Mic aria-hidden="true" className="size-5" />
-            )}
-          </button>
-        ) : null}
-      </div>
-      <Textarea
-        id={id}
+      <label htmlFor={id} className="text-sm font-semibold text-foreground">
+        The idea
+      </label>
+      <VoiceComposer
+        voice={voice}
+        canRecord={recognizerClass() !== null}
+        label="The idea"
+        boxId={id}
         rows={4}
         maxLength={MAX_DESCRIPTION_CHARS}
         placeholder="What should the session do? It writes the spec first."
-        value={idea.text}
-        onChange={(event) => idea.type(event.target.value)}
       />
     </div>
   )
@@ -132,7 +113,7 @@ export default function NewSessionSheet({
   returnFocus: () => void
 }) {
   const form = useNewSession(initialProjectId, onStarted)
-  const idea = useIdea()
+  const idea = useRecognition()
   const { values, set } = form
 
   function submit(event: FormEvent) {
@@ -151,7 +132,7 @@ export default function NewSessionSheet({
         />
         <TypeChoice value={values.type} onChange={set.type} />
         <NameField value={values.name} onChange={set.name} />
-        <IdeaField idea={idea} />
+        <IdeaField voice={idea} />
         <SaveError failed={form.failed} message={REFUSED} />
         <Button type="submit" block disabled={!form.canStart}>
           Start session
