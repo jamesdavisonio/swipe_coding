@@ -1,6 +1,6 @@
 # Feature: The deck's microphone works like Workshop's: talk, stop, edit, add more
 
-**Status:** Drafting (revision 2: hold-to-clear dropped, steady listening on Android added, after James's notes of 2026-11-10; revision 1 was approved in comment ThnjPUVYkPshfmEXIuOp)
+**Status:** Spec confirmed (revision 2, 2026-11-10, James typed "spec confirmed" in the session chat)
 **Date:** 2026-11-10
 **Task class:** Medium
 
