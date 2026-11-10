@@ -1,6 +1,6 @@
-// "Change it": a voice note for the card's session. The words show as they are heard, the arrow
-// sends them (while listening it stops first); without speech recognition (or with the microphone refused) it is a text
-// box with the same arrow.
+// "Change it": a voice note for the card's session. The words show as they are heard and the
+// arrow sends them (the sheet then closes, which ends the listening); without speech recognition
+// (or with the microphone refused) it is a text box with the same arrow.
 import type { CardKind, DeckCard } from '../../lib/deck.ts'
 import { ArrowUp } from '../../lib/icons.ts'
 import DeckSheet from './DeckSheet.tsx'

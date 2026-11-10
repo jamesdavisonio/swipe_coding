@@ -75,13 +75,26 @@ export function useRecognition() {
     for (const timer of [silence, cap, restart]) clearTimeout(timer.current)
   }, [])
 
+  // Lets go of the current run: its handlers are detached, so a late result or end cannot touch
+  // the words, and a new run may start at once. Returns the run, which ends on its own.
+  const release = useCallback(() => {
+    const r = recognizer.current
+    recognizer.current = null
+    if (r) {
+      r.onend = null
+      r.onresult = null
+      r.onerror = null
+    }
+    return r
+  }, [])
+
   // Stopped (by James, the silence or the cap): the words stay, nothing restarts.
   const stop = useCallback(() => {
     quiet()
     commit()
     setListening(false)
-    recognizer.current?.stop()
-  }, [quiet, commit])
+    release()?.stop()
+  }, [quiet, commit, release])
 
   const armSilence = useCallback(() => {
     clearTimeout(silence.current)
@@ -105,6 +118,8 @@ export function useRecognition() {
       if (!NO_MICROPHONE.includes(e.error ?? '')) return
       quiet()
       commit()
+      release()
+      setListening(false)
       setRefused(true)
     }
     r.onend = () => {
@@ -115,7 +130,7 @@ export function useRecognition() {
     }
     recognizer.current = r
     r.start()
-  }, [showHeard, armSilence, quiet, commit])
+  }, [showHeard, armSilence, quiet, commit, release])
 
   const start = useCallback(() => {
     if (!recognizerClass() || active.current || recognizer.current) return
@@ -129,14 +144,8 @@ export function useRecognition() {
   // Ends everything without a trace: no handlers, no timers, the run aborted.
   const shutdown = useCallback(() => {
     quiet()
-    const r = recognizer.current
-    recognizer.current = null
-    if (!r) return
-    r.onend = null
-    r.onresult = null
-    r.onerror = null
-    r.abort()
-  }, [quiet])
+    release()?.abort()
+  }, [quiet, release])
 
   // Closing the sheet throws away what was heard.
   const reset = useCallback(() => {
