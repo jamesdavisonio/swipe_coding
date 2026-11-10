@@ -9,13 +9,13 @@
 Yes: Start building the steady Workshop-style microphone
 
 ### Where it came from
-You asked for this on 9 November and approved the mockup today; this revision follows your notes after it.
+You asked for this on 9 November; this revision follows your notes on today's mockup.
 
 ### Why it exists
 The voice note seems to switch itself off and on, and you can't stop it, fix a word or add more.
 
 ### What will change
-The mic and its square stay steadily on until you stop, heard words show in grey italics, and you tap the text to edit or the mic to add more, in both the note and New session. For example, after a pause the square stays on and your words keep growing.
+The mic and its square stay steadily on until you stop, heard words show in grey italics, and you tap the text to edit or the mic to add more, in notes and New session. For example, after a pause the square stays on and your words keep growing.
 
 ### Key assumptions
 Chrome's own recognition stays, so Android's beep after a pause remains.
