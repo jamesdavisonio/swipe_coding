@@ -1,14 +1,18 @@
-# kanban
+# Swipe Coding
 
-**A phone-first board for steering the Claude Code sessions running on your PC.**
+**Steer the Claude Code sessions running on your PC from your phone, one swipe at a time.**
 
-Each Claude Code session reports its work to the board as a task: a spec to approve, a question,
+Swipe Coding is a phone-first board for your coding sessions. Each Claude Code session reports its work to the board as a task: a spec to approve, a question,
 a pull request ready to merge. The phone shows one decision at a time as a full-screen card. You
 swipe right to agree, swipe left for later, or talk to it. Your answer reaches the session within
 seconds, and the session carries on.
 
-It is a personal tool with one owner and no AI inside the app. The Claude Code sessions are the
-board's clients; the board never calls a model itself.
+It is a personal tool with one owner and no AI inside the app. The Claude Code sessions are
+Swipe Coding's clients; it never calls a model itself.
+
+> **About the name.** Swipe Coding began life as "kanban", and the code still uses that working
+> name: the repository, the `@kanban/*` packages, the MCP server (`kanban`) and the `kanban_*`
+> tools the sessions call. Those identifiers stay as they are; the product is Swipe Coding.
 
 ---
 
@@ -23,8 +27,8 @@ board's clients; the board never calls a model itself.
 - **Talk instead of typing.** The microphone turns your voice into a note for the session, so
   you can change a spec, answer a question or ask for something else. A speaker button reads a
   card aloud.
-- **Notifications.** When a session needs you, the phone gets a push ("Spec · kanban", with the
-  card's headline). Tapping it opens that card.
+- **Notifications.** When a session needs you, the phone gets a push ("Spec · my-app", with the
+  project name and the card's headline). Tapping it opens that card.
 - **Merge cards only when they are ready.** A pull request reaches you only after GitHub says
   every check has passed. If a check fails, the session hears about it and fixes it first.
 - **Start a session from the phone.** Pick a project, name the work, describe the idea, and the
@@ -55,7 +59,7 @@ flowchart LR
 
   subgraph PC["Desktop PC"]
     direction TB
-    s1["Claude Code session"] --- a1["kanban agent<br/>(MCP server)"]
+    s1["Claude Code session"] --- a1["Swipe Coding agent<br/>(MCP server kanban)"]
     s1 -.-|background| w1["watcher<br/>wait.ts"]
     n["notifier<br/>(one per PC)"]
     gh["gh CLI"]
@@ -85,7 +89,7 @@ process listens to it with `onSnapshot` and writes small documents.
 
 ### Tasks and stages
 
-Every piece of work is a task in a project. A project is a folder on a given PC; a git worktree
+In Swipe Coding, every piece of work is a task in a project. A project is a folder on a given PC; a git worktree
 counts as its main checkout's project. Each task type has a fixed chain of stages:
 
 | Type    | Stages                                                                  |
@@ -104,7 +108,7 @@ what becomes a card on the deck. Every decision you make is added to the task's 
 ```mermaid
 sequenceDiagram
   participant S as Claude Code session
-  participant A as kanban agent (MCP)
+  participant A as Swipe Coding agent (MCP)
   participant F as Firestore
   participant N as Notifier
   participant P as Phone
@@ -208,7 +212,8 @@ firebase.json · firestore.rules · firestore.indexes.json
 
 ### Each PC
 
-Register the agent once for every project folder:
+Register the Swipe Coding agent once, for every project folder (the MCP server keeps its
+working name, `kanban`):
 
 ```bash
 claude mcp add --scope user kanban -- node <path-to-repo>/packages/agent/src/index.ts
